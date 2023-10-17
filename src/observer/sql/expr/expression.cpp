@@ -14,6 +14,7 @@ See the Mulan PSL v2 for more details. */
 
 #include "sql/expr/expression.h"
 #include "sql/expr/tuple.h"
+#include <regex>
 
 using namespace std;
 
@@ -89,6 +90,38 @@ ComparisonExpr::~ComparisonExpr()
 RC ComparisonExpr::compare_value(const Value &left, const Value &right, bool &result) const
 {
   RC rc = RC::SUCCESS;
+
+  if(comp_ == REGEX_LIKE || comp_ == REGEX_NOT_LIKE){
+    std::string sentence = right.data();
+    //生成模式
+    std::string res;
+    for(int i = 0; i < sentence.size(); i++){
+      if(sentence[i] == '%'){
+        res.push_back('.');
+        res.push_back('*');
+      }
+      else if(sentence[i] == '_'){
+        //res.push_back('\\');
+        res.push_back('.');
+      }
+      else{
+        res.push_back(sentence[i]);
+      }
+    }
+    std::regex pattern(res);
+    //进行匹配
+    std::string line = left.data();
+    std::smatch matches;
+    result = true;
+    if(!regex_match(line, matches, pattern) && comp_ == REGEX_LIKE){
+      result = false;
+    }
+    if(regex_match(line, matches, pattern) && comp_ == REGEX_NOT_LIKE){
+      result =  false;
+    }
+    return RC::SUCCESS;
+  }
+
   int cmp_result = left.compare(right);
   result = false;
   switch (comp_) {
