@@ -190,8 +190,12 @@ RC PhysicalPlanGenerator::create_plan(ProjectLogicalOperator &project_oper, uniq
 
   ProjectPhysicalOperator *project_operator = new ProjectPhysicalOperator;
   const vector<Field> &project_fields = project_oper.fields();
+  const vector<AggrOp> &project_aggr = project_oper.aggr_fields();
+  int i = 0;
   for (const Field &field : project_fields) {
-    project_operator->add_projection(field.table(), field.meta());
+    AggrOp temp_aggr = project_aggr[i];
+    project_operator->add_projection(field.table(), field.meta(), temp_aggr);
+    i++;
   }
 
   if (child_phy_oper) {

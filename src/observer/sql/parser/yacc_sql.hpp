@@ -87,23 +87,28 @@ extern int yydebug;
     AND = 288,                     /* AND  */
     NOT = 289,                     /* NOT  */
     LIKE = 290,                    /* LIKE  */
-    SET = 291,                     /* SET  */
-    ON = 292,                      /* ON  */
-    LOAD = 293,                    /* LOAD  */
-    DATA = 294,                    /* DATA  */
-    INFILE = 295,                  /* INFILE  */
-    EXPLAIN = 296,                 /* EXPLAIN  */
-    EQ = 297,                      /* EQ  */
-    LT = 298,                      /* LT  */
-    GT = 299,                      /* GT  */
-    LE = 300,                      /* LE  */
-    GE = 301,                      /* GE  */
-    NE = 302,                      /* NE  */
-    NUMBER = 303,                  /* NUMBER  */
-    FLOAT = 304,                   /* FLOAT  */
-    ID = 305,                      /* ID  */
-    SSS = 306,                     /* SSS  */
-    UMINUS = 307                   /* UMINUS  */
+    MAX = 291,                     /* MAX  */
+    MIN = 292,                     /* MIN  */
+    SUM = 293,                     /* SUM  */
+    AVG = 294,                     /* AVG  */
+    COUNT = 295,                   /* COUNT  */
+    SET = 296,                     /* SET  */
+    ON = 297,                      /* ON  */
+    LOAD = 298,                    /* LOAD  */
+    DATA = 299,                    /* DATA  */
+    INFILE = 300,                  /* INFILE  */
+    EXPLAIN = 301,                 /* EXPLAIN  */
+    EQ = 302,                      /* EQ  */
+    LT = 303,                      /* LT  */
+    GT = 304,                      /* GT  */
+    LE = 305,                      /* LE  */
+    GE = 306,                      /* GE  */
+    NE = 307,                      /* NE  */
+    NUMBER = 308,                  /* NUMBER  */
+    FLOAT = 309,                   /* FLOAT  */
+    ID = 310,                      /* ID  */
+    SSS = 311,                     /* SSS  */
+    UMINUS = 312                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -112,12 +117,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 104 "yacc_sql.y"
+#line 109 "yacc_sql.y"
 
   ParsedSqlNode *                   sql_node;
   ConditionSqlNode *                condition;
   Value *                           value;
   enum CompOp                       comp;
+  enum AggrOp                       aggr;
   RelAttrSqlNode *                  rel_attr;
   std::vector<AttrInfoSqlNode> *    attr_infos;
   AttrInfoSqlNode *                 attr_info;
@@ -131,7 +137,7 @@ union YYSTYPE
   int                               number;
   float                             floats;
 
-#line 135 "yacc_sql.hpp"
+#line 141 "yacc_sql.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

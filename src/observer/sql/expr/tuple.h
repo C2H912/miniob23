@@ -55,13 +55,13 @@ public:
   {
     cells_.push_back(cell);
   }
-  void append_cell(const char *table, const char *field)
+  void append_cell(const char *table, const char *field, AggrOp aggr)
   {
-    append_cell(TupleCellSpec(table, field));
+    append_cell(TupleCellSpec(table, field, nullptr, aggr));
   }
-  void append_cell(const char *alias)
+  void append_cell(const char *alias, AggrOp aggr)
   {
-    append_cell(TupleCellSpec(alias));
+    append_cell(TupleCellSpec(alias, aggr));
   }
   int cell_num() const
   {

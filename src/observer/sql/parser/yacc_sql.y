@@ -87,6 +87,11 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         AND
         NOT
         LIKE
+        MAX
+        MIN
+        SUM
+        AVG
+        COUNT
         SET
         ON
         LOAD
@@ -106,6 +111,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   ConditionSqlNode *                condition;
   Value *                           value;
   enum CompOp                       comp;
+  enum AggrOp                       aggr;
   RelAttrSqlNode *                  rel_attr;
   std::vector<AttrInfoSqlNode> *    attr_infos;
   AttrInfoSqlNode *                 attr_info;
@@ -132,6 +138,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <value>               value
 %type <number>              number
 %type <comp>                comp_op
+%type <aggr>                aggr_func;
 %type <rel_attr>            rel_attr
 %type <attr_infos>          attr_def_list
 %type <attr_info>           attr_def
@@ -497,6 +504,7 @@ select_attr:
       RelAttrSqlNode attr;
       attr.relation_name  = "";
       attr.attribute_name = "*";
+      attr.aggr_func = UNKNOWN;
       $$->emplace_back(attr);
     }
     | rel_attr attr_list {
@@ -509,19 +517,46 @@ select_attr:
       delete $1;
     }
     ;
-
+aggr_func:
+    MAX { $$=MAXF; }
+	  | MIN { $$=MINF; }
+	  | COUNT { $$=COUNTF; }
+	  | AVG { $$=AVGF; }
+	  | SUM { $$=SUMF; }
+    ;
 rel_attr:
     ID {
       $$ = new RelAttrSqlNode;
       $$->attribute_name = $1;
+      $$->aggr_func = UNKNOWN;
       free($1);
     }
     | ID DOT ID {
       $$ = new RelAttrSqlNode;
       $$->relation_name  = $1;
       $$->attribute_name = $3;
+      $$->aggr_func = UNKNOWN;
       free($1);
       free($3);
+    }
+    | aggr_func LBRACE '*' RBRACE {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = "*";
+      $$->aggr_func = $1;
+    }
+    | aggr_func LBRACE ID RBRACE {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $3;
+      $$->aggr_func = $1;
+      free($3);
+    }
+    | aggr_func LBRACE ID DOT ID RBRACE {
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $3;
+      $$->attribute_name = $5;
+      $$->aggr_func = $1;
+      free($3);
+      free($5);
     }
     ;
 

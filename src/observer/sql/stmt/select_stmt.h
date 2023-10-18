@@ -53,6 +53,10 @@ public:
   {
     return query_fields_;
   }
+  const std::vector<AggrOp> &aggr_fields() const
+  {
+    return aggr_fields_;
+  }
   FilterStmt *filter_stmt() const
   {
     return filter_stmt_;
@@ -60,6 +64,7 @@ public:
 
 private:
   std::vector<Field> query_fields_;
+  std::vector<AggrOp> aggr_fields_;
   std::vector<Table *> tables_;
   FilterStmt *filter_stmt_ = nullptr;
 };
