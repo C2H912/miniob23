@@ -12,7 +12,7 @@ See the Mulan PSL v2 for more details. */
 // Created by WangYunlai on 2023/4/25.
 //
 
-#include "sql/operator/Update_logical_operator.h"
+#include "sql/operator/update_logical_operator.h"
 
 UpdateLogicalOperator::UpdateLogicalOperator(Table *table, std::vector<Value> values)
     : table_(table), values_(values)
