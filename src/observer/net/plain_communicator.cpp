@@ -164,7 +164,7 @@ RC PlainCommunicator::write_result(SessionEvent *event, bool &need_disconnect)
   writer_->flush(); // TODO handle error
   return rc;
 }
-
+//执行计划
 RC PlainCommunicator::write_result_internal(SessionEvent *event, bool &need_disconnect)
 {
   RC rc = RC::SUCCESS;
@@ -176,7 +176,7 @@ RC PlainCommunicator::write_result_internal(SessionEvent *event, bool &need_disc
     return write_state(event, need_disconnect);
   }
 
-  rc = sql_result->open();
+  rc = sql_result->open();//这里执行计划
   if (OB_FAIL(rc)) {
     sql_result->close();
     sql_result->set_return_code(rc);
@@ -222,7 +222,7 @@ RC PlainCommunicator::write_result_internal(SessionEvent *event, bool &need_disc
   rc = RC::SUCCESS;
   Tuple *tuple = nullptr;
   while (RC::SUCCESS == (rc = sql_result->next_tuple(tuple))) {
-    assert(tuple != nullptr);
+    assert(tuple != nullptr);//这里出问题了
 
     int cell_num = tuple->cell_num();
     for (int i = 0; i < cell_num; i++) {

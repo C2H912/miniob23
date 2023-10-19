@@ -50,6 +50,49 @@ Table::~Table()
   LOG_INFO("Table has been closed: %s", name());
 }
 
+RC Table::drop(
+                 const char *path, 
+                 const char *name, 
+                 const char *base_dir)
+{
+
+ if (common::is_blank(name)) {
+    LOG_WARN("Name cannot be empty");
+    return RC::INVALID_ARGUMENT;
+  }
+
+   RC rc = RC::SUCCESS;
+   BufferPoolManager &bpm = BufferPoolManager::instance();
+  //删除索引
+   for (Index *index : indexes_) {
+    const char *index_name = index->index_meta().name();
+    std::string index_file_path = table_index_file(base_dir_.c_str(), name, index_name);
+    remove(index_file_path.c_str());
+    rc = bpm.close_file(index_file_path.c_str());
+     if (rc != RC::SUCCESS) {
+    return rc;
+  }
+  }
+  //
+  record_handler_->close(); 
+  delete record_handler_;
+  record_handler_ = nullptr;
+
+//删除元数据文件
+  std::string meta_file_path = table_meta_file(base_dir_.c_str(), name);
+  remove(meta_file_path.c_str());
+  rc = bpm.close_file(meta_file_path.c_str());
+  
+//删除数据文件
+  std::string data_file_path = table_data_file(base_dir_.c_str(), name);
+  remove(data_file_path.c_str());
+  rc = bpm.close_file(data_file_path.c_str());
+ 
+
+  return rc;
+}
+
+
 RC Table::create(int32_t table_id, 
                  const char *path, 
                  const char *name, 
