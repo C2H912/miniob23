@@ -347,6 +347,11 @@ public:
     cells_ = cells;
   }
 
+  void set_specs(const std::vector<Field> &specs)
+  {
+    spec_ = specs;
+  }
+
   virtual int cell_num() const override
   {
     return static_cast<int>(cells_.size());
@@ -364,11 +369,24 @@ public:
 
   virtual RC find_cell(const TupleCellSpec &spec, Value &cell) const override
   {
-    return RC::INTERNAL;
+    //return RC::INTERNAL;
+    const char *table_name = spec.table_name();
+    const char *field_name = spec.field_name();
+    for(int i = 0; i < (int)spec_.size(); i++){
+      Field temp = spec_[i];
+      if (0 == strcmp(table_name, temp.table_name())) {
+        if(0 == strcmp(field_name, temp.field_name())){
+          cell_at(i, cell);
+          return RC::SUCCESS;
+        }
+      }
+    }
+    return RC::NOTFOUND;
   }
 
 private:
   std::vector<Value> cells_;
+  std::vector<Field> spec_;
 };
 
 /**
