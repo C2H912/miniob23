@@ -44,9 +44,10 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
   const TableMeta &table_meta = table->table_meta();
   
   // check fields type
-  const int sys_field_num = table_meta.sys_field_num();
+    //const int sys_field_num = table_meta.sys_field_num();
 
-    const FieldMeta *field_meta = table_meta.field(sys_field_num);
+    const FieldMeta *field_meta = table_meta.field(update.attribute_name.c_str());
+    //这里要对表中对应字段进行判断才行
     const AttrType field_type = field_meta->type();
     const AttrType value_type = update.value.attr_type();
     if (field_type != value_type) {  // TODO try to convert the value type to field type
