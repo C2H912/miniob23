@@ -46,8 +46,13 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
   // check fields type
     //const int sys_field_num = table_meta.sys_field_num();
 
-    
+    //首先判断有无该字段
+
     const FieldMeta *field_meta = table_meta.field(update.attribute_name.c_str());
+    if(field_meta==nullptr)
+    {
+      return RC::SCHEMA_FIELD_MISSING;
+    }
     //这里要对表中对应字段进行判断才行
     const AttrType field_type = field_meta->type();
     const AttrType value_type = update.value.attr_type();
