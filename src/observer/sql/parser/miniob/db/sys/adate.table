@@ -1,0 +1,15 @@
+{
+	"fields" : 
+	[
+		{
+			"len" : 4,
+			"name" : "day",
+			"offset" : 0,
+			"type" : "dates",
+			"visible" : true
+		}
+	],
+	"indexes" : null,
+	"table_id" : 2,
+	"table_name" : "adate"
+}

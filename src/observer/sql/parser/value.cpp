@@ -294,7 +294,11 @@ int Value::compare(const Value &other) const
         return common::compare_float((void *)&this->num_value_.float_value_, (void *)&other.num_value_.float_value_);
       } break;
       case DATES: {
-        return common::compare_int((void *)&this->num_value_.int_value_, (void *)&other.num_value_.int_value_);
+        char* tmp = (char *)this->str_value_.c_str();
+        int tempdate = date2int(tmp);
+        void* datetocomp = &tempdate;
+
+        return common::compare_int(datetocomp, (void *)&other.num_value_.int_value_);
       } break;
       case CHARS: {
         return common::compare_string((void *)this->str_value_.c_str(),
