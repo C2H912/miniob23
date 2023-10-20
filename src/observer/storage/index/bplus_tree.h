@@ -72,6 +72,9 @@ public:
       case FLOATS: {
         return common::compare_float((void *)v1, (void *)v2);
       }
+      case DATES: {
+        return common::compare_int((void *)v1, (void *)v2);
+      } break;
       case CHARS: {
         return common::compare_string((void *)v1, attr_length_, (void *)v2, attr_length_);
       }
@@ -142,6 +145,7 @@ public:
   std::string operator()(const char *v) const
   {
     switch (attr_type_) {
+      case DATES:
       case INTS: {
         return std::to_string(*(int *)v);
       } break;

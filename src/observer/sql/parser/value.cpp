@@ -19,7 +19,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/lang/comparator.h"
 #include "common/lang/string.h"
 
-const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "floats", "booleans"};
+const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "dates", "floats", "booleans"};
 
 const char *attr_type_to_string(AttrType type)
 {
@@ -58,6 +58,13 @@ Value::Value(const char *s, int len /*= 0*/)
   set_string(s, len);
 }
 
+Value::Value(bool is_date, const char *s, int len /*= 0*/)
+{
+  if (is_date){
+    set_date(s);
+  }
+}
+
 void Value::set_data(char *data, int length)
 {
   switch (attr_type_) {
@@ -68,6 +75,17 @@ void Value::set_data(char *data, int length)
       num_value_.int_value_ = *(int *)data;
       length_ = length;
     } break;
+    case DATES: {
+      // set_date(data);
+      int tmp = *(int *)data;
+      std::string tmpstring = idate2string(tmp);
+      const char* tmpdate = tmpstring.c_str();
+      length = sizeof(tmpstring);
+      set_string(tmpdate, length);
+      
+      attr_type_ = DATES;
+
+    }break;
     case FLOATS: {
       num_value_.float_value_ = *(float *)data;
       length_ = length;
@@ -112,6 +130,97 @@ void Value::set_string(const char *s, int len /*= 0*/)
   length_ = str_value_.length();
 }
 
+void Value::set_date(const char *s){
+  attr_type_ = DATES;
+  int temp = date2int(s);
+  if(temp == -1){
+    attr_type_ = UNDEFINED;
+    str_value_.assign(s);
+    return;
+  }
+  num_value_.int_value_ = temp;
+  length_ = sizeof(temp);
+}
+
+int date2int(const char *date)
+{
+  if(date == nullptr)
+    return -1;
+  //处理2022-1-1这种情况，转化为20220101
+  // 计算日期字符串的长度
+  int date_length = strlen(date);
+
+  // 分配足够的内存来存储转换后的日期字符串
+  char* trans_date = new char[date_length + 1]; // +1 for null terminator
+  int i = 0, j = 0;
+  // char trans_date[9];
+  while(date[i] != '\0'){
+    if(date[i] == '-'){
+      if(date[i+2] == '\0' || date[i+2] == '-'){
+        trans_date[j] = '0';
+        trans_date[j+1] = date[i+1];
+        j += 2;
+        i += 2;
+      }
+      else{
+        trans_date[j] = date[i+1];
+        j++;
+        i += 2;
+      }
+    }
+    else{
+      trans_date[j] = date[i];
+      j++;
+      i++;
+    }
+  }
+  trans_date[j] = '\0';
+  //转化为int型
+  i = 0;
+  int ret = 0, factor = 10000000;
+  while (trans_date[i] != '\0'){
+    ret += factor * (trans_date[i] - '0');
+    i++;
+    factor /= 10;
+  }
+  // 释放动态分配的内存
+  delete[] trans_date;
+
+  //判断闰年
+  int temp = ret / 10000;
+  bool flag = false;
+  if(temp % 4 == 0 && temp % 100 != 0)
+    flag = true;
+  if(temp % 400 == 0)
+    flag = true;
+  //处理溢出
+  std::unordered_map<int, int> hash;
+  hash[1] = 31;
+  hash[3] = 31;
+  hash[5] = 31;
+  hash[7] = 31;
+  hash[8] = 31;
+  hash[10] = 31;
+  hash[12] = 31;
+  hash[4] = 30;
+  hash[6] = 30;
+  hash[9] = 30;
+  hash[11] = 30;
+  if(flag == true)
+    hash[2] = 29;
+  else
+    hash[2] = 28;
+  int month = ret / 100;
+  month = month % 100;
+  if(month < 1 || month > 12)
+    return -1;
+  int day = ret % 100;
+  if(day < 1 || day > hash[month])
+    return -1;
+
+  return ret;
+}
+
 void Value::set_value(const Value &value)
 {
   switch (value.attr_type_) {
@@ -121,6 +230,9 @@ void Value::set_value(const Value &value)
     case FLOATS: {
       set_float(value.get_float());
     } break;
+    case DATES: {
+      set_date(value.get_date().c_str());
+    }break;
     case CHARS: {
       set_string(value.get_string().c_str());
     } break;
@@ -155,6 +267,9 @@ std::string Value::to_string() const
     case FLOATS: {
       os << common::double_to_str(num_value_.float_value_);
     } break;
+    case DATES: {
+      os << str_value_;
+    } break;
     case BOOLEANS: {
       os << num_value_.bool_value_;
     } break;
@@ -177,6 +292,9 @@ int Value::compare(const Value &other) const
       } break;
       case FLOATS: {
         return common::compare_float((void *)&this->num_value_.float_value_, (void *)&other.num_value_.float_value_);
+      } break;
+      case DATES: {
+        return common::compare_int((void *)&this->num_value_.int_value_, (void *)&other.num_value_.int_value_);
       } break;
       case CHARS: {
         return common::compare_string((void *)this->str_value_.c_str(),
@@ -261,6 +379,24 @@ float Value::get_float() const
 std::string Value::get_string() const
 {
   return this->to_string();
+}
+
+std::string Value::get_date() const
+{
+  int tmp = num_value_.int_value_;
+  return idate2string(tmp);
+}
+
+std::string idate2string(int idate)
+{
+  int year = idate / 10000;
+  int month = idate / 100;
+  month = month % 100;
+  int day = idate % 100;
+  std::string ret = std::to_string(year) + '-';
+  ret += (month < 10 ? '0' + std::to_string(month) : std::to_string(month)) + '-';
+  ret += (day < 10 ? '0' + std::to_string(day) : std::to_string(day));
+  return ret;
 }
 
 bool Value::get_boolean() const
