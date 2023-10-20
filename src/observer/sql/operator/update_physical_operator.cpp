@@ -19,8 +19,8 @@ See the Mulan PSL v2 for more details. */
 
 using namespace std;
 
-UpdatePhysicalOperator::UpdatePhysicalOperator(Table *table, vector<Value> &&values)
-    : table_(table), values_(std::move(values))
+UpdatePhysicalOperator::UpdatePhysicalOperator(Table *table, vector<Value> values,std::vector<std::string> value_name)
+    :table_(table), values_(values),value_name_(value_name)
 {}
 
 RC UpdatePhysicalOperator::open(Trx *trx)
@@ -77,21 +77,27 @@ RC UpdatePhysicalOperator::next()
 
     //先删除record
     RowTuple *row_tuple = static_cast<RowTuple *>(tuple);
-    Record &record = row_tuple->record();
+    Record &record = row_tuple->record();//返回给引用变量 可以操作内存 
+    char* old_record =  record.data();//返回给非引用变量 复制一份
+
+    //需要调换一下顺序，不然record被删除，将会没有数据
+    //格式在stmt中判断过了
+    //是否需要回退
+    Record new_record;
+    RC rc = table_->make_record_for_update(static_cast<int>(values_.size()), values_.data(), new_record,value_name_,old_record);
+    if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to make record. rc=%s", strrc(rc));
+    return rc;
+    }
+
+
     rc = trx_->delete_record(table_, record);
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to delete record: %s", strrc(rc));
       return rc;
     }
 
-    //格式在stmt中判断过了
-    //是否需要回退
-    Record new_record;
-    RC rc = table_->make_record(static_cast<int>(values_.size()), values_.data(), new_record);
-    if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to make record. rc=%s", strrc(rc));
-    return rc;
-    }
+    
 
     rc = trx_->insert_record(table_, new_record);
     if (rc != RC::SUCCESS) {

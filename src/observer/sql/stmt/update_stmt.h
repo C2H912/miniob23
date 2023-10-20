@@ -14,6 +14,8 @@ See the Mulan PSL v2 for more details. */
 
 #pragma once
 
+#include <vector>
+#include <string>
 #include "common/rc.h"
 #include "sql/stmt/stmt.h"
 #include "sql/stmt/filter_stmt.h"
@@ -22,6 +24,7 @@ See the Mulan PSL v2 for more details. */
 
 
 class Table;
+class FilterStmt;
 
 /**
  * @brief 更新语句
@@ -31,7 +34,7 @@ class UpdateStmt : public Stmt
 {
 public:
   UpdateStmt() = default;
-  UpdateStmt(Table *table, Value *values, int value_amount, FilterStmt *filter_stmt);
+  UpdateStmt(Table *table, Value *values, int value_amount, FilterStmt *filter_stmt,std::vector<std::string> &value_name_);
 
 public:
   static RC create(Db *db, const UpdateSqlNode &update_sql, Stmt *&stmt);
@@ -58,12 +61,18 @@ public:
   {
     return StmtType::UPDATE;
   }
+   const std::vector<std::string> &names() const 
+  { 
+    return value_name_; 
+  }
+  
 
 
 
 private:
   Table *table_ = nullptr;
   Value *values_ = nullptr;
+  std::vector<std::string> value_name_; 
   int value_amount_ = 0;
   FilterStmt *filter_stmt_ = nullptr;
 };

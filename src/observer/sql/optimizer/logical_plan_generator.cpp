@@ -178,6 +178,7 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
 {
   Table *table = update_stmt->table();
   vector<Value> values(update_stmt->values(), update_stmt->values() + update_stmt->value_amount());
+  vector<std::string> value_name = update_stmt->names();
   FilterStmt *filter_stmt = update_stmt->filter_stmt();
   std::vector<Field> fields;
   for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num(); i++) {
@@ -193,7 +194,7 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
   }
 
 //新增一个update逻辑算子
-  unique_ptr<LogicalOperator> update_oper(new UpdateLogicalOperator(table, values));
+  unique_ptr<LogicalOperator> update_oper(new UpdateLogicalOperator(table, values,value_name));
 
   if (predicate_oper) {
     predicate_oper->add_child(std::move(table_get_oper));

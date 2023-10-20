@@ -18,8 +18,8 @@ See the Mulan PSL v2 for more details. */
 #include "storage/table/table.h"
 #include "sql/stmt/filter_stmt.h"
 
-UpdateStmt::UpdateStmt(Table *table, Value *values, int value_amount,FilterStmt *filter_stmt )
-    : table_(table), values_(values), value_amount_(value_amount),filter_stmt_(filter_stmt)
+UpdateStmt::UpdateStmt(Table *table, Value *values, int value_amount,FilterStmt *filter_stmt, std::vector<std::string> &value_name )
+    : table_(table), values_(values), value_amount_(value_amount),filter_stmt_(filter_stmt), value_name_(value_name)
 {}
 
 RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
@@ -40,12 +40,13 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
 
   // check the fields number
   Value *values = (Value *)&update.value;//将const转化成非const
-  const int value_num =1;
+  const int value_num =1;//update多字段需要修改
   const TableMeta &table_meta = table->table_meta();
   
   // check fields type
     //const int sys_field_num = table_meta.sys_field_num();
 
+    
     const FieldMeta *field_meta = table_meta.field(update.attribute_name.c_str());
     //这里要对表中对应字段进行判断才行
     const AttrType field_type = field_meta->type();
@@ -55,6 +56,9 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
           table_name, field_meta->name(), field_type, value_type);
       return RC::SCHEMA_FIELD_TYPE_MISMATCH;
     }
+
+
+
   //过滤条件
   std::unordered_map<std::string, Table *> table_map;
   table_map.insert(std::pair<std::string, Table *>(std::string(table_name), table));
@@ -67,9 +71,14 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
     return rc;
   }
 
+  //初始化attr_name容器  //储存要更改的变量名
+  std::vector<std::string> value_name;
+  for(int i = 0;i<value_num;i++){
+    value_name.emplace_back(update.attribute_name);
+  }
 
   // everything alright
-  stmt = new UpdateStmt(table, values, value_num,filter_stmt);
+  stmt = new UpdateStmt(table, values, value_num,filter_stmt,value_name);
   return RC::SUCCESS;
 
 }

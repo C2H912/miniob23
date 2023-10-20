@@ -351,6 +351,74 @@ RC Table::make_record(int value_num, const Value *values, Record &record)
   return RC::SUCCESS;
 }
 
+RC Table::make_record_for_update(int value_num, const Value *values, Record &record,std::vector<std::string> values_name, char *record_in)
+{
+  //由make_record修改而来，修改对应字段的record位置即可
+  
+ //检查字段是否存在 类型是否正确 但是stmt好像也检查了一遍 等下对比一下
+ 
+    
+  int attr_num = table_meta_.field_num() - table_meta_.sys_field_num();//该表的字段数量
+  const int normal_field_start_index = table_meta_.sys_field_num();
+
+  for (int j = 0; j < value_num; j++) {
+    // 测试不同字段是否存在于表中
+    int count = 0;
+    const Value &value = values[j];
+    for (int i = 0; i < attr_num; i++) {
+      const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
+      
+
+      if (0 == strcmp(field->name(), values_name[j].c_str())) {
+        if (field->type() != value.attr_type()) {
+         
+          return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+        }
+      } else {
+        count++;
+      }
+    }
+    if (count == attr_num)  // 表示update的字段和表中所有字段不符合
+    {
+      LOG_ERROR("make_record_for_update: Invalid attribute name");
+      return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+    }
+  }
+
+
+  // 复制所有字段的值
+  int record_size = table_meta_.record_size();
+  char *record_data = (char *)malloc(record_size);
+
+  for (int i = 0; i < attr_num; i++) {
+    const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
+    // 这里是找到匹配的字段
+    //新增的for循环
+    for (int j = 0; j < value_num; j++) {
+      if (0 == strcmp(field->name(), values_name[j].c_str())) {
+        size_t copy_len = field->len();
+        const Value &value = values[j];
+        if (field->type() == CHARS) {
+          //const size_t data_len = strlen((const char *)values[j]->data());
+          const size_t data_len = value.length();
+          if (copy_len > data_len) {
+            copy_len = data_len + 1;
+          }
+        }
+        memcpy(record_data + field->offset(), value.data(), copy_len);
+        break;
+      } else {
+        // 没有匹配的话，就直接用原来的record
+        if(j==value_num-1) //最后一次才执行 节约时间
+        memcpy(record_data + field->offset(), record_in + field->offset(), field->len());
+      }
+    }
+  }
+
+  record.set_data_owner(record_data, record_size);
+  return RC::SUCCESS;
+}
+
 RC Table::init_record_handler(const char *base_dir)
 {
   std::string data_file = table_data_file(base_dir, table_meta_.name());
