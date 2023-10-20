@@ -43,8 +43,8 @@ public:
   Tuple *current_tuple() override;
   RC do_aggre_func(std::vector<std::vector<Value>>& all_tuple);
   Value do_int(std::vector<std::vector<Value>>& all_tuple, int index);
-  //Value do_float(std::vector<std::vector<Value>>& all_tuple, int index);
-  //Value do_char(std::vector<std::vector<Value>>& all_tuple, int index);
+  Value do_float(std::vector<std::vector<Value>>& all_tuple, int index);
+  Value do_char(std::vector<std::vector<Value>>& all_tuple, int index);
 
 private:
   std::vector<Field> fields_;

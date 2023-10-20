@@ -95,11 +95,11 @@ RC AggrePhysicalOperator::do_aggre_func(std::vector<std::vector<Value>>& all_tup
       break;
     }
     case CHARS:{
-      //ret = do_char(all_tuple, i);
+      ret_tuple.push_back(do_char(all_tuple, i));
       break;
     }
     case FLOATS:{
-      //ret = do_float(all_tuple, i);
+      ret_tuple.push_back(do_float(all_tuple, i));
       break;
     }
     //case DATES:{
@@ -154,69 +154,54 @@ Value AggrePhysicalOperator::do_int(std::vector<std::vector<Value>>& all_tuple, 
   return ret;
 }
 
-#if 0
 Value AggrePhysicalOperator::do_char(std::vector<std::vector<Value>>& all_tuple, int index)
 {
-  char *max_value = (char *)(all_tuple[0][index].data());
-  int max_length = all_tuple[0][index].length();
-  char *min_value = (char *)(all_tuple[0][index].data());
-  int min_length = all_tuple[0][index].length();
-  double sum = 0.0;
-  double avg = 0.0;
+  Value max_value(all_tuple[0][index]);
+  Value min_value(all_tuple[0][index]);
+  float sum = 0.0;
+  float avg = 0.0;
 
   int size = all_tuple.size();
   for(int i = 0; i < size; i++){
-    TupleCell tuplecell = all_tuple[i][index];
-    char *temp = (char *)(tuplecell.data());
-    sum += strtod(temp, nullptr);
-    if(compare_string(max_value, max_length, temp, tuplecell.length()) < 0){
-      max_value = temp;
-      max_length = tuplecell.length();
+    Value tuplecell(all_tuple[i][index]);
+    if((max_value.compare(tuplecell)) < 0){
+      max_value = tuplecell;
     }
-    if(compare_string(min_value, min_length, temp, tuplecell.length()) > 0){
-      min_value = temp;
-      min_length = tuplecell.length();
+    if((min_value.compare(tuplecell)) > 0){
+      min_value = tuplecell;
     }
+    sum += strtod(tuplecell.data(), nullptr);
   }
   avg = sum / (int)all_tuple.size();
 
-  char *str = new char[8];
-  memset(str, 0, 8*sizeof(char));
-  if(type == MAXF){
-    TupleCell temp_cell(CHARS, strdup(max_value));
-    temp_cell.set_length(max_length);
-    result_tuple_.push_back(temp_cell);
+  Value ret;
+  if(aggr_fields_[index] == MAXF){
+    ret = max_value;
   }
-  if(type == MINF){
-    TupleCell temp_cell(CHARS, strdup(min_value));
-    temp_cell.set_length(max_length);
-    result_tuple_.push_back(temp_cell);
+  if(aggr_fields_[index] == MINF){
+    ret = min_value;
   }
-  if(type == SUMF){
-    memcpy(str, &sum, sizeof(sum));
-    TupleCell temp_cell(INTS, mystrdup(str));
-    result_tuple_.push_back(temp_cell);
+  if(aggr_fields_[index] == SUMF){
+    ret.set_float(sum);
   }
-  if(type == AVGF){
-    memcpy(str, &avg, sizeof(avg));
-    TupleCell temp_cell(INTS, mystrdup(str));
-    result_tuple_.push_back(temp_cell);
+  if(aggr_fields_[index] == AVGF){
+    ret.set_float(avg);
   }
-  delete str;
-  str = nullptr;
+
+  return ret;
 }
 
 Value AggrePhysicalOperator::do_float(std::vector<std::vector<Value>>& all_tuple, int index)
 {
-  float max_value = *(float *)(all_tuple[0][index].data());
-  float min_value = *(float *)(all_tuple[0][index].data());
+  float max_value = all_tuple[0][index].get_float();
+  float min_value = all_tuple[0][index].get_float();
   float sum = 0;
   float avg = 0;
 
   int size = all_tuple.size();
   for(int i = 0; i < size; i++){
-    TupleCell tuplecell = all_tuple[i][index];
-    int temp = *(float *)(tuplecell.data());
+    Value tuplecell = all_tuple[i][index];
+    float temp = tuplecell.get_float();
     if(max_value < temp){
       max_value = temp;
     }
@@ -227,32 +212,22 @@ Value AggrePhysicalOperator::do_float(std::vector<std::vector<Value>>& all_tuple
   }
   avg = sum / (int)all_tuple.size();
 
-  char *str = new char[8];
-  memset(str, 0, 8*sizeof(char));
-  if(type == MAXF){
-    memcpy(str, &max_value, sizeof(max_value));
-    TupleCell temp_cell(FLOATS, mystrdup(str));
-    result_tuple_.push_back(temp_cell);
+  Value ret;
+  if(aggr_fields_[index] == MAXF){
+    ret.set_float(max_value);
   }
-  if(type == MINF){
-    memcpy(str, &min_value, sizeof(min_value));
-    TupleCell temp_cell(FLOATS, mystrdup(str));
-    result_tuple_.push_back(temp_cell);
+  if(aggr_fields_[index] == MINF){
+    ret.set_float(min_value);
   }
-  if(type == SUMF){
-    memcpy(str, &sum, sizeof(sum));
-    TupleCell temp_cell(FLOATS, mystrdup(str));
-    result_tuple_.push_back(temp_cell);
+  if(aggr_fields_[index] == SUMF){
+    ret.set_float(sum);
   }
-  if(type == AVGF){
-    memcpy(str, &avg, sizeof(avg));
-    TupleCell temp_cell(FLOATS, mystrdup(str));
-    result_tuple_.push_back(temp_cell);
+  if(aggr_fields_[index] == AVGF){
+    ret.set_float(avg);
   }
-  delete str;
-  str = nullptr;
+
+  return ret;
 }
-#endif
 
 RC AggrePhysicalOperator::close()
 {
