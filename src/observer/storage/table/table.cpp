@@ -478,8 +478,7 @@ RC Table::create_index(Trx *trx, std::vector<FieldMeta> &field_meta, const char 
   IndexMeta new_index_meta;
   RC rc = new_index_meta.init(index_name, unique,field_names);//初始化索引文件 但是怎么只有一个field 需要修改
   if (rc != RC::SUCCESS) {
-    LOG_INFO("Failed to init IndexMeta in table:%s, index_name:%s, field_name:%s", 
-             name(), index_name, field_meta->name());
+   
     return rc;
   }
 

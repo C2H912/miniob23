@@ -830,8 +830,11 @@ RC BplusTreeHandler::create(const char *file_name, bool unique,
     return RC::NOMEM;
   }
 
-  key_comparator_.init(unique,file_header->attr_type, file_header->attr_length);
-  key_printer_.init(file_header->attr_type, file_header->attr_length);
+  //key_comparator_.init(unique,file_header->attr_type, file_header->attr_length);
+  //key_printer_.init(file_header->attr_type, file_header->attr_length);
+
+  key_comparator_.init(unique, attr_type, attr_length);
+  key_printer_.init(attr_type, attr_length);
 
   this->sync();
 
@@ -877,8 +880,18 @@ RC BplusTreeHandler::open(const char *file_name)
   // close old page_handle
   disk_buffer_pool->unpin_page(frame);
 
-  key_comparator_.init(file_header->unique,file_header->attr_type, file_header->attr_length);
-  key_printer_.init(file_header->attr_type, file_header->attr_length);
+  std::vector<AttrType> attr_type;
+  std::vector<int32_t> attr_length;
+  for (int i = 0; i < file_header_.attr_num; i++) {
+    attr_type.push_back(file_header_.attr_type[i]);
+    attr_length.push_back(file_header_.attr_length[i]);
+  }
+
+  //key_comparator_.init(file_header->unique,file_header->attr_type, file_header->attr_length);
+  //key_printer_.init(file_header->attr_type, file_header->attr_length);
+  key_comparator_.init(file_header_.unique,attr_type, attr_length);
+  key_printer_.init(attr_type, attr_length);
+
   LOG_INFO("Successfully open index %s", file_name);
   return RC::SUCCESS;
 }
