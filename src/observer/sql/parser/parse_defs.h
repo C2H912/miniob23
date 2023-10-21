@@ -153,8 +153,8 @@ struct DeleteSqlNode
 struct UpdateSqlNode
 {
   std::string                   relation_name;         ///< Relation to update
-  std::string                   attribute_name;        ///< 更新的字段，仅支持一个字段
-  Value                         value;                 ///< 更新的值，仅支持一个字段
+  std::vector<std::string>      attribute_name;        ///< 更新的字段，现在支持多个了
+  std::vector<Value>            value;                 ///< 更新的值，现在支持多个了
   std::vector<ConditionSqlNode> conditions;
 };
 
@@ -239,9 +239,9 @@ struct LoadDataSqlNode
 };
 
 /**
- * @brief 设置变量的值
+ * @brief 设置变量的值 我用来储存update的字段
  * @ingroup SQLParser
- * @note 当前还没有查询变量
+ * @note 当前还没有查询变量 
  */
 struct SetVariableSqlNode
 {

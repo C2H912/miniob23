@@ -123,6 +123,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   Expression *                      expression;
   std::vector<Expression *> *       expression_list;
   std::vector<Value> *              value_list;
+  std::vector<SetVariableSqlNode> * attr_name_a_values;
+  SetVariableSqlNode *               attr_name_value;
   std::vector<ConditionSqlNode> *   condition_list;
   std::vector<RelAttrSqlNode> *     rel_attr_list;
   std::vector<std::string> *        relation_list;
@@ -158,6 +160,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <relation_list>       rel_list
 %type <index_attr_list>     id_list
 %type <string>              id
+%type <attr_name_a_values>  update_options
+%type <attr_name_value>     update_option
 %type <rel_attr_list>       attr_list
 %type <expression>          expression
 %type <expression_list>     expression_list
@@ -481,15 +485,26 @@ delete_stmt:    /*  delete 语句的语法解析树*/
     }
     ;
 update_stmt:      /*  update 语句的语法解析树*/
-    UPDATE ID SET ID EQ value where 
+    UPDATE ID SET update_option update_options where 
     {
       $$ = new ParsedSqlNode(SCF_UPDATE);
       $$->update.relation_name = $2;
-      $$->update.attribute_name = $4;
-      $$->update.value = *$6;
-      if ($7 != nullptr) {
-        $$->update.conditions.swap(*$7);
-        delete $7;
+      std::vector<SetVariableSqlNode> *u_list;
+      if($5!=nullptr){
+          u_list = $5;
+      }
+      u_list->emplace_back(*$4);
+      for(int i = u_list->size();i>0;i--)
+      {
+        update.attribute_name.emplace_back(*u_list[i-1].name);
+        update.value.emplace_back(*u_list[i-1].value);
+      }
+     if($5!=nullptr){
+          delete $5;
+      }
+      if ($6 != nullptr) {
+        $$->update.conditions.swap(*$6);
+        delete $6;
       }
       free($2);
       free($4);
@@ -497,14 +512,26 @@ update_stmt:      /*  update 语句的语法解析树*/
     ;
 update_options:
 		/* EMPTY */
-		|COMMA update_option update_options {
-			// Do Nothing
-		}
+    {
+      $$ = nullptr;
+    }
+		| COMMA update_option update_options {
+      if ($3 != nullptr) {
+        $$ = $3;
+      } else {
+        $$ = new std::vector<SetVariableSqlNode>;
+      }
+      $$->emplace_back(*$2);
+       delete $2;
+		};
 update_option:
 		ID EQ value {
-    	
+    	$$ = new SetVariableSqlNode();
+      $$->value = $3;
+      $$->name = $1;
+      free($1);
+      free($3);
 		}
-   
     ;
 
 
