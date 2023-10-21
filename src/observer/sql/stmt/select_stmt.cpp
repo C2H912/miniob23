@@ -43,7 +43,7 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
     return RC::INVALID_ARGUMENT;
   }
 
-  // collect tables in `from` statement
+  // ---------- collect tables in `from` statement ----------
   std::vector<Table *> tables;
   std::unordered_map<std::string, Table *> table_map;
   for (size_t i = 0; i < select_sql.relations.size(); i++) {
@@ -62,8 +62,25 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
   }
+  for(int i = 0; i < (int)select_sql.joinTables.size(); i++){
+    InnerJoinSqlNode temp_node = select_sql.joinTables[i];
+    const char *table_name = temp_node.join_relations.c_str();
+    if (nullptr == table_name) {
+      LOG_WARN("invalid argument. relation name is null. index=%d", i);
+      return RC::INVALID_ARGUMENT;
+    }
 
-  // collect query fields in `select` statement
+    Table *table = db->find_table(table_name);
+    if (nullptr == table) {
+      LOG_WARN("no such table. db=%s, table_name=%s", db->name(), table_name);
+      return RC::SCHEMA_TABLE_NOT_EXIST;
+    }
+
+    tables.push_back(table);
+    table_map.insert(std::pair<std::string, Table *>(table_name, table));
+  }
+
+  // ---------- collect query fields in `select` statement ----------
   std::vector<Field> query_fields;
   std::vector<AggrOp> aggr_fields;
   std::vector<std::string> aggr_specs;
@@ -74,6 +91,8 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
   for (int i = static_cast<int>(select_sql.attributes.size()) - 1; i >= 0; i--) {
     const RelAttrSqlNode &relation_attr = select_sql.attributes[i];
     
+  //1. 检查聚合的语法
+
     //要么全部都是聚合或者全部都不是聚合
     if(aggr_flag == UNKNOWN){
       if(relation_attr.aggr_func != UNKNOWN){
@@ -92,6 +111,8 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
         return RC::INVALID_ARGUMENT;
       }
     }
+
+  //2. 创建stmt
 
     if (common::is_blank(relation_attr.relation_name.c_str()) &&
         0 == strcmp(relation_attr.attribute_name.c_str(), "*")) {
@@ -176,13 +197,22 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
     default_table = tables[0];
   }
 
-  // create filter statement in `where` statement
+  // ---------- create filter statement in `where` statement ----------
   FilterStmt *filter_stmt = nullptr;
+  std::vector<ConditionSqlNode> all_filters;
+  for(size_t i = 0; i < select_sql.conditions.size(); i++){
+    all_filters.push_back(select_sql.conditions[i]);
+  }
+  for(size_t i = 0; i < select_sql.joinTables.size(); i++){
+    for(size_t j = 0; j < select_sql.joinTables[i].join_conditions.size(); j++){
+      all_filters.push_back(select_sql.joinTables[i].join_conditions[j]);
+    }
+  }
   RC rc = FilterStmt::create(db,
       default_table,
       &table_map,
-      select_sql.conditions.data(),
-      static_cast<int>(select_sql.conditions.size()),
+      all_filters.data(),
+      static_cast<int>(all_filters.size()),
       filter_stmt);
   if (rc != RC::SUCCESS) {
     LOG_WARN("cannot construct filter stmt");

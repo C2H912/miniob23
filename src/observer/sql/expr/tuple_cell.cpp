@@ -30,6 +30,9 @@ TupleCellSpec::TupleCellSpec(const char *table_name, const char *field_name, con
   if (alias) {
     alias_ = alias;
   }
+  else{
+    alias_ = table_name_ + "." + field_name_;
+  }
 }
 
 TupleCellSpec::TupleCellSpec(std::string s, AggrOp aggr)

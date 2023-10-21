@@ -453,6 +453,7 @@ select_stmt:        /*  select 语句的语法解析树*/
       if ($6 != nullptr) {
         $$->selection.joinTables.swap(*$6);
         delete $6;
+        std::reverse($$->selection.joinTables.begin(), $$->selection.joinTables.end());
       }
 
       if ($7 != nullptr) {
