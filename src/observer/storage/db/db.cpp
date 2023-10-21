@@ -76,6 +76,33 @@ RC Db::init(const char *name, const char *dbpath)
   return rc;
 }
 
+RC Db::drop_table(const char *table_name)
+{
+ RC rc = RC::SUCCESS;
+  // check table_name
+  if (opened_tables_.count(table_name) == 0) { //说明在打开的表中找不到这个表，删除失败
+    LOG_WARN("%s has been opened before.", table_name);
+    return RC::SCHEMA_TABLE_NOT_EXIST;
+  }
+
+  // 文件路径可以移到Table模块
+  std::string table_file_path = table_meta_file(path_.c_str(), table_name);//获得文件路径
+  Table *table = find_table(table_name);//找到要被删除的表
+  rc = table->drop(table_file_path.c_str(), table_name, path_.c_str());
+  if (rc != RC::SUCCESS) {
+    LOG_ERROR("Failed to drop table %s.", table_name);
+    delete table;
+    return rc;
+  }
+
+//删除map里的
+  opened_tables_.erase(table_name);
+  LOG_INFO("Create table success. table name=%s", table_name);
+  return RC::SUCCESS;
+}
+
+
+
 RC Db::create_table(const char *table_name, int attribute_count, const AttrInfoSqlNode *attributes)
 {
   RC rc = RC::SUCCESS;

@@ -61,6 +61,11 @@ public:
    */
   RC open(const char *meta_file, const char *base_dir);
 
+  RC drop(
+            const char *path, 
+            const char *name, 
+            const char *base_dir);
+
   /**
    * @brief 根据给定的字段生成一个记录/行
    * @details 通常是由用户传过来的字段，按照schema信息组装成一个record。
@@ -69,6 +74,7 @@ public:
    * @param record    生成的记录数据
    */
   RC make_record(int value_num, const Value *values, Record &record);
+  RC make_record_for_update(int value_num, const Value *values, Record &record,std::vector<std::string> values_name, char *record_in);
 
   /**
    * @brief 在当前的表中插入一条记录

@@ -50,6 +50,49 @@ Table::~Table()
   LOG_INFO("Table has been closed: %s", name());
 }
 
+RC Table::drop(
+                 const char *path, 
+                 const char *name, 
+                 const char *base_dir)
+{
+
+ if (common::is_blank(name)) {
+    LOG_WARN("Name cannot be empty");
+    return RC::INVALID_ARGUMENT;
+  }
+
+   RC rc = RC::SUCCESS;
+   BufferPoolManager &bpm = BufferPoolManager::instance();
+  //删除索引
+   for (Index *index : indexes_) {
+    const char *index_name = index->index_meta().name();
+    std::string index_file_path = table_index_file(base_dir_.c_str(), name, index_name);
+    remove(index_file_path.c_str());
+    rc = bpm.close_file(index_file_path.c_str());
+     if (rc != RC::SUCCESS) {
+    return rc;
+  }
+  }
+  //
+  record_handler_->close(); 
+  delete record_handler_;
+  record_handler_ = nullptr;
+
+//删除元数据文件
+  std::string meta_file_path = table_meta_file(base_dir_.c_str(), name);
+  remove(meta_file_path.c_str());
+  rc = bpm.close_file(meta_file_path.c_str());
+  
+//删除数据文件
+  std::string data_file_path = table_data_file(base_dir_.c_str(), name);
+  remove(data_file_path.c_str());
+  rc = bpm.close_file(data_file_path.c_str());
+ 
+
+  return rc;
+}
+
+
 RC Table::create(int32_t table_id, 
                  const char *path, 
                  const char *name, 
@@ -302,6 +345,74 @@ RC Table::make_record(int value_num, const Value *values, Record &record)
       }
     }
     memcpy(record_data + field->offset(), value.data(), copy_len);
+  }
+
+  record.set_data_owner(record_data, record_size);
+  return RC::SUCCESS;
+}
+
+RC Table::make_record_for_update(int value_num, const Value *values, Record &record,std::vector<std::string> values_name, char *record_in)
+{
+  //由make_record修改而来，修改对应字段的record位置即可
+  
+ //检查字段是否存在 类型是否正确 但是stmt好像也检查了一遍 等下对比一下
+ 
+    
+  int attr_num = table_meta_.field_num() - table_meta_.sys_field_num();//该表的字段数量
+  const int normal_field_start_index = table_meta_.sys_field_num();
+
+  for (int j = 0; j < value_num; j++) {
+    // 测试不同字段是否存在于表中
+    int count = 0;
+    const Value &value = values[j];
+    for (int i = 0; i < attr_num; i++) {
+      const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
+      
+
+      if (0 == strcmp(field->name(), values_name[j].c_str())) {
+        if (field->type() != value.attr_type()) {
+         
+          return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+        }
+      } else {
+        count++;
+      }
+    }
+    if (count == attr_num)  // 表示update的字段和表中所有字段不符合
+    {
+      LOG_ERROR("make_record_for_update: Invalid attribute name");
+      return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+    }
+  }
+
+
+  // 复制所有字段的值
+  int record_size = table_meta_.record_size();
+  char *record_data = (char *)malloc(record_size);
+
+  for (int i = 0; i < attr_num; i++) {
+    const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
+    // 这里是找到匹配的字段
+    //新增的for循环
+    for (int j = 0; j < value_num; j++) {
+      if (0 == strcmp(field->name(), values_name[j].c_str())) {
+        size_t copy_len = field->len();
+        const Value &value = values[j];
+        if (field->type() == CHARS) {
+          //const size_t data_len = strlen((const char *)values[j]->data());
+          const size_t data_len = value.length();
+          if (copy_len > data_len) {
+            copy_len = data_len + 1;
+          }
+        }
+        memcpy(record_data + field->offset(), value.data(), copy_len);
+        break;
+      } else {
+        // 没有匹配的话，就直接用原来的record
+        if(j==value_num-1) //最后一次才执行 节约时间
+        memcpy(record_data + field->offset(), record_in + field->offset(), field->len());
+      }
+    }
   }
 
   record.set_data_owner(record_data, record_size);
