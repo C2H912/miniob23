@@ -135,7 +135,7 @@ Value AggrePhysicalOperator::do_int(std::vector<std::vector<Value>>& all_tuple, 
     }
     sum += temp;
   }
-  avg = sum / (int)all_tuple.size();
+  avg = (float)sum / (float)all_tuple.size();
 
   Value ret;
   if(aggr_fields_[index] == MAXF){
@@ -176,7 +176,7 @@ Value AggrePhysicalOperator::do_char(std::vector<std::vector<Value>>& all_tuple,
     }
     sum += strtod(tuplecell.data(), nullptr);
   }
-  avg = sum / (int)all_tuple.size();
+  avg = (float)sum / (float)all_tuple.size();
 
   Value ret;
   if(aggr_fields_[index] == MAXF){
@@ -216,7 +216,7 @@ Value AggrePhysicalOperator::do_float(std::vector<std::vector<Value>>& all_tuple
     }
     sum += temp;
   }
-  avg = sum / (int)all_tuple.size();
+  avg = (float)sum / (float)all_tuple.size();
 
   Value ret;
   if(aggr_fields_[index] == MAXF){
@@ -260,7 +260,7 @@ Value AggrePhysicalOperator::do_date(std::vector<std::vector<Value>>& all_tuple,
     }
     sum += tempdate;
   }
-  avg = sum / (int)all_tuple.size();
+  avg = (float)sum / (float)all_tuple.size();
 
   Value ret;
   if(aggr_fields_[index] == MAXF){
