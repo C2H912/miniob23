@@ -495,6 +495,19 @@ update_stmt:      /*  update 语句的语法解析树*/
       free($4);
     }
     ;
+update_options:
+		/* EMPTY */
+		|COMMA update_option update_options {
+			// Do Nothing
+		}
+update_option:
+		ID EQ value {
+    	
+		}
+   
+    ;
+
+
 select_stmt:        /*  select 语句的语法解析树*/
     SELECT select_attr FROM ID rel_list join_list where
     {

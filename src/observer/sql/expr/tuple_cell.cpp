@@ -64,34 +64,34 @@ TupleCellSpec::TupleCellSpec(std::string s, AggrOp aggr)
   alias_ = all_alias;
 }
 
-TupleCellSpec::TupleCellSpec(std::string s, AggrOp aggr)
-{
-  std::string aggr_name;
-  switch (aggr) {
-  case MAXF: {
-    aggr_name = "MAX(";
-    break;
-  }
-  case MINF: {
-    aggr_name = "MIN(";
-    break;
-  }
-  case COUNTF: {
-    aggr_name = "COUNT(";
-    break;
-  }
-  case AVGF: {
-    aggr_name = "AVG(";
-    break;
-  }
-  case SUMF: {
-    aggr_name = "SUM(";
-    break;
-  }
-  }
-  std::string all_alias = aggr_name + s + ")";
-  alias_ = all_alias;
-}
+// TupleCellSpec::TupleCellSpec(std::string s, AggrOp aggr)
+// {
+//   std::string aggr_name;
+//   switch (aggr) {
+//   case MAXF: {
+//     aggr_name = "MAX(";
+//     break;
+//   }
+//   case MINF: {
+//     aggr_name = "MIN(";
+//     break;
+//   }
+//   case COUNTF: {
+//     aggr_name = "COUNT(";
+//     break;
+//   }
+//   case AVGF: {
+//     aggr_name = "AVG(";
+//     break;
+//   }
+//   case SUMF: {
+//     aggr_name = "SUM(";
+//     break;
+//   }
+//   }
+//   std::string all_alias = aggr_name + s + ")";
+//   alias_ = all_alias;
+// }
 
 TupleCellSpec::TupleCellSpec(const char *alias)
 {
