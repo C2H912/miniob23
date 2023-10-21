@@ -249,14 +249,15 @@ Value AggrePhysicalOperator::do_date(std::vector<std::vector<Value>>& all_tuple,
   int size = all_tuple.size();
   for(int i = 0; i < size; i++){
     Value tuplecell = all_tuple[i][index];
+    char* tmp = (char *)tuplecell.ret_str().c_str();
+    int tempdate = date2int(tmp);
+    tuplecell.set_only_int(tempdate);
     if(max_value.compare(tuplecell) < 0){
       max_value = tuplecell;
     }
     if(min_value.compare(tuplecell) > 0){
       min_value = tuplecell;
     }
-    char* tmp = (char *)tuplecell.ret_str().c_str();
-    int tempdate = date2int(tmp);
     sum += tempdate;
   }
   avg = sum / (int)all_tuple.size();

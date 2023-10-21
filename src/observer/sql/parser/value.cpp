@@ -105,6 +105,10 @@ void Value::set_int(int val)
   num_value_.int_value_ = val;
   length_ = sizeof(val);
 }
+void Value::set_only_int(int val)
+{
+  num_value_.int_value_ = val;
+}
 
 void Value::set_float(float val)
 {

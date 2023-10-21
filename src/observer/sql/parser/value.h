@@ -69,6 +69,7 @@ public:
     this->set_data(const_cast<char *>(data), length);
   }
   void set_int(int val);
+  void set_only_int(int val);
   void set_float(float val);
   void set_boolean(bool val);
   void set_string(const char *s, int len = 0);
