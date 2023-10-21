@@ -30,6 +30,38 @@ TupleCellSpec::TupleCellSpec(const char *table_name, const char *field_name, con
   if (alias) {
     alias_ = alias;
   }
+  else{
+    alias_ = table_name_ + "." + field_name_;
+  }
+}
+
+TupleCellSpec::TupleCellSpec(std::string s, AggrOp aggr)
+{
+  std::string aggr_name;
+  switch (aggr) {
+  case MAXF: {
+    aggr_name = "MAX(";
+    break;
+  }
+  case MINF: {
+    aggr_name = "MIN(";
+    break;
+  }
+  case COUNTF: {
+    aggr_name = "COUNT(";
+    break;
+  }
+  case AVGF: {
+    aggr_name = "AVG(";
+    break;
+  }
+  case SUMF: {
+    aggr_name = "SUM(";
+    break;
+  }
+  }
+  std::string all_alias = aggr_name + s + ")";
+  alias_ = all_alias;
 }
 
 TupleCellSpec::TupleCellSpec(std::string s, AggrOp aggr)
