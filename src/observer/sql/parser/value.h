@@ -89,6 +89,10 @@ public:
   {
     return attr_type_;
   }
+  std::string ret_str() const
+  {
+    return str_value_;
+  }
 
 public:
   /**

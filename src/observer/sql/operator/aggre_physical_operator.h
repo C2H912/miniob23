@@ -45,6 +45,7 @@ public:
   Value do_int(std::vector<std::vector<Value>>& all_tuple, int index);
   Value do_float(std::vector<std::vector<Value>>& all_tuple, int index);
   Value do_char(std::vector<std::vector<Value>>& all_tuple, int index);
+  Value do_date(std::vector<std::vector<Value>>& all_tuple, int index);
 
 private:
   std::vector<Field> fields_;
