@@ -85,6 +85,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         VALUES
         FROM
         WHERE
+        INNER
+        JOIN
         AND
         NOT
         LIKE
@@ -110,6 +112,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %union {
   ParsedSqlNode *                   sql_node;
   ConditionSqlNode *                condition;
+  std::vector<InnerJoinSqlNode> *   join_lists;
   Value *                           value;
   enum CompOp                       comp;
   enum AggrOp                       aggr;
@@ -147,6 +150,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <value_list>          value_list
 %type <condition_list>      where
 %type <condition_list>      condition_list
+%type <condition_list>      on
+%type <join_lists>          join_list
 %type <rel_attr_list>       select_attr
 %type <relation_list>       rel_list
 %type <rel_attr_list>       attr_list
@@ -432,7 +437,7 @@ update_stmt:      /*  update 语句的语法解析树*/
     }
     ;
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT select_attr FROM ID rel_list where
+    SELECT select_attr FROM ID rel_list join_list where
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
       if ($2 != nullptr) {
@@ -445,10 +450,14 @@ select_stmt:        /*  select 语句的语法解析树*/
       }
       $$->selection.relations.push_back($4);
       std::reverse($$->selection.relations.begin(), $$->selection.relations.end());
-
       if ($6 != nullptr) {
-        $$->selection.conditions.swap(*$6);
+        $$->selection.joinTables.swap(*$6);
         delete $6;
+      }
+
+      if ($7 != nullptr) {
+        $$->selection.conditions.swap(*$7);
+        delete $7;
       }
       free($4);
     }
@@ -599,6 +608,35 @@ rel_list:
 
       $$->push_back($2);
       free($2);
+    }
+    ;
+join_list:
+    /* empty */
+    {
+      $$ = nullptr;
+    }
+    | INNER JOIN ID on join_list{
+      if ($5 != nullptr) {
+        $$ = $5;
+      } else {
+        $$ = new std::vector<InnerJoinSqlNode>;
+      }
+      InnerJoinSqlNode current;
+      current.join_relations = $3;
+      current.join_conditions.swap(*$4);
+      $$->push_back(current);
+
+      free($3);
+      free($4);
+    }
+    ;
+on:
+    /* empty */
+    {
+      $$ = nullptr;
+    }
+    | ON condition_list {
+      $$ = $2;  
     }
     ;
 where:
