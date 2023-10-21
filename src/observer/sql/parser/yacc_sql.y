@@ -55,6 +55,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 
 //标识tokens
 %token  SEMICOLON
+        IN
         CREATE
         DROP
         TABLE
@@ -107,10 +108,13 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         LE
         GE
         NE
+        EXISTS
+
 
 /** union 中定义各种数据类型，真实生成的代码也是union类型，所以不能有非POD类型的数据 **/
 %union {
   ParsedSqlNode *                   sql_node;
+  SelectSqlNode *                   sub_sql_node;
   ConditionSqlNode *                condition;
   std::vector<InnerJoinSqlNode> *   join_lists;
   Value *                           value;
@@ -159,6 +163,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <expression_list>     expression_list
 %type <sql_node>            calc_stmt
 %type <sql_node>            select_stmt
+%type <sub_sql_node>        sub_select_stmt
 %type <sql_node>            insert_stmt
 %type <sql_node>            update_stmt
 %type <sql_node>            delete_stmt
@@ -463,6 +468,28 @@ select_stmt:        /*  select 语句的语法解析树*/
       free($4);
     }
     ;
+sub_select_stmt:        /*  select 语句的语法解析树*/
+    LBRACE SELECT select_attr FROM ID rel_list where RBRACE
+    {
+      $$ = new SelectSqlNode;
+      if ($3 != nullptr) {
+        $$->attributes.swap(*$3);
+        delete $3;
+      }
+      if ($6 != nullptr) {
+        $$->relations.swap(*$6);
+        delete $6;
+      }
+      $$->relations.push_back($5);
+      std::reverse($$->relations.begin(), $$->relations.end());
+
+      if ($7 != nullptr) {
+        $$->conditions.swap(*$7);
+        delete $7;
+      }
+      free($5);
+    }
+    ;
 calc_stmt:
     CALC expression_list
     {
@@ -714,6 +741,19 @@ condition:
       delete $1;
       delete $3;
     }
+  
+    | rel_attr comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 1;
+      $$->left_attr = *$1;
+      $$->right_is_attr = -1;
+      $$->right_sql = $3;
+      $$->comp = $2;
+
+      delete $1;
+    }
+  
     ;
 
 comp_op:
@@ -725,6 +765,10 @@ comp_op:
     | NE { $$ = NOT_EQUAL; }
     | LIKE { $$ = REGEX_LIKE; }
     | NOT LIKE { $$ = REGEX_NOT_LIKE; }
+    | IN { $$ = IN_QUERY; }
+    | NOT IN { $$ = NOT_IN_QUERY; }
+    | EXISTS { $$ = EXISTS_QUERY; }
+    | NOT EXISTS { $$ = NOT_EXISTS_QUERY; }
     ;
 
 load_data_stmt:
