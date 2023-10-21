@@ -49,54 +49,117 @@ enum class BplusTreeOperationType
  * @brief 属性比较(BplusTree)
  * @ingroup BPlusTree
  */
-class AttrComparator 
-{
+class AttrComparator {
 public:
-  void init(AttrType type, int length)
+  void init( std::vector<AttrType> type, std::vector<int> length)
   {
+    //attr_id_ = id;
     attr_type_ = type;
     attr_length_ = length;
   }
 
   int attr_length() const
   {
-    return attr_length_;
+    int sum_len = 0;
+    for (size_t i = 0; i < attr_length_.size(); i++) {
+      sum_len += attr_length_[i];
+    }
+    return sum_len;  // TO DO MULTI INDEX
   }
 
-  int operator()(const char *v1, const char *v2) const
+  int operator()(const char *v1, const char *v2, bool null_as_differnet = false) const
   {
-    switch (attr_type_) {
-      case INTS: {
-        return common::compare_int((void *)v1, (void *)v2);
-      } break;
-      case FLOATS: {
-        return common::compare_float((void *)v1, (void *)v2);
+
+    // 这里有问题，就算有多个字段 也只能比较一次
+    int rc = 0;
+    // int pos = attr_length_[0];//修改
+    int pos = 0;
+    for (size_t i = 0; i < attr_length_.size(); i++)  // 不考虑NULL
+    {
+      switch (attr_type_[i]) {
+        case INTS: {
+          rc = common::compare_int((void *)(v1 + pos), (void *)(v2 + pos));
+        } break;
+        case FLOATS: { 
+          rc = common::compare_float((void *)(v1 + pos), (void *)(v2 + pos));
+        }break;
+        case CHARS: {
+          rc = common::compare_string((void *)(v1 + pos), attr_length_[i], (void *)(v2 + pos), attr_length_[i]);
+        }break;
+        // case DATES: {   
+        //   rc = common::compare_date((void *)(v1 + pos), (void *)(v2 + pos));
+        // }break;
+        default: {
+          LOG_ERROR("unknown attr type. %d", attr_type_[i]);
+          abort();
+        }
       }
-      case CHARS: {
-        return common::compare_string((void *)v1, attr_length_, (void *)v2, attr_length_);
+      if (rc != 0) {
+        return rc;
       }
-      default: {
-        ASSERT(false, "unknown attr type. %d", attr_type_);
-        return 0;
-      }
+      pos += attr_length_[i];
     }
+    return rc;
+
   }
 
 private:
-  AttrType attr_type_;
-  int attr_length_;
+  // AttrType attr_type_;
+  // int attr_length_;
+  // 第一列为标记NULL的bitmap
+  //std::vector<int> attr_id_;
+  std::vector<AttrType> attr_type_;
+  std::vector<int> attr_length_;
 };
+
+// class AttrComparator 
+// {
+// public:
+//   void init(AttrType type, int length)
+//   {
+//     attr_type_ = type;
+//     attr_length_ = length;
+//   }
+
+//   int attr_length() const
+//   {
+//     return attr_length_;
+//   }
+
+//   int operator()(const char *v1, const char *v2) const
+//   {
+//     switch (attr_type_) {
+//       case INTS: {
+//         return common::compare_int((void *)v1, (void *)v2);
+//       } break;
+//       case FLOATS: {
+//         return common::compare_float((void *)v1, (void *)v2);
+//       }
+//       case CHARS: {
+//         return common::compare_string((void *)v1, attr_length_, (void *)v2, attr_length_);
+//       }
+//       default: {
+//         ASSERT(false, "unknown attr type. %d", attr_type_);
+//         return 0;
+//       }
+//     }
+//   }
+
+// private:
+//   AttrType attr_type_;
+//   int attr_length_;
+// };
 
 /**
  * @brief 键值比较(BplusTree)
  * @details BplusTree的键值除了字段属性，还有RID，是为了避免属性值重复而增加的。
  * @ingroup BPlusTree
  */
-class KeyComparator 
-{
+class KeyComparator {
 public:
-  void init(AttrType type, int length)
+  void init(bool unique, std::vector<AttrType> type, std::vector<int> length)
   {
+    unique_ = unique;
     attr_comparator_.init(type, length);
   }
 
@@ -108,7 +171,7 @@ public:
   int operator()(const char *v1, const char *v2) const
   {
     int result = attr_comparator_(v1, v2);
-    if (result != 0) {
+    if (unique_ || result != 0) {
       return result;
     }
 
@@ -118,6 +181,7 @@ public:
   }
 
 private:
+  bool unique_;
   AttrComparator attr_comparator_;
 };
 
@@ -125,10 +189,10 @@ private:
  * @brief 属性打印,调试使用(BplusTree)
  * @ingroup BPlusTree
  */
-class AttrPrinter 
-{
+class AttrPrinter {
 public:
-  void init(AttrType type, int length)
+  // void init(AttrType type, int length)
+  void init(std::vector<AttrType> type, std::vector<int> length)
   {
     attr_type_ = type;
     attr_length_ = length;
@@ -136,48 +200,86 @@ public:
 
   int attr_length() const
   {
-    return attr_length_;
+    // return attr_length_;
+    int len_sum = 0;
+    for (size_t i = 0; i < attr_length_.size(); i++) {
+      len_sum += attr_length_[i];
+    }
+    return len_sum;
   }
 
+  // 这里有点怪 为什么里面会有for循环
   std::string operator()(const char *v) const
   {
-    switch (attr_type_) {
-      case INTS: {
-        return std::to_string(*(int *)v);
-      } break;
-      case FLOATS: {
-        return std::to_string(*(float *)v);
-      }
-      case CHARS: {
-        std::string str;
-        for (int i = 0; i < attr_length_; i++) {
-          if (v[i] == 0) {
-            break;
-          }
-          str.push_back(v[i]);
+    // switch (attr_type_) {
+    // case DATES:
+    // case INTS: {
+    //   return std::to_string(*(int*)v);
+    // }
+    //   break;
+    // case FLOATS: {
+    //   return std::to_string(*(float*)v);
+    // }
+    // case CHARS: {
+    //   std::string str;
+    //   for (int i = 0; i < attr_length_; i++) {
+    //     if (v[i] == 0) {
+    //       break;
+    //     }
+    //     str.push_back(v[i]);
+    //   }
+    //   return str;
+    // }
+    // default:{
+    //   LOG_ERROR("unknown attr type. %d", attr_type_);
+    //   abort();
+    // }
+    // }
+
+    for (size_t i = 0; i < attr_type_.size(); i++) {
+      switch (attr_type_[i]) {
+        //case DATES:
+        case INTS: {
+          return std::to_string(*(int *)v);
+        } break;
+        case FLOATS: {
+          return std::to_string(*(float *)v);
         }
-        return str;
-      }
-      default: {
-        ASSERT(false, "unknown attr type. %d", attr_type_);
+        case CHARS: {
+          std::string str;
+          // 这个i不会有问题吗
+          for (int i = 0; i < attr_length_[i]; i++) {
+            if (v[i] == 0) {
+              break;
+            }
+            str.push_back(v[i]);
+          }
+          return str;
+        }
+        default: {
+          LOG_ERROR("unknown attr type. %d", attr_type_[i]);
+          abort();
+        }
       }
     }
-    return std::string();
+    return nullptr;
   }
 
 private:
-  AttrType attr_type_;
-  int attr_length_;
+  // AttrType attr_type_;
+  // int attr_length_;
+  std::vector<AttrType> attr_type_;
+  std::vector<int> attr_length_;
 };
 
 /**
  * @brief 键值打印,调试使用(BplusTree)
  * @ingroup BPlusTree
  */
-class KeyPrinter 
-{
+class KeyPrinter {
 public:
-  void init(AttrType type, int length)
+  // void init(AttrType type, int length)
+  void init(std::vector<AttrType> type, std::vector<int> length)
   {
     attr_printer_.init(type, length);
   }
@@ -207,28 +309,39 @@ private:
  * @details this is the first page of bplus tree.
  * only one field can be supported, can you extend it to multi-fields?
  */
-struct IndexFileHeader 
+struct IndexFileHeader //TODOINDEX
 {
   IndexFileHeader()
   {
     memset(this, 0, sizeof(IndexFileHeader));
     root_page = BP_INVALID_PAGE_NUM;
   }
+  bool unique;
   PageNum root_page;          ///< 根节点在磁盘中的页号
   int32_t internal_max_size;  ///< 内部节点最大的键值对数
   int32_t leaf_max_size;      ///< 叶子节点最大的键值对数
-  int32_t attr_length;        ///< 键值的长度
+  int32_t attr_num;
+  //int32_t attr_length;        ///< 键值的长度
+  std::vector<int32_t> attr_length;  /// 第一列为标记NULL的bitmap
+  std::vector<int32_t> attr_offset;
   int32_t key_length;         ///< attr length + sizeof(RID)
-  AttrType attr_type;         ///< 键值的类型
+  std::vector<AttrType> attr_type;///< 键值的类型
 
   const std::string to_string()
   {
     std::stringstream ss;
 
-    ss << "attr_length:" << attr_length << ","
+    ss << "attr_length:" << attr_length[0];
+    for (int i = 1; i < attr_num; i++) {
+      ss << "|" << attr_length[i];
+    }
+    ss << ","
        << "key_length:" << key_length << ","
-       << "attr_type:" << attr_type << ","
-       << "root_page:" << root_page << ","
+       << "attr_type:" << attr_type[0];
+    for (int i = 1; i < attr_num; i++) {
+      ss << "|" << attr_type[i];
+    }
+    ss << "root_page:" << root_page << ","
        << "internal_max_size:" << internal_max_size << ","
        << "leaf_max_size:" << leaf_max_size << ";";
 
@@ -463,10 +576,12 @@ public:
    * attrType描述被索引属性的类型，attrLength描述被索引属性的长度
    */
   RC create(const char *file_name, 
-            AttrType attr_type, 
-            int attr_length, 
-            int internal_max_size = -1, 
-            int leaf_max_size = -1);
+            bool unique,
+            std::vector<AttrType> attr_type, 
+            std::vector<int> attr_length, 
+            std::vector<int> attr_offset,//TODOINDEX
+			       int internal_max_size = -1, 
+             int leaf_max_size = -1);
 
   /**
    * 打开名为fileName的索引文件。
@@ -563,7 +678,8 @@ protected:
   RC adjust_root(LatchMemo &latch_memo, Frame *root_frame);
 
 private:
-  common::MemPoolItem::unique_ptr make_key(const char *user_key, const RID &rid);
+  //common::MemPoolItem::unique_ptr make_key(const char *user_key, const RID &rid);
+  char* make_key(const char *user_key, const RID &rid);
   void free_key(char *key);
 
 protected:

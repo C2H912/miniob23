@@ -71,6 +71,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         LBRACE
         RBRACE
         COMMA
+        UNIQUE
         TRX_BEGIN
         TRX_COMMIT
         TRX_ROLLBACK
@@ -115,6 +116,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   std::vector<ConditionSqlNode> *   condition_list;
   std::vector<RelAttrSqlNode> *     rel_attr_list;
   std::vector<std::string> *        relation_list;
+  std::vector<std::string> *        index_attr_list;
   char *                            string;
   int                               number;
   float                             floats;
@@ -140,6 +142,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <condition_list>      condition_list
 %type <rel_attr_list>       select_attr
 %type <relation_list>       rel_list
+%type <index_attr_list>     id_list
+%type <string>              id
 %type <rel_attr_list>       attr_list
 %type <expression>          expression
 %type <expression_list>     expression_list
@@ -259,18 +263,73 @@ desc_table_stmt:
     ;
 
 create_index_stmt:    /*create index 语句的语法解析树*/
-    CREATE INDEX ID ON ID LBRACE ID RBRACE
+    CREATE INDEX ID ON ID LBRACE id id_list RBRACE
     {
       $$ = new ParsedSqlNode(SCF_CREATE_INDEX);
       CreateIndexSqlNode &create_index = $$->create_index;
       create_index.index_name = $3;
       create_index.relation_name = $5;
-      create_index.attribute_name = $7;
+      //create_index.attribute_name = $7
+      std::vector<std::string> *src_attrs = $8;
+      if (src_attrs != nullptr) {
+        create_index.attribute_name.swap(*src_attrs);
+      }
+      std::string temp = $7;
+      create_index.attribute_name.emplace_back(temp);
+      std::reverse(create_index.attribute_name.begin(), create_index.attribute_name.end());
+      delete $7;
+    
+      create_index.unique = false;
       free($3);
       free($5);
-      free($7);
+      //free($7);
     }
+    | CREATE UNIQUE INDEX ID ON ID LBRACE id id_list RBRACE SEMICOLON 
+		{
+			$$ = new ParsedSqlNode(SCF_CREATE_INDEX);
+      CreateIndexSqlNode &create_index = $$->create_index;
+      create_index.index_name = $4;
+      create_index.relation_name = $6;
+      //create_index.attribute_name = $7
+      std::vector<std::string> *src_attrs = $9;
+      if (src_attrs != nullptr) {
+        create_index.attribute_name.swap(*src_attrs);
+      }
+      std::string temp = $8;
+      create_index.attribute_name.push_back(temp);
+      std::reverse(create_index.attribute_name.begin(), create_index.attribute_name.end());//保持顺序
+      delete $8;
+      create_index.unique = true;
+      free($4);
+      free($6);
+      //free($8);
+      
+		}
     ;
+
+id_list:
+		 /* empty */
+    {
+      $$ = nullptr;
+    }
+    | COMMA id id_list
+    {
+      if ($3 != nullptr) {
+        $$ = $3;
+      } else {
+        $$ = new std::vector<std::string>;
+      }
+      $$->push_back($2);
+      delete $2;
+    }
+id:
+	ID 
+	{
+
+		$$ = $1;
+    //free($1);
+	}
+	;
 
 drop_index_stmt:      /*drop index 语句的语法解析树*/
     DROP INDEX ID ON ID

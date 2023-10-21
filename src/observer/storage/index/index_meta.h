@@ -15,6 +15,7 @@ See the Mulan PSL v2 for more details. */
 #pragma once
 
 #include <string>
+#include <vector>
 #include "common/rc.h"
 
 class TableMeta;
@@ -30,16 +31,19 @@ class Value;
  * @details 一个索引包含了表的哪些字段，索引的名称等。
  * 如果以后实现了多种类型的索引，还需要记录索引的类型，对应类型的一些元数据等
  */
-class IndexMeta 
+class IndexMeta //修改成员field->vector<field>
 {
 public:
   IndexMeta() = default;
 
-  RC init(const char *name, const FieldMeta &field);
+  RC init(const char *name, bool unique, std::vector<std::string> &field);
 
 public:
   const char *name() const;
-  const char *field() const;
+  //const char *field() const;//要修改
+  const std::vector<std::string> *field() const;
+  const bool is_unique() const { return unique_;} 
+  const int field_count() const {return field_.size();} 
 
   void desc(std::ostream &os) const;
 
@@ -49,5 +53,6 @@ public:
 
 protected:
   std::string name_;   // index's name
-  std::string field_;  // field's name
+  std::vector<std::string> field_;  // field's name
+  bool unique_ = false;
 };

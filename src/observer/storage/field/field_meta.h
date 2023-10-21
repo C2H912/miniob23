@@ -37,6 +37,7 @@ public:
   RC init(const char *name, AttrType attr_type, int attr_offset, int attr_len, bool visible);
 
 public:
+  int id() const  { return id_;};
   const char *name() const;
   AttrType type() const;
   int offset() const;
@@ -51,6 +52,7 @@ public:
   static RC from_json(const Json::Value &json_value, FieldMeta &field);
 
 protected:
+  int id_;//在索引中的第几个字段
   std::string name_;
   AttrType attr_type_;
   int attr_offset_;

@@ -199,18 +199,27 @@ RC Table::open(const char *meta_file, const char *base_dir)
   const int index_num = table_meta_.index_num();
   for (int i = 0; i < index_num; i++) {
     const IndexMeta *index_meta = table_meta_.index(i);
-    const FieldMeta *field_meta = table_meta_.field(index_meta->field());
-    if (field_meta == nullptr) {
-      LOG_ERROR("Found invalid index meta info which has a non-exists field. table=%s, index=%s, field=%s",
-                name(), index_meta->name(), index_meta->field());
-      // skip cleanup
-      //  do all cleanup action in destructive Table function
-      return RC::INTERNAL;
+    //const FieldMeta *field_meta = table_meta_.field(index_meta->field());
+    const std::vector<std::string> *index_field_names = index_meta->field();
+    std::vector<FieldMeta> field_metas;
+    for (size_t i = 0; i < index_field_names->size(); i++) {
+      const char *field_name = index_field_names->at(i).data();
+      const FieldMeta *field_meta = table_meta_.field(field_name);
+      if (field_meta == nullptr) {
+        LOG_ERROR("Found invalid index meta info which has a non-exists field. table=%s, index=%s, field=%s",
+            name(),
+            index_meta->name(),
+            index_meta->field());
+        // skip cleanup
+        //  do all cleanup action in destructive Table function
+        return RC::INTERNAL;
+      }
+      field_metas.push_back(*field_meta);
     }
 
     BplusTreeIndex *index = new BplusTreeIndex();
     std::string index_file = table_index_file(base_dir, name(), index_meta->name());
-    rc = index->open(index_file.c_str(), *index_meta, *field_meta);
+    rc = index->open(index_file.c_str(), *index_meta, field_metas);
     if (rc != RC::SUCCESS) {
       delete index;
       LOG_ERROR("Failed to open index. table=%s, index=%s, file=%s, rc=%s",
@@ -451,26 +460,38 @@ RC Table::get_record_scanner(RecordFileScanner &scanner, Trx *trx, bool readonly
   }
   return rc;
 }
-
-RC Table::create_index(Trx *trx, const FieldMeta *field_meta, const char *index_name)
+//这个函数是关键 多列索引要修改的有  每个entry的key生成 key之间的对比 是否为unique
+RC Table::create_index(Trx *trx, std::vector<FieldMeta> &field_meta, const char *index_name,bool unique)
 {
-  if (common::is_blank(index_name) || nullptr == field_meta) {
+  if (common::is_blank(index_name) || field_meta.empty()==true) {
     LOG_INFO("Invalid input arguments, table name is %s, index_name is blank or attribute_name is blank", name());
     return RC::INVALID_ARGUMENT;
   }
 
+//转换成string类型
+ std::vector<std::string> field_names;  // 字段名
+  for (const FieldMeta &field_meta_temp:field_meta) {
+    std::string field_name = field_meta_temp.name();
+    field_names.push_back(field_name);
+  }
+
   IndexMeta new_index_meta;
-  RC rc = new_index_meta.init(index_name, *field_meta);
+  RC rc = new_index_meta.init(index_name, unique,field_names);//初始化索引文件 但是怎么只有一个field 需要修改
   if (rc != RC::SUCCESS) {
     LOG_INFO("Failed to init IndexMeta in table:%s, index_name:%s, field_name:%s", 
              name(), index_name, field_meta->name());
     return rc;
   }
 
+  //  if (table_meta_.find_index_by_field(field_names)) {  // 已存在字段的索引 不行
+  //   LOG_INFO("Invalid input arguments, table name is %s, attribute %s exist index", name(), index_name, attribute_name);
+  //   return RC::SCHEMA_INDEX_EXIST;
+  // }
+
   // 创建索引相关数据
   BplusTreeIndex *index = new BplusTreeIndex();
   std::string index_file = table_index_file(base_dir_.c_str(), name(), index_name);
-  rc = index->create(index_file.c_str(), new_index_meta, *field_meta);
+  rc = index->create(index_file.c_str(), new_index_meta, field_meta);//TODO
   if (rc != RC::SUCCESS) {
     delete index;
     LOG_ERROR("Failed to create bplus tree index. file name=%s, rc=%d:%s", index_file.c_str(), rc, strrc(rc));
@@ -494,7 +515,7 @@ RC Table::create_index(Trx *trx, const FieldMeta *field_meta, const char *index_
                name(), index_name, strrc(rc));
       return rc;
     }
-    rc = index->insert_entry(record.data(), &record.rid());
+    rc = index->insert_entry(record.data(), &record.rid());//这里要改 把单个key改成多个key
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to insert record into index while creating index. table=%s, index=%s, rc=%s",
                name(), index_name, strrc(rc));

@@ -34,7 +34,7 @@ class IndexScanner;
  * @brief 索引基类
  * @ingroup Index
  */
-class Index 
+class Index //MULTIINDEX 将成员修改为多字段 同时修改对应函数
 {
 public:
   Index() = default;
@@ -81,11 +81,12 @@ public:
   virtual RC sync() = 0;
 
 protected:
-  RC init(const IndexMeta &index_meta, const FieldMeta &field_meta);
+  RC init(const IndexMeta &index_meta,  std::vector<FieldMeta> &field_meta);
 
 protected:
   IndexMeta index_meta_;  ///< 索引的元数据
-  FieldMeta field_meta_;  ///< 当前实现仅考虑一个字段的索引
+  //FieldMeta field_meta_;  /// 当前实现仅考虑一个字段的索引
+  std::vector<FieldMeta> field_meta_;
 };
 
 /**
