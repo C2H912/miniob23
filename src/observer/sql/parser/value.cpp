@@ -287,6 +287,17 @@ std::string Value::to_string() const
   return os.str();
 }
 
+void string2number(const char * s, int &ret1, float &ret2)
+{
+  if(s[0] < '0' || s[0] > '9'){
+    ret1 = 0;
+    ret2 = 0.0;
+    return;
+  }
+  ret2 = strtod(s, nullptr);
+  ret1 = (int)ret2;
+}
+
 int Value::compare(const Value &other) const
 {
   if (this->attr_type_ == other.attr_type_) {
@@ -323,6 +334,32 @@ int Value::compare(const Value &other) const
   } else if (this->attr_type_ == FLOATS && other.attr_type_ == INTS) {
     float other_data = other.num_value_.int_value_;
     return common::compare_float((void *)&this->num_value_.float_value_, (void *)&other_data);
+  } else if (this->attr_type_ == CHARS && other.attr_type_ == FLOATS) {   //
+    const char *this_data = this->ret_str().c_str();
+    int ret1 = -1;
+    float ret2 = -1.0;
+    string2number(this_data, ret1, ret2);
+    return common::compare_float((void *)&ret2, (void *)&other.num_value_.float_value_);
+  } else if (this->attr_type_ == CHARS && other.attr_type_ == INTS) {  //.
+    const char *this_data = this->ret_str().c_str();
+    int ret1 = -1;
+    float ret2 = -1.0;
+    string2number(this_data, ret1, ret2);
+    float other_ret = *(int*)other.num_value_.int_value_;
+    return common::compare_float((void *)&ret2, (void *)&other_ret);
+  } else if (this->attr_type_ == FLOATS && other.attr_type_ == CHARS) {  //.
+    const char *this_data = other.ret_str().c_str();
+    int ret1 = -1;
+    float ret2 = -1.0;
+    string2number(this_data, ret1, ret2);
+    return common::compare_float((void *)&this->num_value_.float_value_, (void *)&ret2);
+  } else if (this->attr_type_ == INTS && other.attr_type_ == CHARS) {  //.
+    const char *this_data = other.ret_str().c_str();
+    int ret1 = -1;
+    float ret2 = -1.0;
+    string2number(this_data, ret1, ret2);
+    float other_ret = *(int*)this->num_value_.int_value_;
+    return common::compare_float((void *)&other_ret, (void *)&ret2);
   }
   LOG_WARN("not supported");
   return -1;  // TODO return rc?

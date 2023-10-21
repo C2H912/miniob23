@@ -17,11 +17,99 @@ See the Mulan PSL v2 for more details. */
 #include "storage/db/db.h"
 #include "storage/table/table.h"
 
+std::string double2string(double v)
+{
+  char buf[256];
+  snprintf(buf, sizeof(buf), "%.2f", v);
+  size_t len = strlen(buf);
+  while (buf[len - 1] == '0') {
+    len--;
+      
+  }
+  if (buf[len - 1] == '.') {
+    len--;
+  }
+
+  return std::string(buf, len);
+}
+
+void string2number2(const char * s, int &ret1, float &ret2)
+{
+  if(s[0] < '0' || s[0] > '9'){
+    ret1 = 0;
+    ret2 = 0.0;
+    return;
+  }
+  ret2 = strtod(s, nullptr);
+  ret1 = (int)ret2;
+}
+
+void input_typecast(Value *input, AttrType output_type)
+{
+  AttrType input_type = input->attr_type();
+  if(output_type == INTS){
+    switch(input_type){
+    case FLOATS: {
+      float tempf = input->get_float();
+      int tempi = 0;
+      if(((int)(tempf + 0.5)) > ((int)tempf))
+        tempi = (int)(tempf + 0.5);
+      else
+        tempi = (int)tempf;
+      input->set_int(tempi);
+      break;
+    }
+    case CHARS: {
+      int tempi = 0;
+      float tempf = 0.0;
+      string2number2(input->ret_str().c_str(), tempi, tempf);
+      if(((int)(tempf + 0.5)) > ((int)tempf))
+        tempi = (int)(tempf + 0.5);
+      else
+        tempi = (int)tempf;
+      input->set_int(tempi);
+      break;
+    } 
+    }
+  }
+  if(output_type == FLOATS){
+    switch(input_type){
+    case INTS: {
+      float tempd = input->get_int();
+      input->set_float(tempd);
+      break;
+    }
+    case CHARS: {
+      int tempi = 0;
+      float tempf = 0.0;
+      string2number2(input->ret_str().c_str(), tempi, tempf);
+      input->set_float(tempi);
+      break;
+    } 
+    }
+  }
+  if(output_type == CHARS){
+    switch(input_type){
+    case FLOATS: {
+      std::string temps = double2string(input->get_float());
+      input->set_string(temps.c_str());
+      break;
+    }
+    case INTS: {
+      float tempf = input->get_int();
+      std::string temps = double2string(tempf);
+      input->set_string(temps.c_str());
+      break;
+    } 
+    }
+  }
+}
+
 InsertStmt::InsertStmt(Table *table, const Value *values, int value_amount)
     : table_(table), values_(values), value_amount_(value_amount)
 {}
 
-RC InsertStmt::create(Db *db, const InsertSqlNode &inserts, Stmt *&stmt)
+RC InsertStmt::create(Db *db, InsertSqlNode &inserts, Stmt *&stmt)
 {
   const char *table_name = inserts.relation_name.c_str();
   if (nullptr == db || nullptr == table_name || inserts.values.empty()) {
@@ -38,7 +126,7 @@ RC InsertStmt::create(Db *db, const InsertSqlNode &inserts, Stmt *&stmt)
   }
 
   // check the fields number
-  const Value *values = inserts.values.data();
+  Value *values_ptr = inserts.values.data();
   const int value_num = static_cast<int>(inserts.values.size());
   const TableMeta &table_meta = table->table_meta();
   const int field_num = table_meta.field_num() - table_meta.sys_field_num();
@@ -52,15 +140,16 @@ RC InsertStmt::create(Db *db, const InsertSqlNode &inserts, Stmt *&stmt)
   for (int i = 0; i < value_num; i++) {
     const FieldMeta *field_meta = table_meta.field(i + sys_field_num);
     const AttrType field_type = field_meta->type();
-    const AttrType value_type = values[i].attr_type();
+    const AttrType value_type = values_ptr[i].attr_type();
     if (field_type != value_type) {  // TODO try to convert the value type to field type
-      LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
-          table_name, field_meta->name(), field_type, value_type);
-      return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      //LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+      //    table_name, field_meta->name(), field_type, value_type);
+      //return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      input_typecast(&values_ptr[i], field_type);
     }
   }
 
   // everything alright
-  stmt = new InsertStmt(table, values, value_num);
+  stmt = new InsertStmt(table, values_ptr, value_num);
   return RC::SUCCESS;
 }
