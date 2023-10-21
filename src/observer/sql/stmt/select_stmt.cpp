@@ -66,6 +66,7 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
   // collect query fields in `select` statement
   std::vector<Field> query_fields;
   std::vector<AggrOp> aggr_fields;
+  std::vector<std::string> aggr_specs;
 
   const RelAttrSqlNode &relation_attr = select_sql.attributes[static_cast<int>(select_sql.attributes.size()) - 1];
   AggrOp aggr_flag = relation_attr.aggr_func;   //是否带有聚合
@@ -95,8 +96,14 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
     if (common::is_blank(relation_attr.relation_name.c_str()) &&
         0 == strcmp(relation_attr.attribute_name.c_str(), "*")) {
       for (Table *table : tables) {
-        wildcard_fields(table, query_fields);
+        if(relation_attr.aggr_func != UNKNOWN){
+          query_fields.push_back(Field(table, table->table_meta().field(0)));
+        }
+        else{
+          wildcard_fields(table, query_fields);
+        }
       }
+      aggr_specs.push_back("*");
 
     } else if (!common::is_blank(relation_attr.relation_name.c_str())) {
       const char *table_name = relation_attr.relation_name.c_str();
@@ -108,8 +115,14 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
           return RC::SCHEMA_FIELD_MISSING;
         }
         for (Table *table : tables) {
-          wildcard_fields(table, query_fields);
+          if(relation_attr.aggr_func != UNKNOWN){
+            query_fields.push_back(Field(table, table->table_meta().field(0)));
+          }
+          else{
+            wildcard_fields(table, query_fields);
+          }
         }
+        aggr_specs.push_back("*");
       } else {
         auto iter = table_map.find(table_name);
         if (iter == table_map.end()) {
@@ -119,7 +132,13 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
 
         Table *table = iter->second;
         if (0 == strcmp(field_name, "*")) {
-          wildcard_fields(table, query_fields);
+          if(relation_attr.aggr_func != UNKNOWN){
+            query_fields.push_back(Field(table, table->table_meta().field(0)));
+          }
+          else{
+            wildcard_fields(table, query_fields);
+          }
+          aggr_specs.push_back("*");
         } else {
           const FieldMeta *field_meta = table->table_meta().field(field_name);
           if (nullptr == field_meta) {
@@ -128,6 +147,7 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
           }
 
           query_fields.push_back(Field(table, field_meta));
+          aggr_specs.push_back(relation_attr.attribute_name);
         }
       }
     } else {
@@ -144,6 +164,7 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
       }
 
       query_fields.push_back(Field(table, field_meta));
+      aggr_specs.push_back(relation_attr.attribute_name);
     }
     aggr_fields.push_back(relation_attr.aggr_func);
   }
@@ -174,6 +195,7 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
   select_stmt->tables_.swap(tables);
   select_stmt->query_fields_.swap(query_fields);
   select_stmt->aggr_fields_.swap(aggr_fields);
+  select_stmt->aggr_specs_.swap(aggr_specs);
   select_stmt->filter_stmt_ = filter_stmt;
   stmt = select_stmt;
   return RC::SUCCESS;

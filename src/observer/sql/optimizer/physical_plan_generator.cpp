@@ -197,13 +197,22 @@ RC PhysicalPlanGenerator::create_plan(ProjectLogicalOperator &project_oper, uniq
   ProjectPhysicalOperator *project_operator = new ProjectPhysicalOperator;
   const vector<Field> &project_fields = project_oper.fields();
   const vector<AggrOp> &project_aggr = project_oper.aggr_fields();
-  int i = 0;
-  for (const Field &field : project_fields) {
-    AggrOp temp_aggr = project_aggr[i];
-    project_operator->add_projection(field.table(), field.meta(), temp_aggr);
-    i++;
+#if 0
+  const vector<string> &project_aggr_spec = project_oper.aggr_specs();
+  if(project_aggr[0] != UNKNOWN){
+    for(int i = 0; i < (int)project_aggr.size(); i++){
+      project_operator->add_projection(project_aggr_spec[i], project_aggr[i]);
+    }
   }
-
+  else{
+    for (const Field &field : project_fields) {
+      project_operator->add_projection(field.table(), field.meta());
+    }
+  }
+#endif
+  for (const Field &field : project_fields) {
+    project_operator->add_projection(field.table(), field.meta());
+  }
   if (child_phy_oper) {
     project_operator->add_child(std::move(child_phy_oper));
   }

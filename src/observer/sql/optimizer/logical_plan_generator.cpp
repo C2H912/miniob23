@@ -85,6 +85,7 @@ RC LogicalPlanGenerator::create_plan(
   const std::vector<Table *> &tables = select_stmt->tables();
   const std::vector<Field> &all_fields = select_stmt->query_fields();
   const std::vector<AggrOp> &aggr_fields = select_stmt->aggr_fields();
+  const std::vector<string> &aggr_specs = select_stmt->aggr_specs();
   for (Table *table : tables) {
     std::vector<Field> fields;
     for (const Field &field : all_fields) {
@@ -116,7 +117,7 @@ RC LogicalPlanGenerator::create_plan(
     aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields));
   }
 
-  unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields));
+  unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs));
   if (aggr_oper) {
     if (predicate_oper) {
       if (table_oper) {

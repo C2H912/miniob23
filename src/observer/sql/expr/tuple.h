@@ -55,13 +55,17 @@ public:
   {
     cells_.push_back(cell);
   }
-  void append_cell(const char *table, const char *field, AggrOp aggr)
+  void append_cell(const char *table, const char *Field)
   {
-    append_cell(TupleCellSpec(table, field, nullptr, aggr));
+    append_cell(TupleCellSpec(table, Field, nullptr));
   }
-  void append_cell(const char *alias, AggrOp aggr)
+  void append_cell(std::string s, AggrOp aggr)
   {
-    append_cell(TupleCellSpec(alias, aggr));
+    append_cell(TupleCellSpec(s, aggr));
+  }
+  void append_cell(const char *alias)
+  {
+    append_cell(TupleCellSpec(alias));
   }
   int cell_num() const
   {
@@ -106,7 +110,7 @@ public:
    * @param spec cell的描述
    * @param[out] cell 返回的cell
    */
-  virtual RC find_cell(const TupleCellSpec &spec, Value &cell) const = 0;
+  virtual RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const = 0;
 
   virtual std::string to_string() const
   {
@@ -178,7 +182,7 @@ public:
     return RC::SUCCESS;
   }
 
-  RC find_cell(const TupleCellSpec &spec, Value &cell) const override
+  RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const override
   {
     const char *table_name = spec.table_name();
     const char *field_name = spec.field_name();
@@ -267,12 +271,12 @@ public:
     }
 
     const TupleCellSpec *spec = speces_[index];
-    return tuple_->find_cell(*spec, cell);
+    return tuple_->find_cell(*spec, cell, index);
   }
 
-  RC find_cell(const TupleCellSpec &spec, Value &cell) const override
+  RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const override
   {
-    return tuple_->find_cell(spec, cell);
+    return tuple_->find_cell(spec, cell, index);
   }
 
 #if 0
@@ -317,7 +321,7 @@ public:
     return expr->try_get_value(cell);
   }
 
-  RC find_cell(const TupleCellSpec &spec, Value &cell) const override
+  RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const override
   {
     for (const std::unique_ptr<Expression> &expr : expressions_) {
       if (0 == strcmp(spec.alias(), expr->name().c_str())) {
@@ -367,21 +371,11 @@ public:
     return RC::SUCCESS;
   }
 
-  virtual RC find_cell(const TupleCellSpec &spec, Value &cell) const override
+  virtual RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const override
   {
     //return RC::INTERNAL;
-    const char *table_name = spec.table_name();
-    const char *field_name = spec.field_name();
-    for(int i = 0; i < (int)spec_.size(); i++){
-      Field temp = spec_[i];
-      if (0 == strcmp(table_name, temp.table_name())) {
-        if(0 == strcmp(field_name, temp.field_name())){
-          cell_at(i, cell);
-          return RC::SUCCESS;
-        }
-      }
-    }
-    return RC::NOTFOUND;
+    cell_at(index, cell);
+    return RC::SUCCESS;
   }
 
 private:
@@ -428,14 +422,14 @@ public:
     return RC::NOTFOUND;
   }
 
-  RC find_cell(const TupleCellSpec &spec, Value &value) const override
+  RC find_cell(const TupleCellSpec &spec, Value &value, int index) const override
   {
-    RC rc = left_->find_cell(spec, value);
+    RC rc = left_->find_cell(spec, value, index);
     if (rc == RC::SUCCESS || rc != RC::NOTFOUND) {
       return rc;
     }
 
-    return right_->find_cell(spec, value);
+    return right_->find_cell(spec, value, index);
   }
 
 private:

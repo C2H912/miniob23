@@ -69,15 +69,20 @@ RC ExecuteStage::handle_request_with_physical_operator(SQLStageEvent *sql_event)
       SelectStmt *select_stmt = static_cast<SelectStmt *>(stmt);
       bool with_table_name = select_stmt->tables().size() > 1;
 
-      int i = 0;
-      for (const Field &field : select_stmt->query_fields()) {
-        AggrOp temp_aggr = select_stmt->aggr_fields()[i];
-        if (with_table_name) {
-          schema.append_cell(field.table_name(), field.field_name(), temp_aggr);
-        } else {
-          schema.append_cell(field.field_name(), temp_aggr);
+      if(select_stmt->aggr_fields()[0] != UNKNOWN){
+        for(int i = 0; i < (int)select_stmt->aggr_fields().size(); i++){
+          AggrOp temp_aggr = select_stmt->aggr_fields()[i];
+          schema.append_cell(select_stmt->aggr_specs()[i], temp_aggr);
         }
-        i++;
+      }
+      else{
+        for (const Field &field : select_stmt->query_fields()) {
+          if (with_table_name) {
+            schema.append_cell(field.table_name(), field.field_name());
+          } else {
+            schema.append_cell(field.field_name());
+          }
+        }
       }
     } break;
 

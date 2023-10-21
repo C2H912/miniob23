@@ -14,6 +14,7 @@ See the Mulan PSL v2 for more details. */
 
 #include "sql/operator/project_logical_operator.h"
 
-ProjectLogicalOperator::ProjectLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields) 
-: fields_(fields), aggr_fields_(aggr_fields)
+ProjectLogicalOperator::ProjectLogicalOperator(const std::vector<Field> &fields, 
+            const std::vector<AggrOp> &aggr_fields, const std::vector<std::string> &aggr_specs) 
+: fields_(fields), aggr_fields_(aggr_fields), aggr_specs_(aggr_specs)
 {}
