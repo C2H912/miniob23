@@ -101,6 +101,11 @@ RC UpdatePhysicalOperator::next()
 
     rc = trx_->insert_record(table_, new_record);
     if (rc != RC::SUCCESS) {
+      //update失败要回退
+      Record temp_record;
+      int record_size = table_->table_meta().record_size();
+      temp_record.set_data_owner(old_record,record_size);
+      RC rc2 = trx_->insert_record(table_, temp_record);
       LOG_WARN("failed to insert record by transaction. rc=%s", strrc(rc));
        return rc;
     }

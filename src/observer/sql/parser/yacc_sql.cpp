@@ -2133,10 +2133,10 @@ yyreduce:
           u_list = (yyvsp[-1].attr_name_a_values);
       }
       u_list->emplace_back(*(yyvsp[-2].attr_name_value));
-      for(int i = u_list->size();i>0;i--)
+      for(int i = u_list->size()-1;i>=0;i--)
       {
-        update.attribute_name.emplace_back(*u_list[i-1].name);
-        update.value.emplace_back(*u_list[i-1].value);
+        (yyval.sql_node)->update.attribute_name.emplace_back((*u_list)[i].name);
+        (yyval.sql_node)->update.value.emplace_back((*u_list)[i].value);
       }
      if((yyvsp[-1].attr_name_a_values)!=nullptr){
           delete (yyvsp[-1].attr_name_a_values);
@@ -2177,7 +2177,7 @@ yyreduce:
 #line 528 "yacc_sql.y"
                             {
     	(yyval.attr_name_value) = new SetVariableSqlNode();
-      (yyval.attr_name_value)->value = (yyvsp[0].value);
+      (yyval.attr_name_value)->value = *(yyvsp[0].value);
       (yyval.attr_name_value)->name = (yyvsp[-2].string);
       free((yyvsp[-2].string));
       free((yyvsp[0].value));

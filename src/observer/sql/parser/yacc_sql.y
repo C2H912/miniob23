@@ -494,10 +494,10 @@ update_stmt:      /*  update 语句的语法解析树*/
           u_list = $5;
       }
       u_list->emplace_back(*$4);
-      for(int i = u_list->size();i>0;i--)
+      for(int i = u_list->size()-1;i>=0;i--)
       {
-        update.attribute_name.emplace_back(*u_list[i-1].name);
-        update.value.emplace_back(*u_list[i-1].value);
+        $$->update.attribute_name.emplace_back((*u_list)[i].name);
+        $$->update.value.emplace_back((*u_list)[i].value);
       }
      if($5!=nullptr){
           delete $5;
@@ -527,7 +527,7 @@ update_options:
 update_option:
 		ID EQ value {
     	$$ = new SetVariableSqlNode();
-      $$->value = $3;
+      $$->value = *$3;
       $$->name = $1;
       free($1);
       free($3);

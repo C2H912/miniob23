@@ -214,7 +214,8 @@ RC LogicalPlanGenerator::create_plan(
 RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<LogicalOperator> &logical_operator)
 {
   Table *table = update_stmt->table();
-  vector<Value> values(update_stmt->values(), update_stmt->values() + update_stmt->value_amount());
+  //vector<Value> values(update_stmt->values(), update_stmt->values() + update_stmt->value_amount());
+  vector<Value> values = update_stmt->values();
   vector<std::string> value_name = update_stmt->names();
   FilterStmt *filter_stmt = update_stmt->filter_stmt();
   std::vector<Field> fields;
