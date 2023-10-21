@@ -10,13 +10,13 @@
 		},
 		{
 			"len" : 4,
-			"name" : "b",
+			"name" : "c",
 			"offset" : 4,
-			"type" : "ints",
+			"type" : "dates",
 			"visible" : true
 		}
 	],
 	"indexes" : null,
-	"table_id" : 1,
+	"table_id" : 0,
 	"table_name" : "oo"
 }

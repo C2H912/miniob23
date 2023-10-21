@@ -9,12 +9,11 @@ MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 See the Mulan PSL v2 for more details. */
 
 //
-// Created by Wangyunlai on 2022/12/15
+// Created by Wangyunlai on 2022/12/13.
 //
 
-#include "sql/operator/project_logical_operator.h"
+#include "sql/operator/aggre_logical_operator.h"
 
-ProjectLogicalOperator::ProjectLogicalOperator(const std::vector<Field> &fields, 
-            const std::vector<AggrOp> &aggr_fields, const std::vector<std::string> &aggr_specs) 
-: fields_(fields), aggr_fields_(aggr_fields), aggr_specs_(aggr_specs)
+AggreLogicalOperator::AggreLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields)
+: fields_(fields), aggr_fields_(aggr_fields)
 {}

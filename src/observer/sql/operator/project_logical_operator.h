@@ -29,7 +29,8 @@ See the Mulan PSL v2 for more details. */
 class ProjectLogicalOperator : public LogicalOperator 
 {
 public:
-  ProjectLogicalOperator(const std::vector<Field> &fields);
+  ProjectLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
+              const std::vector<std::string> &aggr_specs);
   virtual ~ProjectLogicalOperator() = default;
 
   LogicalOperatorType type() const override
@@ -49,6 +50,14 @@ public:
   {
     return fields_;
   }
+  const std::vector<AggrOp> &aggr_fields() const
+  {
+    return aggr_fields_;
+  }
+  const std::vector<std::string> &aggr_specs() const
+  {
+    return aggr_specs_;
+  }
 
 private:
   //! 投影映射的字段名称
@@ -56,4 +65,6 @@ private:
   //! 或者是执行某个函数。所以这里应该是表达式Expression。
   //! 不过现在简单处理，就使用字段来描述
   std::vector<Field> fields_;
+  std::vector<AggrOp> aggr_fields_;
+  std::vector<std::string> aggr_specs_;
 };

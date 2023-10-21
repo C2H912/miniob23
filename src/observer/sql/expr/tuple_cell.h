@@ -22,6 +22,7 @@ class TupleCellSpec
 {
 public:
   TupleCellSpec(const char *table_name, const char *field_name, const char *alias = nullptr);
+  TupleCellSpec(std::string s, AggrOp aggr);
   TupleCellSpec(const char *alias);
 
   const char *table_name() const

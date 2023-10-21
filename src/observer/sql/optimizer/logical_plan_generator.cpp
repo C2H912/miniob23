@@ -25,6 +25,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/join_logical_operator.h"
 #include "sql/operator/project_logical_operator.h"
 #include "sql/operator/explain_logical_operator.h"
+#include "sql/operator/aggre_logical_operator.h"
 
 #include "sql/stmt/stmt.h"
 #include "sql/stmt/calc_stmt.h"
@@ -90,6 +91,8 @@ RC LogicalPlanGenerator::create_plan(
 
   const std::vector<Table *> &tables = select_stmt->tables();
   const std::vector<Field> &all_fields = select_stmt->query_fields();
+  const std::vector<AggrOp> &aggr_fields = select_stmt->aggr_fields();
+  const std::vector<string> &aggr_specs = select_stmt->aggr_specs();
   for (Table *table : tables) {
     std::vector<Field> fields;
     for (const Field &field : all_fields) {
@@ -116,15 +119,35 @@ RC LogicalPlanGenerator::create_plan(
     return rc;
   }
 
-  unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields));
-  if (predicate_oper) {
-    if (table_oper) {
-      predicate_oper->add_child(std::move(table_oper));
+  unique_ptr<LogicalOperator> aggr_oper;
+  if (aggr_fields[0] != UNKNOWN) {
+    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields));
+  }
+
+  unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs));
+  if (aggr_oper) {
+    if (predicate_oper) {
+      if (table_oper) {
+        predicate_oper->add_child(std::move(table_oper));
+      }
+      aggr_oper->add_child(std::move(predicate_oper));
+    } else {
+      if (table_oper) {
+        aggr_oper->add_child(std::move(table_oper));
+      }
     }
-    project_oper->add_child(std::move(predicate_oper));
-  } else {
-    if (table_oper) {
-      project_oper->add_child(std::move(table_oper));
+    project_oper->add_child(std::move(aggr_oper));
+  }
+  else{
+    if (predicate_oper) {
+      if (table_oper) {
+        predicate_oper->add_child(std::move(table_oper));
+      }
+      project_oper->add_child(std::move(predicate_oper));
+    } else {
+      if (table_oper) {
+        project_oper->add_child(std::move(table_oper));
+      }
     }
   }
 
@@ -162,6 +185,20 @@ RC LogicalPlanGenerator::create_plan(
   logical_operator = std::move(predicate_oper);
   return RC::SUCCESS;
 }
+
+#if 0
+RC LogicalPlanGenerator::create_plan(
+    const std::vector<Field> &all_fields, const std::vector<AggrOp> &aggr_fields, unique_ptr<LogicalOperator> &logical_operator)
+{
+  unique_ptr<AggreLogicalOperator> aggre_oper;
+  if (aggr_fields[0] != UNKNOWN) {
+    aggre_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields));
+  }
+
+  logical_operator = std::move(aggre_oper);
+  return RC::SUCCESS;
+}
+#endif
 
 RC LogicalPlanGenerator::create_plan(
     InsertStmt *insert_stmt, unique_ptr<LogicalOperator> &logical_operator)

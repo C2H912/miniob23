@@ -25,12 +25,16 @@ enum AttrType
   UNDEFINED,
   CHARS,          ///< 字符串类型
   INTS,           ///< 整数类型(4字节)
+  DATES,
   FLOATS,         ///< 浮点数类型(4字节)
   BOOLEANS,       ///< boolean类型，当前不是由parser解析出来的，是程序内部使用的
 };
 
 const char *attr_type_to_string(AttrType type);
 AttrType attr_type_from_string(const char *s);
+
+int date2int(const char *date);
+std::string idate2string(int idate);
 
 /**
  * @brief 属性的值
@@ -50,6 +54,7 @@ public:
   explicit Value(float val);
   explicit Value(bool val);
   explicit Value(const char *s, int len = 0);
+  explicit Value(bool is_date, const char *s, int len = 0);
 
   Value(const Value &other) = default;
   Value &operator=(const Value &other) = default;
@@ -64,9 +69,11 @@ public:
     this->set_data(const_cast<char *>(data), length);
   }
   void set_int(int val);
+  void set_only_int(int val);
   void set_float(float val);
   void set_boolean(bool val);
   void set_string(const char *s, int len = 0);
+  void set_date(const char *s);
   void set_value(const Value &value);
 
   std::string to_string() const;
@@ -83,6 +90,10 @@ public:
   {
     return attr_type_;
   }
+  std::string ret_str() const
+  {
+    return str_value_;
+  }
 
 public:
   /**
@@ -92,6 +103,7 @@ public:
   int get_int() const;
   float get_float() const;
   std::string get_string() const;
+  std::string get_date() const;
   bool get_boolean() const;
 
 private:

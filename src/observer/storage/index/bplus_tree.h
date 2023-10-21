@@ -86,9 +86,9 @@ public:
         case CHARS: {
           rc = common::compare_string((void *)(v1 + pos), attr_length_[i], (void *)(v2 + pos), attr_length_[i]);
         }break;
-        // case DATES: {   
-        //   rc = common::compare_date((void *)(v1 + pos), (void *)(v2 + pos));
-        // }break;
+         case DATES: {   
+           rc = common::compare_int((void *)(v1 + pos), (void *)(v2 + pos));
+         }break;
         default: {
           LOG_ERROR("unknown attr type. %d", attr_type_[i]);
           abort();
@@ -211,34 +211,10 @@ public:
   // 这里有点怪 为什么里面会有for循环
   std::string operator()(const char *v) const
   {
-    // switch (attr_type_) {
-    // case DATES:
-    // case INTS: {
-    //   return std::to_string(*(int*)v);
-    // }
-    //   break;
-    // case FLOATS: {
-    //   return std::to_string(*(float*)v);
-    // }
-    // case CHARS: {
-    //   std::string str;
-    //   for (int i = 0; i < attr_length_; i++) {
-    //     if (v[i] == 0) {
-    //       break;
-    //     }
-    //     str.push_back(v[i]);
-    //   }
-    //   return str;
-    // }
-    // default:{
-    //   LOG_ERROR("unknown attr type. %d", attr_type_);
-    //   abort();
-    // }
-    // }
-
+    
     for (size_t i = 0; i < attr_type_.size(); i++) {
       switch (attr_type_[i]) {
-        //case DATES:
+        case DATES:
         case INTS: {
           return std::to_string(*(int *)v);
         } break;

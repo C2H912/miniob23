@@ -34,6 +34,8 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/join_physical_operator.h"
 #include "sql/operator/calc_logical_operator.h"
 #include "sql/operator/calc_physical_operator.h"
+#include "sql/operator/aggre_logical_operator.h"
+#include "sql/operator/aggre_physical_operator.h"
 #include "sql/expr/expression.h"
 #include "common/log/log.h"
 
@@ -54,6 +56,10 @@ RC PhysicalPlanGenerator::create(LogicalOperator &logical_operator, unique_ptr<P
 
     case LogicalOperatorType::PREDICATE: {
       return create_plan(static_cast<PredicateLogicalOperator &>(logical_operator), oper);
+    } break;
+
+    case LogicalOperatorType::AGGRE: {
+      return create_plan(static_cast<AggreLogicalOperator &>(logical_operator), oper);
     } break;
 
     case LogicalOperatorType::PROJECTION: {
@@ -196,10 +202,23 @@ RC PhysicalPlanGenerator::create_plan(ProjectLogicalOperator &project_oper, uniq
 
   ProjectPhysicalOperator *project_operator = new ProjectPhysicalOperator;
   const vector<Field> &project_fields = project_oper.fields();
+  const vector<AggrOp> &project_aggr = project_oper.aggr_fields();
+#if 0
+  const vector<string> &project_aggr_spec = project_oper.aggr_specs();
+  if(project_aggr[0] != UNKNOWN){
+    for(int i = 0; i < (int)project_aggr.size(); i++){
+      project_operator->add_projection(project_aggr_spec[i], project_aggr[i]);
+    }
+  }
+  else{
+    for (const Field &field : project_fields) {
+      project_operator->add_projection(field.table(), field.meta());
+    }
+  }
+#endif
   for (const Field &field : project_fields) {
     project_operator->add_projection(field.table(), field.meta());
   }
-
   if (child_phy_oper) {
     project_operator->add_child(std::move(child_phy_oper));
   }
@@ -207,6 +226,34 @@ RC PhysicalPlanGenerator::create_plan(ProjectLogicalOperator &project_oper, uniq
   oper = unique_ptr<PhysicalOperator>(project_operator);
 
   LOG_TRACE("create a project physical operator");
+  return rc;
+}
+
+RC PhysicalPlanGenerator::create_plan(AggreLogicalOperator &aggr_oper, unique_ptr<PhysicalOperator> &oper)
+{
+  vector<unique_ptr<LogicalOperator>> &child_opers = aggr_oper.children();
+
+  unique_ptr<PhysicalOperator> child_phy_oper;
+
+  RC rc = RC::SUCCESS;
+  if (!child_opers.empty()) {
+    LogicalOperator *child_oper = child_opers.front().get();
+    rc = create(*child_oper, child_phy_oper);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to create aggre logical operator's child physical operator. rc=%s", strrc(rc));
+      return rc;
+    }
+  }
+
+  AggrePhysicalOperator *aggre_operator = new AggrePhysicalOperator(aggr_oper.fields(), aggr_oper.aggr_fields());
+
+  if (child_phy_oper) {
+    aggre_operator->add_child(std::move(child_phy_oper));
+  }
+
+  oper = unique_ptr<PhysicalOperator>(aggre_operator);
+
+  LOG_TRACE("create a aggre physical operator");
   return rc;
 }
 
