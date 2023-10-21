@@ -293,7 +293,7 @@ create_index_stmt:    /*create index 语句的语法解析树*/
       free($5);
       //free($7);
     }
-    | CREATE UNIQUE INDEX ID ON ID LBRACE id id_list RBRACE SEMICOLON 
+    | CREATE UNIQUE INDEX ID ON ID LBRACE id id_list RBRACE 
 		{
 			$$ = new ParsedSqlNode(SCF_CREATE_INDEX);
       CreateIndexSqlNode &create_index = $$->create_index;
@@ -302,7 +302,7 @@ create_index_stmt:    /*create index 语句的语法解析树*/
       //create_index.attribute_name = $7
       std::vector<std::string> *src_attrs = $9;
       if (src_attrs != nullptr) {
-        create_index.attribute_name.swap(*src_attrs);
+      create_index.attribute_name.swap(*src_attrs);
       }
       std::string temp = $8;
       create_index.attribute_name.push_back(temp);

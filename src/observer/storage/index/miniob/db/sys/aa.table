@@ -1,0 +1,25 @@
+{
+	"fields" : 
+	[
+		{
+			"len" : 4,
+			"name" : "a",
+			"offset" : 0,
+			"type" : "dates",
+			"visible" : true
+		}
+	],
+	"indexes" : 
+	[
+		{
+			"field_name" : 
+			[
+				"a"
+			],
+			"name" : "d",
+			"unique" : false
+		}
+	],
+	"table_id" : 1,
+	"table_name" : "aa"
+}

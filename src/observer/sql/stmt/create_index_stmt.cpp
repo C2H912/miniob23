@@ -40,7 +40,7 @@ RC CreateIndexStmt::create(Db *db, const CreateIndexSqlNode &create_index, Stmt 
   }
   //这里要一个for循环 对比所有字段是否存在
   std::vector<FieldMeta> field_metas;//储存索引字段
-  for(int i = 0;i<create_index.attribute_name.size();i++)
+  for(int i = 0;i<create_index.attribute_name.size();i++) //注意字段顺序对不对
   {
   const FieldMeta *field_meta = table->table_meta().field(create_index.attribute_name[i].c_str());
   if (nullptr == field_meta) {

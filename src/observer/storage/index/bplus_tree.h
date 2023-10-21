@@ -655,7 +655,7 @@ protected:
 
 private:
   //common::MemPoolItem::unique_ptr make_key(const char *user_key, const RID &rid);
-  char* make_key(const char *user_key, const RID &rid);
+  common::MemPoolItem::unique_ptr make_key(const char *user_key, const RID &rid);
   void free_key(char *key);
 
 protected:

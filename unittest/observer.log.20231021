@@ -141,3 +141,43 @@ Finish dump configuration
 [2023-10-21 14:32:00.996271 pid:55779 tid:7ffff5e03640 ctx:5555558192e0 WARN: handle_request@resolve_stage.cpp:50] >> failed to create stmt. rc=22:SCHEMA_TABLE_NOT_EXIST
 [2023-10-21 14:32:01.003932 pid:55779 tid:7ffff5e03640 ctx:5555558192e0 TRACE: handle_sql@session_stage.cpp:143] >> failed to do resolve. rc=SCHEMA_TABLE_NOT_EXIST
 [2023-10-21 14:32:01.016518 pid:55779 tid:7ffff5e03640 ctx:5555558192e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-21 14:39:01.915432 pid:55779 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:89] >> receive command(size=29): create index aa on a (a,c);
+
+[2023-10-21 14:39:05.755562 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:88] >> CREATE
+[2023-10-21 14:39:05.756226 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:92] >> INDEX
+[2023-10-21 14:39:05.756892 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:125] >> ID
+[2023-10-21 14:39:05.757494 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:93] >> ON
+[2023-10-21 14:39:05.758269 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:125] >> ID
+[2023-10-21 14:39:05.758815 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:126] >> LBRACE
+[2023-10-21 14:39:05.759208 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:125] >> ID
+[2023-10-21 14:39:05.759684 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:129] >> COMMA
+[2023-10-21 14:39:05.760311 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:125] >> ID
+[2023-10-21 14:39:05.760877 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:127] >> RBRACE
+[2023-10-21 14:39:05.761443 pid:55779 tid:7ffff5602640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:83] >> SEMICOLON
+[2023-10-21 14:40:02.757044 pid:55779 tid:7ffff5602640 ctx:5555558192e0 WARN: create@create_index_stmt.cpp:38] >> no such table. db=sys, table_name=a
+[2023-10-21 14:40:02.757826 pid:55779 tid:7ffff5602640 ctx:5555558192e0 WARN: handle_request@resolve_stage.cpp:50] >> failed to create stmt. rc=22:SCHEMA_TABLE_NOT_EXIST
+[2023-10-21 14:40:02.758522 pid:55779 tid:7ffff5602640 ctx:5555558192e0 TRACE: handle_sql@session_stage.cpp:143] >> failed to do resolve. rc=SCHEMA_TABLE_NOT_EXIST
+[2023-10-21 14:40:02.759224 pid:55779 tid:7ffff5602640 ctx:5555558192e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-21 14:40:14.359780 pid:55779 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:89] >> receive command(size=30): create index aa on oo (a,c);
+
+[2023-10-21 14:40:16.451997 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:88] >> CREATE
+[2023-10-21 14:40:16.452745 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:92] >> INDEX
+[2023-10-21 14:40:16.453369 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:125] >> ID
+[2023-10-21 14:40:16.453847 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:93] >> ON
+[2023-10-21 14:40:16.454509 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:125] >> ID
+[2023-10-21 14:40:16.455211 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:126] >> LBRACE
+[2023-10-21 14:40:16.455919 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:125] >> ID
+[2023-10-21 14:40:16.456535 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:129] >> COMMA
+[2023-10-21 14:40:16.457201 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:125] >> ID
+[2023-10-21 14:40:16.457705 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:127] >> RBRACE
+[2023-10-21 14:40:16.458268 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: yylex@lex_sql.l:83] >> SEMICOLON
+[2023-10-21 14:40:33.658303 pid:55779 tid:7ffff6604640 ctx:5555558192e0 INFO: create_file@disk_buffer_pool.cpp:677] >> Successfully create miniob/db/sys/oo-aa.index.
+[2023-10-21 14:40:33.658803 pid:55779 tid:7ffff6604640 ctx:5555558192e0 INFO: create@bplus_tree.cpp:758] >> Successfully create index file:miniob/db/sys/oo-aa.index
+[2023-10-21 14:40:33.661894 pid:55779 tid:7ffff6604640 ctx:5555558192e0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/oo-aa.index.
+[2023-10-21 14:40:33.665267 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff7953078, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=5555558192e0, lbt=0x5555556e24e9 0x5555555c1005 0x5555555a4307 0x5555555abf88 0x5555555a53a0 0x5555555af30e 0x5555556ad4cf 0x55555564d5d5 0x5555555e62da 0x55555560b6ce 0x5555556093a0 0x5555555828c9 0x5555555818ac 0x555555580476 0x55555557ffbd 0x555555702a6e 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-10-21 14:40:33.671987 pid:55779 tid:7ffff6604640 ctx:5555558192e0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/oo-aa.index. file_desc=12, hdr_frame=0x7ffff7953078, file header=pageCount:1, allocatedCount:1
+[2023-10-21 14:40:33.685100 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=12, bp=0x7ffff0002ea0, lbt=0x5555556e24e9 0x5555555afa88 0x5555556ad4cf 0x55555564d5d5 0x5555555e62da 0x55555560b6ce 0x5555556093a0 0x5555555828c9 0x5555555818ac 0x555555580476 0x55555557ffbd 0x555555702a6e 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-10-21 14:40:33.692701 pid:55779 tid:7ffff6604640 ctx:5555558192e0 INFO: create@bplus_tree.cpp:766] >> Successfully open index file miniob/db/sys/oo-aa.index.
+[2023-10-21 14:40:33.695326 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff79550d8, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=1, xid=5555558192e0, lbt=0x5555556e24e9 0x5555555c1005 0x5555555a4307 0x5555555abf88 0x5555555a7b2b 0x5555556adc29 0x55555564d5d5 0x5555555e62da 0x55555560b6ce 0x5555556093a0 0x5555555828c9 0x5555555818ac 0x555555580476 0x55555557ffbd 0x555555702a6e 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-10-21 14:40:33.697098 pid:55779 tid:7ffff6604640 ctx:5555558192e0 INFO: allocate_page@disk_buffer_pool.cpp:370] >> allocate new page. file=miniob/db/sys/oo-aa.index, pageNum=1, pin=1
+[2023-10-21 14:40:33.706146 pid:55779 tid:7ffff6604640 ctx:5555558192e0 DEBUG: flush_page_internal@disk_buffer_pool.cpp:511] >> Flush block. file desc=12, pageNum=1, pin count=1

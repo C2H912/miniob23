@@ -786,10 +786,13 @@ RC BplusTreeHandler::create(const char *file_name, bool unique,
   for (size_t i = 0; i < attr_length.size(); i++) {
     length_sum += attr_length[i];
     //file_header->attr_id[i] = attr_id[i];
-    file_header->attr_type[i] = attr_type[i];
-    file_header->attr_length[i] = attr_length[i];
-    file_header->attr_offset[i] = attr_offset[i];
+    // file_header->attr_type.push_back(attr_type[i]);//vector
+    // file_header->attr_length.push_back(attr_length[i]);
+    // file_header->attr_offset.push_back(attr_offset[i];
   }
+  file_header->attr_type=attr_type;//vector
+  file_header->attr_length=attr_length;
+  file_header->attr_offset=attr_offset;
 
   if (internal_max_size < 0) {
     internal_max_size = calc_internal_page_capacity(length_sum);
@@ -1383,10 +1386,10 @@ RC BplusTreeHandler::create_new_tree(const char *key, const RID *rid)
 
 //MemPoolItem::unique_ptr BplusTreeHandler::make_key(const char *user_key, const RID &rid)
 
-char *BplusTreeHandler::make_key(const char *user_key, const RID &rid)
+MemPoolItem::unique_ptr BplusTreeHandler::make_key(const char *user_key, const RID &rid)
 {
-  //MemPoolItem::unique_ptr key = mem_pool_item_->alloc_unique_ptr();
-  char *key = (char *)mem_pool_item_->alloc();
+  MemPoolItem::unique_ptr key = mem_pool_item_->alloc_unique_ptr();
+  //char *key = (char *)mem_pool_item_->alloc();
   if (key == nullptr) {
     LOG_WARN("Failed to alloc memory for key.");
     return nullptr;
@@ -1396,10 +1399,10 @@ char *BplusTreeHandler::make_key(const char *user_key, const RID &rid)
   // return key;
    int pos = 0;
   for (int i = 0; i < file_header_.attr_num; i++) {
-    memcpy(key + pos, user_key + pos, file_header_.attr_length[i]);
+    memcpy(static_cast<char *>(key.get()) + pos, user_key + pos, file_header_.attr_length[i]);
     pos += file_header_.attr_length[i];
   }
-  memcpy(key + pos, &rid, sizeof(rid));
+  memcpy(static_cast<char *>(key.get()) + pos, &rid, sizeof(rid));
   return key;
 }
 
@@ -1418,8 +1421,8 @@ RC BplusTreeHandler::insert_entry(const char *user_key, const RID *rid)
     memcpy(fixed_user_key + pos, user_key + file_header_.attr_offset[i], file_header_.attr_length[i]);
     pos += file_header_.attr_length[i];
   }
-
-  MemPoolItem::unique_ptr pkey(make_key(fixed_user_key, *rid));//修改为多个字段组成key
+//MemPoolItem::unique_ptr pkey = make_key(user_key, *rid);
+  MemPoolItem::unique_ptr pkey =  make_key(fixed_user_key, *rid);//修改为多个字段组成key
   if (pkey == nullptr) {
     LOG_WARN("Failed to alloc memory for key.");
     return RC::NOMEM;
@@ -1436,6 +1439,10 @@ RC BplusTreeHandler::insert_entry(const char *user_key, const RID *rid)
     }
     root_lock_.unlock();
   }
+
+
+
+
 
   LatchMemo latch_memo(disk_buffer_pool_);
 
@@ -1767,11 +1774,11 @@ RC BplusTreeScanner::open(const char *left_user_key, int left_len, bool left_inc
 
     MemPoolItem::unique_ptr left_pkey;
     if (left_inclusive) {
-      MemPoolItem::unique_ptr temp(tree_handler_.make_key(fixed_left_key, *RID::min()));
-      left_pkey = std::move(temp);
+      //MemPoolItem::unique_ptr temp(tree_handler_.make_key(fixed_left_key, *RID::min()));
+      left_pkey = tree_handler_.make_key(fixed_left_key, *RID::min());
     } else {
-      MemPoolItem::unique_ptr temp(tree_handler_.make_key(fixed_left_key, *RID::max()));
-      left_pkey = std::move(temp);
+      //MemPoolItem::unique_ptr temp(tree_handler_.make_key(fixed_left_key, *RID::max()));
+      left_pkey = tree_handler_.make_key(fixed_left_key, *RID::max());
     }
 
     const char *left_key = (const char *)left_pkey.get();
@@ -1834,11 +1841,11 @@ RC BplusTreeScanner::open(const char *left_user_key, int left_len, bool left_inc
       }
     }
     if (right_inclusive) {
-      MemPoolItem::unique_ptr temp(tree_handler_.make_key(fixed_right_key, *RID::max()));
-      right_key_ = std::move(temp);
+      //MemPoolItem::unique_ptr temp(tree_handler_.make_key(fixed_right_key, *RID::max()));
+      right_key_ = tree_handler_.make_key(fixed_right_key, *RID::max());
     } else {
       MemPoolItem::unique_ptr temp(tree_handler_.make_key(fixed_right_key, *RID::min()));
-      right_key_ = std::move(temp);
+      right_key_ = tree_handler_.make_key(fixed_right_key, *RID::min());
     }
 
     if (fixed_right_key != right_user_key) {
