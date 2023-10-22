@@ -28,7 +28,7 @@ class InsertStmt : public Stmt
 {
 public:
   InsertStmt() = default;
-  InsertStmt(Table *table, const Value *values, int value_amount);
+  InsertStmt(Table *table, const ValueRecord *valuerecords, int valuerecord_amount);
 
   StmtType type() const override
   {
@@ -43,17 +43,19 @@ public:
   {
     return table_;
   }
-  const Value *values() const
+  const ValueRecord *valuerecords() const
   {
-    return values_;
+    return valuerecords_;
   }
-  int value_amount() const
+  int valuerecord_amount() const
   {
-    return value_amount_;
+    return valuerecord_amount_;
   }
 
 private:
   Table *table_ = nullptr;
-  const Value *values_ = nullptr;
-  int value_amount_ = 0;
+  const ValueRecord *valuerecords_ = nullptr;
+  int valuerecord_amount_ = 0;
+  //const Value *values_ = nullptr;
+  //int value_amount_ = 0;
 };

@@ -204,9 +204,9 @@ RC LogicalPlanGenerator::create_plan(
     InsertStmt *insert_stmt, unique_ptr<LogicalOperator> &logical_operator)
 {
   Table *table = insert_stmt->table();
-  vector<Value> values(insert_stmt->values(), insert_stmt->values() + insert_stmt->value_amount());
+  vector<ValueRecord> valuerecords(insert_stmt->valuerecords(), insert_stmt->valuerecords() + insert_stmt->valuerecord_amount());
 
-  InsertLogicalOperator *insert_operator = new InsertLogicalOperator(table, values);
+  InsertLogicalOperator *insert_operator = new InsertLogicalOperator(table, valuerecords);
   logical_operator.reset(insert_operator);//重新设置只能指针的指向
   return RC::SUCCESS;
 }
