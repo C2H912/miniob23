@@ -406,6 +406,7 @@ record:
         //current.values.swap(*$2);
         //$$->push_back(current);
         $$->emplace_back(*$2);
+        std::reverse($$->begin(), $$->end());
         delete $2;
     }
 
