@@ -13,6 +13,7 @@ See the Mulan PSL v2 for more details. */
 //
 
 #include "sql/optimizer/logical_plan_generator.h"
+#include "event/sql_debug.h"
 
 #include "sql/operator/logical_operator.h"
 #include "sql/operator/calc_logical_operator.h"
@@ -242,6 +243,9 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
   }
 
   logical_operator = std::move(update_oper);
+
+  //输出调试信息 查看增加了哪些索引
+  sql_debug(value_name.data()->c_str());
   return rc;
 }
 

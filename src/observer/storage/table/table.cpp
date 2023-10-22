@@ -242,15 +242,15 @@ RC Table::insert_record(Record &record)
     LOG_ERROR("Insert record failed. table name=%s, rc=%s", table_meta_.name(), strrc(rc));
     return rc;
   }
-
+  //记录一下插入和删除操作的rid
   rc = insert_entry_of_indexes(record.data(), record.rid());
-  if (rc != RC::SUCCESS) { // 可能出现了键值重复
-    RC rc2 = delete_entry_of_indexes(record.data(), record.rid(), false/*error_on_not_exists*/);
-    if (rc2 != RC::SUCCESS) {
-      LOG_ERROR("Failed to rollback index data when insert index entries failed. table name=%s, rc=%d:%s",
-                name(), rc2, strrc(rc2));
-    }
-    rc2 = record_handler_->delete_record(&record.rid());
+  if (rc != RC::SUCCESS) { // 可能出现了键值重复  奇怪的是 这两个的rid怎么会是一样的
+    // RC rc2 = delete_entry_of_indexes(record.data(), record.rid(), false/*error_on_not_exists*/);
+    // if (rc2 != RC::SUCCESS) {
+    //   LOG_ERROR("Failed to rollback index data when insert index entries failed. table name=%s, rc=%d:%s",
+    //             name(), rc2, strrc(rc2));
+    // }
+    RC rc2 = record_handler_->delete_record(&record.rid());
     if (rc2 != RC::SUCCESS) {
       LOG_PANIC("Failed to rollback record data when insert index entries failed. table name=%s, rc=%d:%s",
                 name(), rc2, strrc(rc2));
@@ -498,6 +498,7 @@ RC Table::create_index(Trx *trx, std::vector<FieldMeta> &field_meta, const char 
   }
 
   // 遍历当前的所有数据，插入这个索引
+  //应该是创建索引时候产生的问题
   RecordFileScanner scanner;
   rc = get_record_scanner(scanner, trx, true/*readonly*/);
   if (rc != RC::SUCCESS) {
@@ -581,13 +582,31 @@ RC Table::delete_record(const Record &record)
 
 RC Table::insert_entry_of_indexes(const char *record, const RID &rid)
 {
+  //按理来说，由于RID的存在，删除索引应该不会出现数据一样但是被删的情况
   RC rc = RC::SUCCESS;
-  for (Index *index : indexes_) {
-    rc = index->insert_entry(record, &rid);
+
+  // for (Index *index : indexes_) {
+  //   rc = index->insert_entry(record, &rid);
+  //   if (rc != RC::SUCCESS) {
+  //     break;
+  //   }
+  // }
+  for(int i = 0;i<indexes_.size();i++){
+    rc = indexes_[i]->insert_entry(record, &rid);
     if (rc != RC::SUCCESS) {
-      break;
-    }
+      for(int j = i-1;j>=0;j++)//不成功的话 当场回退
+      {
+        RC rc2 = indexes_[i]->delete_entry(record, &rid);
+        if(rc2!=RC::SUCCESS){
+          return rc2;
+        }
+      }
+       break;
+     }
   }
+
+
+
   return rc;
 }
 

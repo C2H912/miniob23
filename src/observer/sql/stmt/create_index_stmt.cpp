@@ -11,7 +11,7 @@ See the Mulan PSL v2 for more details. */
 //
 // Created by Wangyunlai on 2023/4/25.
 //
-
+#include "event/sql_debug.h"
 #include "sql/stmt/create_index_stmt.h"
 #include "storage/table/table.h"
 #include "storage/db/db.h"
@@ -59,6 +59,8 @@ RC CreateIndexStmt::create(Db *db, const CreateIndexSqlNode &create_index, Stmt 
     return RC::SCHEMA_INDEX_NAME_REPEAT;
   }
 //stmt需要修改 传入参数
+
+  
   stmt = new CreateIndexStmt(table, field_metas, create_index.index_name,create_index.unique);
   return RC::SUCCESS;
 }

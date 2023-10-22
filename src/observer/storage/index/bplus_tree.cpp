@@ -1406,6 +1406,7 @@ MemPoolItem::unique_ptr BplusTreeHandler::make_key(const char *user_key, const R
   return key;
 }
 
+
 RC BplusTreeHandler::insert_entry(const char *user_key, const RID *rid)
 {
   if (user_key == nullptr || rid == nullptr) {
@@ -1435,6 +1436,7 @@ RC BplusTreeHandler::insert_entry(const char *user_key, const RID *rid)
     if (is_empty()) {
       RC rc = create_new_tree(key, rid);
       root_lock_.unlock();
+    
       return rc;
     }
     root_lock_.unlock();
@@ -1456,9 +1458,10 @@ RC BplusTreeHandler::insert_entry(const char *user_key, const RID *rid)
   rc = insert_entry_into_leaf_node(latch_memo, frame, key, rid);
   if (rc != RC::SUCCESS) {
     LOG_TRACE("Failed to insert into leaf of index, rid:%s. rc=%s", rid->to_string().c_str(), strrc(rc));
+    disk_buffer_pool_->unpin_page(frame);
     return rc;
   }
-
+ 
   LOG_TRACE("insert entry success");
   return RC::SUCCESS;
 }
@@ -1693,7 +1696,7 @@ RC BplusTreeHandler::delete_entry(const char *user_key, const RID *rid)
     memcpy(key + pos, user_key + file_header_.attr_offset[i], file_header_.attr_length[i]);
     pos += file_header_.attr_length[i];
   }
-   memcpy(key + pos, rid, sizeof(*rid));
+   memcpy(key + pos, rid, sizeof(*rid));//问题在于RID有没有参与对比
 
   BplusTreeOperationType op = BplusTreeOperationType::DELETE;
   LatchMemo latch_memo(disk_buffer_pool_);
