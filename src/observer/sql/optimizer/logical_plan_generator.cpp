@@ -164,11 +164,11 @@ RC LogicalPlanGenerator::create_plan(
     const FilterObj &filter_obj_left = filter_unit->left();
     const FilterObj &filter_obj_right = filter_unit->right();
 
-    unique_ptr<Expression> left(filter_obj_left.is_attr
+    unique_ptr<Expression> left(filter_obj_left.type
                                          ? static_cast<Expression *>(new FieldExpr(filter_obj_left.field))
                                          : static_cast<Expression *>(new ValueExpr(filter_obj_left.value)));
 
-    unique_ptr<Expression> right(filter_obj_right.is_attr
+    unique_ptr<Expression> right(filter_obj_right.type
                                           ? static_cast<Expression *>(new FieldExpr(filter_obj_right.field))
                                           : static_cast<Expression *>(new ValueExpr(filter_obj_right.value)));
 

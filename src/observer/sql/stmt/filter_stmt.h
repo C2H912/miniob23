@@ -18,6 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include <unordered_map>
 #include "sql/parser/parse_defs.h"
 #include "sql/stmt/stmt.h"
+#include "sql/stmt/select_stmt.h"
 #include "sql/expr/expression.h"
 
 class Db;
@@ -26,20 +27,27 @@ class FieldMeta;
 
 struct FilterObj 
 {
-  bool is_attr;
+  int type;
   Field field;
   Value value;
+  SelectStmt *stmt;
 
   void init_attr(const Field &field)
   {
-    is_attr = true;
+    type = 1;
     this->field = field;
   }
 
   void init_value(const Value &value)
   {
-    is_attr = false;
+    type = 0;
     this->value = value;
+  }
+
+  void init_stmt(SelectStmt *stmt)
+  {
+    type = -1;
+    this->stmt = stmt;
   }
 };
 
