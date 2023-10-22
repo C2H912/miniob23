@@ -489,19 +489,20 @@ update_stmt:      /*  update 语句的语法解析树*/
     {
       $$ = new ParsedSqlNode(SCF_UPDATE);
       $$->update.relation_name = $2;
-      std::vector<SetVariableSqlNode> *u_list;
+      //std::vector<SetVariableSqlNode> *u_list;
+      std::vector<SetVariableSqlNode> u_list;
       if($5!=nullptr){
-          u_list = $5;
-      }
-      u_list->emplace_back(*$4);
-      for(int i = u_list->size()-1;i>=0;i--)
-      {
-        $$->update.attribute_name.emplace_back((*u_list)[i].name);
-        $$->update.value.emplace_back((*u_list)[i].value);
-      }
-     if($5!=nullptr){
+          u_list.swap(*$5);
           delete $5;
       }
+      u_list.push_back(*$4);
+      for(int i = u_list.size();i>0;i--)
+      {
+        $$->update.attribute_name.push_back(u_list[i-1].name);
+        $$->update.value.push_back(u_list[i-1].value);
+      }
+      //delete u_list;
+     
       if ($6 != nullptr) {
         $$->update.conditions.swap(*$6);
         delete $6;
