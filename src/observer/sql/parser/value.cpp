@@ -19,7 +19,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/lang/comparator.h"
 #include "common/lang/string.h"
 
-const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "dates", "floats", "booleans"};
+const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "dates", "nulls","floats", "booleans"};
 
 const char *attr_type_to_string(AttrType type)
 {
@@ -63,6 +63,17 @@ Value::Value(bool is_date, const char *s, int len /*= 0*/)
   if (is_date){
     set_date(s);
   }
+}
+
+// Value::Value(bool is_null,char *ptr)
+// {
+
+// }
+void Value::set_null_value()
+{
+  attr_type_ = NULLS;
+  //num_value_ = nullptr;
+  
 }
 
 void Value::set_data(char *data, int length)
@@ -255,6 +266,10 @@ const char *Value::data() const
     case CHARS: {
       return str_value_.c_str();
     } break;
+    case NULLS:{
+      return nullptr;
+      break;
+    }
     default: {
       return (const char *)&num_value_;
     } break;

@@ -26,6 +26,7 @@ enum AttrType
   CHARS,          ///< 字符串类型
   INTS,           ///< 整数类型(4字节)
   DATES,
+  NULLS,          //表示这个value是NULL
   FLOATS,         ///< 浮点数类型(4字节)
   BOOLEANS,       ///< boolean类型，当前不是由parser解析出来的，是程序内部使用的
 };
@@ -55,6 +56,7 @@ public:
   explicit Value(bool val);
   explicit Value(const char *s, int len = 0);
   explicit Value(bool is_date, const char *s, int len = 0);
+  //Value(bool is_null,char *ptr);
 
   Value(const Value &other) = default;
   Value &operator=(const Value &other) = default;
@@ -75,6 +77,7 @@ public:
   void set_string(const char *s, int len = 0);
   void set_date(const char *s);
   void set_value(const Value &value);
+  void set_null_value();
 
   std::string to_string() const;
 
@@ -107,7 +110,7 @@ public:
   bool get_boolean() const;
 
 private:
-  AttrType attr_type_ = UNDEFINED;
+  AttrType attr_type_ = UNDEFINED;//NULLS RECORD CHAR* NULLPTR
   int length_ = 0;
 
   union {

@@ -86,6 +86,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         VALUES
         FROM
         WHERE
+        NULL_T
         INNER
         JOIN
         AND
@@ -403,6 +404,41 @@ attr_def:
       $$->length = $4;
       free($1);
     }
+    | ID type LBRACE number RBRACE NOT NULL_T
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = (AttrType)$2;
+      $$->name = $1;
+      $$->length = $4;
+      free($1);
+    }
+    | ID type LBRACE number RBRACE NULL_T
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = (AttrType)$2;
+      $$->name = $1;
+      $$->length = $4;
+      $$->nullable = true;
+      free($1);
+    }
+    | ID type NOT NULL_T
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = (AttrType)$2;
+      $$->name = $1;
+      $$->length = 4;
+      //$$->nullable = true;
+      free($1);
+    }
+    | ID type NULL_T
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = (AttrType)$2;
+      $$->name = $1;
+      $$->length = 4;
+      $$->nullable = true;
+      free($1);
+    }
     | ID type
     {
       $$ = new AttrInfoSqlNode;
@@ -460,6 +496,12 @@ value:
       $$ = new Value((float)$1);
       @$ = @1;
     }
+    | NULL_T{ //要放到SSS的前面
+      //char *tmp = common::substr($1,1,strlen($1)-2);
+      $$ = new Value(0);
+      $$->set_null_value();
+      //free(tmp);
+    }
     |SSS {
       char *tmp = common::substr($1,1,strlen($1)-2);
       $$ = new Value(tmp);
@@ -470,6 +512,7 @@ value:
       $$ = new Value(1, tmp);
       free(tmp);
 		}
+   
     ;
     
 delete_stmt:    /*  delete 语句的语法解析树*/
