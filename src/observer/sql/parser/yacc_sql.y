@@ -753,6 +753,21 @@ condition:
 
       delete $1;
     }
+    | rel_attr comp_op LBRACE value value_list RBRACE
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 1;
+      $$->left_attr = *$1;
+      $$->right_is_attr = 3;
+      if ($5 != nullptr) {
+        $$->right_list.swap(*$5);
+      }
+      $$->right_list.emplace_back(*$4);
+      std::reverse($$->right_list.begin(), $$->right_list.end());
+      $$->comp = $2;
+
+      delete $1;
+    }
     | comp_op sub_select_stmt
     {
       $$ = new ConditionSqlNode;

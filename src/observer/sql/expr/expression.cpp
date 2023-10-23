@@ -29,6 +29,11 @@ RC ValueExpr::get_value(const Tuple &tuple, Value &value) const
   return RC::SUCCESS;
 }
 
+//注意这里只提供一个get_value()的接口实现了纯虚函数的多态，实际上这个函数应该永远也不被调用！
+RC ValueListExpr::get_value(const Tuple &tuple, Value &value) const
+{
+  return RC::SUCCESS;
+}
 
 //注意这里只提供一个get_value()的接口实现了纯虚函数的多态，实际上这个函数应该永远也不被调用！
 RC SubQueryExpr::get_value(const Tuple &tuple, Value &value) const
@@ -37,6 +42,13 @@ RC SubQueryExpr::get_value(const Tuple &tuple, Value &value) const
 }
 
 /////////////////////////////////////////////////////////////////////////////////
+ValueListExpr::ValueListExpr(const std::vector<Value> &value_list)
+  : value_list_(value_list)
+{}
+
+ValueListExpr::~ValueListExpr()
+{}
+
 SubQueryExpr::SubQueryExpr(std::vector<std::vector<Value>> &sub_table)
   : sub_table_(sub_table)
 {}
@@ -203,6 +215,10 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
     }
     //返回子表
     std::vector<std::vector<Value>> sub_table = right_->sub_table();
+    if ((int)sub_table.size() == 0) {
+      LOG_WARN("failed to get table or value list");
+      return RC::INVALID_ARGUMENT;
+    }
     if(sub_table[0].size() > 1){
       LOG_WARN("IN column is more than one!");
       return RC::INVALID_ARGUMENT;

@@ -31,6 +31,7 @@ struct FilterObj
   Field field;
   Value value;
   SelectStmt *stmt;
+  std::vector<Value> value_list;
 
   void init_attr(const Field &field)
   {
@@ -48,6 +49,12 @@ struct FilterObj
   {
     type = -1;
     this->stmt = stmt;
+  }
+
+  void init_value_list(std::vector<Value> list)
+  {
+    type = 3;
+    this->value_list = list;
   }
 };
 

@@ -224,11 +224,13 @@ RC LogicalPlanGenerator::create_plan(
                                          ? static_cast<Expression *>(new SubQueryExpr(sub_table)) :
                                            static_cast<Expression *>(new FieldExpr()))));
 
-    unique_ptr<Expression> right(filter_obj_right.type
+    unique_ptr<Expression> right(filter_obj_right.type == 1
                                           ? static_cast<Expression *>(new FieldExpr(filter_obj_right.field)) :
                                 (filter_obj_right.type == 0
                                          ? static_cast<Expression *>(new ValueExpr(filter_obj_right.value)) :
-                                           static_cast<Expression *>(new SubQueryExpr(sub_table))));
+                                (filter_obj_right.type == -1
+                                         ? static_cast<Expression *>(new SubQueryExpr(sub_table)) :
+                                           static_cast<Expression *>(new ValueListExpr(filter_obj_right.value_list)))));
 
     ComparisonExpr *cmp_expr = new ComparisonExpr(filter_unit->comp(), std::move(left), std::move(right));
     cmp_exprs.emplace_back(cmp_expr);

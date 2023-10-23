@@ -139,7 +139,8 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     FilterObj filter_obj;
     filter_obj.init_attr(Field(table, field));
     filter_unit->set_right(filter_obj);
-  } else if (condition.right_is_attr == 0) {
+  } 
+  else if (condition.right_is_attr == 0) {
     if(condition.right_value.attr_type() == UNDEFINED){
       LOG_WARN("attr_type invalid");
       return RC::INVALID_ARGUMENT;
@@ -148,7 +149,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     filter_obj.init_value(condition.right_value);
     filter_unit->set_right(filter_obj);
   }
-  else {
+  else if (condition.right_is_attr == -1) {
     //递归地调用create生成子查询
     Stmt *sub_stmt;
     SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
@@ -160,6 +161,14 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     FilterObj filter_obj;
     filter_obj.init_stmt(static_cast<SelectStmt*>(sub_stmt));
     filter_unit->set_right(filter_obj);
+  }
+  else if (condition.right_is_attr == 3) {
+    FilterObj filter_obj;
+    filter_obj.init_value_list(condition.right_list);
+    filter_unit->set_right(filter_obj);
+  }
+  else {
+    //无
   }
 
   filter_unit->set_comp(comp);

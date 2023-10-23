@@ -39,6 +39,7 @@ enum class ExprType
   STAR,         ///< 星号，表示所有字段
   FIELD,        ///< 字段。在实际执行时，根据行数据内容提取对应字段的值
   VALUE,        ///< 常量值
+  VALUELIST,        ///< 常量列
   QUERY,        ///< 子查询
   CAST,         ///< 需要做类型转换的表达式
   COMPARISON,   ///< 需要做比较的表达式
@@ -182,6 +183,38 @@ public:
 
 private:
   Value value_;
+};
+
+/**
+ * @brief 常量值列表达式
+ * @ingroup Expression
+ */
+class ValueListExpr : public Expression 
+{
+public:
+  ValueListExpr(const std::vector<Value> &value_list);
+  virtual ~ValueListExpr();
+
+  RC get_value(const Tuple &tuple, Value &value) const override;
+
+  RC try_get_value(Value &value) const override { return RC::SUCCESS; }
+
+  ExprType type() const override { return ExprType::VALUELIST; }
+
+  AttrType value_type() const override { return INTS; }
+
+  std::vector<std::vector<Value>> sub_table() const override {
+    std::vector<std::vector<Value>> ret;
+    for(size_t i = 0; i < value_list_.size(); i++){
+      std::vector<Value> temp;
+      temp.push_back(value_list_[i]);
+      ret.push_back(temp);
+    }
+    return ret;
+  }
+
+private:
+  std::vector<Value> value_list_;
 };
 
 /**
