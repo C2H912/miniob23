@@ -65,6 +65,9 @@ RC AggrePhysicalOperator::next()
     all_tuple.push_back(one_tuple);
   }
   
+  if((int)all_tuple.size() == 0){
+    return RC::RECORD_EOF;
+  }
   rc = do_aggre_func(all_tuple);
   if (rc != RC::SUCCESS) {
     return rc;
