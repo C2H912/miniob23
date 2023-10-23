@@ -753,6 +753,39 @@ condition:
 
       delete $1;
     }
+    | sub_select_stmt comp_op rel_attr
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = -1;
+      $$->left_sql = $1;
+      $$->right_is_attr = 1;
+      $$->right_attr = *$3;
+      $$->comp = $2;
+
+      delete $3;
+    }
+    | value comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 0;
+      $$->left_value = *$1;
+      $$->right_is_attr = -1;
+      $$->right_sql = $3;
+      $$->comp = $2;
+
+      delete $1;
+    }
+    | sub_select_stmt comp_op value
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = -1;
+      $$->left_sql = $1;
+      $$->right_is_attr = 0;
+      $$->right_value = *$3;
+      $$->comp = $2;
+
+      delete $3;
+    }
     | rel_attr comp_op LBRACE value value_list RBRACE
     {
       $$ = new ConditionSqlNode;

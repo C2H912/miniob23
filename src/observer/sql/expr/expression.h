@@ -101,6 +101,11 @@ public:
    */
   virtual std::vector<std::vector<Value>> sub_table() const = 0;
 
+  /**
+   * 返回操作符类型
+   */
+  virtual int expr_type() const = 0;
+
 private:
   std::string  name_;
 };
@@ -143,6 +148,10 @@ public:
     return ret2;
   }
 
+  int expr_type() const override {
+    return 1;
+  }
+
 private:
   Field field_;
 };
@@ -181,6 +190,10 @@ public:
     return ret2;
   }
 
+  int expr_type() const override {
+    return 0;
+  }
+
 private:
   Value value_;
 };
@@ -213,6 +226,10 @@ public:
     return ret;
   }
 
+  int expr_type() const override {
+    return 3;
+  }
+
 private:
   std::vector<Value> value_list_;
 };
@@ -243,6 +260,10 @@ public:
   RC try_get_value(Value &value) const override { return RC::SUCCESS; }
 
   std::vector<std::vector<Value>> sub_table() const override { return sub_table_; }
+
+  int expr_type() const override {
+    return -1;
+  }
 
 private:
   //SelectStmt sub_query_;
@@ -279,6 +300,10 @@ public:
     std::vector<std::vector<Value>> ret2;
     ret2.push_back(ret1);
     return ret2;
+  }
+
+  int expr_type() const override {
+    return 4;
   }
 
 private:
@@ -332,6 +357,10 @@ public:
    */
   RC compare_value(const Value &left, const Value &right, bool &value) const;
 
+  int expr_type() const override {
+    return 5;
+  }
+
 private:
   CompOp comp_;
   std::unique_ptr<Expression> left_;
@@ -376,6 +405,10 @@ public:
 
   std::vector<std::unique_ptr<Expression>> &children() { return children_; }
 
+  int expr_type() const override {
+    return 6;
+  }
+
 private:
   Type conjunction_type_;
   std::vector<std::unique_ptr<Expression>> children_;
@@ -416,6 +449,10 @@ public:
     std::vector<std::vector<Value>> ret2;
     ret2.push_back(ret1);
     return ret2;
+  }
+
+  int expr_type() const override {
+    return 7;
   }
 
   Type arithmetic_type() const { return arithmetic_type_; }

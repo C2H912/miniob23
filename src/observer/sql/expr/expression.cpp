@@ -271,16 +271,48 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
   // ---------- 一般的比较语句 -----------
   Value left_value;
   Value right_value;
+  RC rc = RC::SUCCESS;
 
-  RC rc = left_->get_value(tuple, left_value);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
-    return rc;
+  int left_type = left_->expr_type();
+  if(left_type == 1 || left_type == 0){
+    rc = left_->get_value(tuple, left_value);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      return rc;
+    }
   }
-  rc = right_->get_value(tuple, right_value);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of right expression. rc=%s", strrc(rc));
-    return rc;
+  else{
+    std::vector<std::vector<Value>> left_sub_table = left_->sub_table();
+    if((int)left_sub_table.size() == 0){
+      LOG_WARN("failed to get table");
+      return RC::INVALID_ARGUMENT;
+    }
+    if((int)left_sub_table.size() > 1 || (int)left_sub_table[0].size() > 1){
+      LOG_WARN("table size is incorrect");
+      return RC::INVALID_ARGUMENT;
+    }
+    left_value = left_sub_table[0][0];
+  }
+
+  int right_type = right_->expr_type();
+  if(right_type == 1 || right_type == 0){
+    rc = right_->get_value(tuple, right_value);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      return rc;
+    }
+  }
+  else{
+    std::vector<std::vector<Value>> right_sub_table = right_->sub_table();
+    if((int)right_sub_table.size() == 0){
+      LOG_WARN("failed to get table");
+      return RC::INVALID_ARGUMENT;
+    }
+    if((int)right_sub_table.size() > 1 || (int)right_sub_table[0].size() > 1){
+      LOG_WARN("table size is incorrect");
+      return RC::INVALID_ARGUMENT;
+    }
+    right_value = right_sub_table[0][0];
   }
 
   bool bool_value = false;
