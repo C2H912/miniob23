@@ -216,8 +216,14 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
     //返回子表
     std::vector<std::vector<Value>> sub_table = right_->sub_table();
     if ((int)sub_table.size() == 0) {
-      LOG_WARN("failed to get table or value list");
-      return RC::INVALID_ARGUMENT;
+      if(comp_ == NOT_IN_QUERY){
+        value.set_boolean(true);
+        return RC::SUCCESS;
+      }
+      else{
+        value.set_boolean(false);
+        return RC::SUCCESS;
+      }
     }
     if(sub_table[0].size() > 1){
       LOG_WARN("IN column is more than one!");
