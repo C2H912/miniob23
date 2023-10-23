@@ -13,6 +13,7 @@ See the Mulan PSL v2 for more details. */
 //
 
 #include "sql/optimizer/logical_plan_generator.h"
+#include "sql/optimizer/optimize_stage.h"
 
 #include "sql/operator/logical_operator.h"
 #include "sql/operator/calc_logical_operator.h"
@@ -75,6 +76,15 @@ RC LogicalPlanGenerator::create(Stmt *stmt, unique_ptr<LogicalOperator> &logical
       rc = RC::UNIMPLENMENT;
     }
   }
+  return rc;
+}
+
+RC LogicalPlanGenerator::create_sub_query(SelectStmt *stmt, unique_ptr<LogicalOperator> &logical_operator)
+{
+  RC rc = RC::SUCCESS;
+
+  rc = create_plan(stmt, logical_operator);
+
   return rc;
 }
 
@@ -164,13 +174,61 @@ RC LogicalPlanGenerator::create_plan(
     const FilterObj &filter_obj_left = filter_unit->left();
     const FilterObj &filter_obj_right = filter_unit->right();
 
-    unique_ptr<Expression> left(filter_obj_left.type
-                                         ? static_cast<Expression *>(new FieldExpr(filter_obj_left.field))
-                                         : static_cast<Expression *>(new ValueExpr(filter_obj_left.value)));
+    //递归地生成子查询的火山
+    unique_ptr<PhysicalOperator> sub_volcano;
+    if(filter_obj_left.type == -1){
+      OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
+      RC rc = caller.create_sub_request(filter_obj_left.stmt, sub_volcano);
+    }
+    if(filter_obj_right.type == -1){
+      OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
+      RC rc = caller.create_sub_request(filter_obj_right.stmt, sub_volcano);
+    }
+    //这里拿到火山后马上执行，把子表读到SubQueryExpr中，因为expression表达式如果再包含PhysicalOperator.h
+    //的话会形成自包含，编译不通过
+    std::vector<std::vector<Value>> sub_table;
+    if(sub_volcano){
+      RC rc = RC::SUCCESS;
+      //把子表读进sub_table中
+      sub_volcano->open(nullptr);
+      while (RC::SUCCESS == (rc = sub_volcano->next())) {
+        Tuple * tuple = sub_volcano->current_tuple();
+        std::vector<Value> row;
+        for(int i = 0; i < tuple->cell_num(); i++){
+          Value value;
+          rc = tuple->cell_at(i, value);
+          if (rc != RC::SUCCESS) {
+            sub_volcano->close();
+            LOG_WARN("failed to get SUB TABLE from operator");
+            return rc;
+          }
+          row.push_back(value);
+        }
+        sub_table.push_back(row);
+      }
+      sub_volcano->close();
+      if (rc == RC::RECORD_EOF) {
+        rc = RC::SUCCESS;
+      }
+      else{
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
+    }
+
+    unique_ptr<Expression> left(filter_obj_left.type == 1
+                                         ? static_cast<Expression *>(new FieldExpr(filter_obj_left.field)) :
+                                (filter_obj_left.type == 0
+                                         ? static_cast<Expression *>(new ValueExpr(filter_obj_left.value)) :
+                                (filter_obj_left.type == -1
+                                         ? static_cast<Expression *>(new SubQueryExpr(sub_table)) :
+                                           static_cast<Expression *>(new FieldExpr()))));
 
     unique_ptr<Expression> right(filter_obj_right.type
-                                          ? static_cast<Expression *>(new FieldExpr(filter_obj_right.field))
-                                          : static_cast<Expression *>(new ValueExpr(filter_obj_right.value)));
+                                          ? static_cast<Expression *>(new FieldExpr(filter_obj_right.field)) :
+                                (filter_obj_right.type == 0
+                                         ? static_cast<Expression *>(new ValueExpr(filter_obj_right.value)) :
+                                           static_cast<Expression *>(new SubQueryExpr(sub_table))));
 
     ComparisonExpr *cmp_expr = new ComparisonExpr(filter_unit->comp(), std::move(left), std::move(right));
     cmp_exprs.emplace_back(cmp_expr);
@@ -185,20 +243,6 @@ RC LogicalPlanGenerator::create_plan(
   logical_operator = std::move(predicate_oper);
   return RC::SUCCESS;
 }
-
-#if 0
-RC LogicalPlanGenerator::create_plan(
-    const std::vector<Field> &all_fields, const std::vector<AggrOp> &aggr_fields, unique_ptr<LogicalOperator> &logical_operator)
-{
-  unique_ptr<AggreLogicalOperator> aggre_oper;
-  if (aggr_fields[0] != UNKNOWN) {
-    aggre_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields));
-  }
-
-  logical_operator = std::move(aggre_oper);
-  return RC::SUCCESS;
-}
-#endif
 
 RC LogicalPlanGenerator::create_plan(
     InsertStmt *insert_stmt, unique_ptr<LogicalOperator> &logical_operator)

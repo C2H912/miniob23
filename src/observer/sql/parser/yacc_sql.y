@@ -753,7 +753,14 @@ condition:
 
       delete $1;
     }
-  
+    | comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 2;
+      $$->right_is_attr = -1;
+      $$->right_sql = $2;
+      $$->comp = $1;
+    }
     ;
 
 comp_op:

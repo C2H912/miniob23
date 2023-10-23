@@ -29,7 +29,23 @@ RC ValueExpr::get_value(const Tuple &tuple, Value &value) const
   return RC::SUCCESS;
 }
 
+
+//注意这里只提供一个get_value()的接口实现了纯虚函数的多态，实际上这个函数应该永远也不被调用！
+RC SubQueryExpr::get_value(const Tuple &tuple, Value &value) const
+{
+  return RC::SUCCESS;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
+SubQueryExpr::SubQueryExpr(std::vector<std::vector<Value>> &sub_table)
+  : sub_table_(sub_table)
+{}
+
+SubQueryExpr::~SubQueryExpr()
+{}
+
+/////////////////////////////////////////////////////////////////////////////////
+
 CastExpr::CastExpr(unique_ptr<Expression> child, AttrType cast_type)
     : child_(std::move(child)), cast_type_(cast_type)
 {}
@@ -175,6 +191,68 @@ RC ComparisonExpr::try_get_value(Value &cell) const
 
 RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
 {
+  // ------------ IN、EXISTS ------------
+  //1. IN
+  if(comp_ == IN_QUERY || comp_ == NOT_IN_QUERY){
+    //读取左值
+    Value left_value;
+    RC rc = left_->get_value(tuple, left_value);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      return rc;
+    }
+    //返回子表
+    std::vector<std::vector<Value>> sub_table = right_->sub_table();
+    if(sub_table[0].size() > 1){
+      LOG_WARN("IN column is more than one!");
+      return RC::INVALID_ARGUMENT;
+    }
+    //判断是否IN
+    size_t i = 0;
+    for(i = 0; i < sub_table.size(); i++){
+      Value right_value = sub_table[i][0];
+      int cmp_result = left_value.compare(right_value);
+      if(cmp_result == 0){
+        break;
+      }
+    }
+    if(i == sub_table.size()){
+      if(comp_ == IN_QUERY){
+        value.set_boolean(false);
+        return RC::SUCCESS;
+      }
+      if(comp_ == NOT_IN_QUERY){
+        value.set_boolean(true);
+        return RC::SUCCESS;
+      }
+    }
+    else{
+      if(comp_ == IN_QUERY){
+        value.set_boolean(true);
+        return RC::SUCCESS;
+      }
+      if(comp_ == NOT_IN_QUERY){
+        value.set_boolean(false);
+        return RC::SUCCESS;
+      }
+    }
+  }
+  //2. EXISTS
+  if(comp_ == EXISTS_QUERY || comp_ == NOT_EXISTS_QUERY){
+    //返回子表
+    std::vector<std::vector<Value>> sub_table = right_->sub_table();
+    //判断
+    if((int)sub_table.size() > 0){
+      value.set_boolean(true);
+      return RC::SUCCESS;
+    }
+    else{
+      value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+  }
+
+  // ---------- 一般的比较语句 -----------
   Value left_value;
   Value right_value;
 

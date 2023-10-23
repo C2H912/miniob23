@@ -66,6 +66,41 @@ RC OptimizeStage::handle_request(SQLStageEvent *sql_event)
   return rc;
 }
 
+RC OptimizeStage::create_sub_request(SelectStmt *stmt, unique_ptr<PhysicalOperator> &subExpr)
+{
+  unique_ptr<LogicalOperator> logical_operator;
+  RC rc = logical_plan_generator_.create_sub_query(stmt, logical_operator);
+  if (rc != RC::SUCCESS) {
+    if (rc != RC::UNIMPLENMENT) {
+      LOG_WARN("failed to create sub logical plan. rc=%s", strrc(rc));
+    }
+    return rc;
+  }
+
+  rc = rewrite(logical_operator);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to rewrite sub plan. rc=%s", strrc(rc));
+    return rc;
+  }
+
+  rc = optimize(logical_operator);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to optimize sub plan. rc=%s", strrc(rc));
+    return rc;
+  }
+
+  unique_ptr<PhysicalOperator> physical_operator;
+  rc = generate_physical_plan(logical_operator, physical_operator);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to generate sub physical plan. rc=%s", strrc(rc));
+    return rc;
+  }
+
+  subExpr.swap(physical_operator);
+
+  return rc;
+}
+
 RC OptimizeStage::optimize(unique_ptr<LogicalOperator> &oper)
 {
   // do nothing

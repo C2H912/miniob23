@@ -84,7 +84,7 @@ struct SelectSqlNode;
 struct ConditionSqlNode
 {
   int             left_is_attr;    ///< TRUE if left-hand side is an attribute
-                                   ///< 1时，操作符左边是属性名，0时，是属性值，-1时，是子表达式
+                                   ///< 1时，操作符左边是属性名，0时，是属性值，-1时，是子表达式，2时是existsde左边(无)
   Value           left_value;      ///< left-hand side value if left_is_attr = FALSE
   RelAttrSqlNode  left_attr;       ///< left-hand side attribute
   SelectSqlNode*   left_sql;
