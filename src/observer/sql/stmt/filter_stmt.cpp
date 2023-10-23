@@ -83,13 +83,13 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   RC rc = RC::SUCCESS;
 
   CompOp comp = condition.comp;
-  if (comp < EQUAL_TO || comp >= NO_OP) {
+  if (comp < EQUAL_TO || comp >= NO_OP) { //操作符无效
     LOG_WARN("invalid compare operator : %d", comp);
     return RC::INVALID_ARGUMENT;
   }
 
   filter_unit = new FilterUnit;
-
+  //只需要找到value的那边
   if (condition.left_is_attr) {
     Table *table = nullptr;
     const FieldMeta *field = nullptr;

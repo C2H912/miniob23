@@ -315,6 +315,8 @@ void test_delete()
 TEST(test_bplus_tree, test_leaf_index_node_handle)
 {
   IndexFileHeader index_file_header;
+  
+  index_file_header.attr_id.push_back(0);
   index_file_header.root_page = BP_INVALID_PAGE_NUM;
   index_file_header.internal_max_size = 5;
   index_file_header.leaf_max_size = 5;
@@ -325,7 +327,7 @@ TEST(test_bplus_tree, test_leaf_index_node_handle)
   Frame frame;
 
   KeyComparator key_comparator;
-  key_comparator.init(false,index_file_header.attr_type,index_file_header.attr_length);
+  key_comparator.init(false,index_file_header.attr_id,index_file_header.attr_type,index_file_header.attr_length);
 
   LeafIndexNodeHandler leaf_node(index_file_header, &frame);
   leaf_node.init_empty();
@@ -372,6 +374,7 @@ TEST(test_bplus_tree, test_leaf_index_node_handle)
 TEST(test_bplus_tree, test_internal_index_node_handle)
 {
   IndexFileHeader index_file_header;
+  index_file_header.attr_id.push_back(0);
   index_file_header.root_page = BP_INVALID_PAGE_NUM;
   index_file_header.internal_max_size = 5;
   index_file_header.leaf_max_size = 5;
@@ -382,7 +385,7 @@ TEST(test_bplus_tree, test_internal_index_node_handle)
   Frame frame;
 
   KeyComparator key_comparator;
-  key_comparator.init(false,index_file_header.attr_type, index_file_header.attr_length);
+  key_comparator.init(false,index_file_header.attr_id,index_file_header.attr_type, index_file_header.attr_length);
 
   InternalIndexNodeHandler internal_node(index_file_header, &frame);
   internal_node.init_empty();
@@ -475,6 +478,8 @@ TEST(test_bplus_tree, test_chars)
   std::vector<AttrType> attr_type;
   std::vector<int> attr_len;
   std::vector<int> attr_offset;
+  std::vector<int> attr_id;
+  attr_id.push_back(0);
   attr_type.push_back(CHARS);
   attr_len.push_back(8);
   attr_offset.push_back(sizeof(int32_t));
@@ -482,7 +487,7 @@ TEST(test_bplus_tree, test_chars)
 
 
 
-  handler->create(index_name,false, attr_type, attr_len, attr_offset);
+  handler->create(index_name,false,attr_id, attr_type, attr_len, attr_offset);
 
   char keys[][9] = {
     "abcdefg",
@@ -528,10 +533,12 @@ TEST(test_bplus_tree, test_scanner)
   std::vector<AttrType> attr_type;
   std::vector<int> attr_len;
   std::vector<int> attr_offset;
+  std::vector<int> attr_id;
+  attr_id.push_back(0);               
   attr_type.push_back(CHARS);
   attr_len.push_back(4);
   attr_offset.push_back(ORDER);
-  handler->create(index_name,false, attr_type, attr_len, attr_offset );
+  handler->create(index_name,false, attr_id,attr_type, attr_len, attr_offset );
 
   int count = 0;
   RC rc = RC::SUCCESS;
@@ -744,11 +751,13 @@ TEST(test_bplus_tree, test_bplus_tree_insert)
   std::vector<AttrType> attr_type;
   std::vector<int> attr_len;
   std::vector<int> attr_offset;
+  std::vector<int> attr_id;
+  attr_len.push_back(0);
   attr_type.push_back(INTS);
   attr_len.push_back(sizeof(int32_t));
   attr_offset.push_back(sizeof(int32_t));
 
-  handler->create(index_name, false,attr_type, attr_len/*attr_len*/,attr_offset);
+  handler->create(index_name, false,attr_id,attr_type, attr_len/*attr_len*/,attr_offset);
 
   test_insert();
 

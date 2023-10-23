@@ -25,7 +25,7 @@ RC FieldExpr::get_value(const Tuple &tuple, Value &value) const
 
 RC ValueExpr::get_value(const Tuple &tuple, Value &value) const
 {
-  value = value_;
+  value = value_;//用户输入的NULL的AttrType就为NULL，所以这里就不需要了
   return RC::SUCCESS;
 }
 
@@ -90,6 +90,10 @@ ComparisonExpr::~ComparisonExpr()
 RC ComparisonExpr::compare_value(const Value &left, const Value &right, bool &result) const
 {
   RC rc = RC::SUCCESS;
+  if(left.attr_type()==AttrType::NULLS||right.attr_type()==AttrType::NULLS){
+    result =false;
+    return rc;
+  }
 
   if(comp_ == REGEX_LIKE || comp_ == REGEX_NOT_LIKE){
     std::string sentence = right.data();

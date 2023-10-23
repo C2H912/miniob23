@@ -5,17 +5,26 @@
 			"id" : 0,
 			"len" : 4,
 			"name" : "a",
-			"nullable" : true,
+			"nullable" : false,
 			"offset" : 0,
 			"type" : "ints",
 			"visible" : true
 		},
 		{
 			"id" : 1,
+			"len" : 4,
+			"name" : "b",
+			"nullable" : true,
+			"offset" : 4,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 2,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 4,
+			"offset" : 8,
 			"type" : "chars",
 			"visible" : false
 		}

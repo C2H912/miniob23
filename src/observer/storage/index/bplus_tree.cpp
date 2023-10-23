@@ -745,7 +745,7 @@ RC BplusTreeHandler::sync()
   return disk_buffer_pool_->flush_all_pages();
 }
 
-RC BplusTreeHandler::create(const char *file_name, bool unique,
+RC BplusTreeHandler::create(const char *file_name, bool unique,std::vector<int> attr_id,
     std::vector<AttrType> attr_type, std::vector<int> attr_length, std::vector<int> attr_offset,//TODOINDEX
 			    int internal_max_size /* = -1*/, int leaf_max_size /* = -1 */)
 {
@@ -790,6 +790,7 @@ RC BplusTreeHandler::create(const char *file_name, bool unique,
     // file_header->attr_length.push_back(attr_length[i]);
     // file_header->attr_offset.push_back(attr_offset[i];
   }
+  file_header->attr_id = attr_id;
   file_header->attr_type=attr_type;//vector
   file_header->attr_length=attr_length;
   file_header->attr_offset=attr_offset;
@@ -836,7 +837,7 @@ RC BplusTreeHandler::create(const char *file_name, bool unique,
   //key_comparator_.init(unique,file_header->attr_type, file_header->attr_length);
   //key_printer_.init(file_header->attr_type, file_header->attr_length);
 
-  key_comparator_.init(unique, attr_type, attr_length);
+  key_comparator_.init(unique, attr_id, attr_type, attr_length);
   key_printer_.init(attr_type, attr_length);
 
   this->sync();
@@ -882,17 +883,18 @@ RC BplusTreeHandler::open(const char *file_name)
 
   // close old page_handle
   disk_buffer_pool->unpin_page(frame);
-
+  std::vector<int> attr_id;
   std::vector<AttrType> attr_type;
   std::vector<int32_t> attr_length;
   for (int i = 0; i < file_header_.attr_num; i++) {
+    attr_id.push_back(file_header_.attr_id[i]);
     attr_type.push_back(file_header_.attr_type[i]);
     attr_length.push_back(file_header_.attr_length[i]);
   }
 
   //key_comparator_.init(file_header->unique,file_header->attr_type, file_header->attr_length);
   //key_printer_.init(file_header->attr_type, file_header->attr_length);
-  key_comparator_.init(file_header_.unique,attr_type, attr_length);
+  key_comparator_.init(file_header_.unique,attr_id,attr_type, attr_length);
   key_printer_.init(attr_type, attr_length);
 
   LOG_INFO("Successfully open index %s", file_name);

@@ -51,9 +51,9 @@ enum class BplusTreeOperationType
  */
 class AttrComparator {
 public:
-  void init( std::vector<AttrType> type, std::vector<int> length)
+  void init( std::vector<int32_t> id,std::vector<AttrType> type, std::vector<int> length)
   {
-    //attr_id_ = id;
+    attr_id_ = id;
     attr_type_ = type;
     attr_length_ = length;
   }
@@ -74,8 +74,22 @@ public:
     int rc = 0;
     // int pos = attr_length_[0];//修改
     int pos = 0;
-    for (size_t i = 0; i < attr_length_.size(); i++)  // 不考虑NULL
+    //开始考虑null
+    common::Bitmap old_null_bitmap(const_cast<char *>(v1), attr_length_[attr_length_.size()-1]);
+    common::Bitmap new_null_bitmap(const_cast<char *>(v2), attr_length_[attr_length_.size()-1]);
+    for (size_t i = 0; i < attr_length_.size()-1; i++)  // 不考虑NULL
     {
+        if (new_null_bitmap.get_bit(attr_id_[i])) {
+        if (null_as_differnet)  // 这里认为NULL比其它值(包括NULL)都大，返回-1
+          return -1;
+        if (old_null_bitmap.get_bit(attr_id_[i])) {
+          continue;  // bitmap值为1，说明此字段为NULL, NULL和NULL相等
+        } else {
+          return -1;  // 这里认为NULL比其它值(不包括NULL)都大，返回-1
+        }
+      } else if (old_null_bitmap.get_bit(attr_id_[i])) {
+        return 1;
+      }
       switch (attr_type_[i]) {
         case INTS: {
           rc = common::compare_int((void *)(v1 + pos), (void *)(v2 + pos));
@@ -107,7 +121,7 @@ private:
   // AttrType attr_type_;
   // int attr_length_;
   // 第一列为标记NULL的bitmap
-  //std::vector<int> attr_id_;
+  std::vector<int> attr_id_;
   std::vector<AttrType> attr_type_;
   std::vector<int> attr_length_;
 };
@@ -157,10 +171,10 @@ private:
  */
 class KeyComparator {
 public:
-  void init(bool unique, std::vector<AttrType> type, std::vector<int> length)
+  void init(bool unique,std::vector<int32_t> id, std::vector<AttrType> type, std::vector<int> length)
   {
     unique_ = unique;
-    attr_comparator_.init(type, length);
+    attr_comparator_.init(id,type, length);
   }
 
   const AttrComparator &attr_comparator() const
@@ -298,6 +312,7 @@ struct IndexFileHeader //TODOINDEX
   int32_t leaf_max_size;      ///< 叶子节点最大的键值对数
   int32_t attr_num;
   //int32_t attr_length;        ///< 键值的长度
+  std::vector<int32_t> attr_id;      // 标识该列在record中的位置
   std::vector<int32_t> attr_length;  /// 第一列为标记NULL的bitmap
   std::vector<int32_t> attr_offset;
   int32_t key_length;         ///< attr length + sizeof(RID)
@@ -553,6 +568,7 @@ public:
    */
   RC create(const char *file_name, 
             bool unique,
+            std::vector<int> attr_id,
             std::vector<AttrType> attr_type, 
             std::vector<int> attr_length, 
             std::vector<int> attr_offset,//TODOINDEX

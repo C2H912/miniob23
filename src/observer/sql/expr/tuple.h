@@ -17,7 +17,7 @@ See the Mulan PSL v2 for more details. */
 #include <memory>
 #include <vector>
 #include <string>
-
+#include "common/lang/bitmap.h"
 #include "common/log/log.h"
 #include "sql/expr/tuple_cell.h"
 #include "sql/parser/parse.h"
@@ -175,18 +175,33 @@ public:
       return RC::INVALID_ARGUMENT;
     }
 
+    const FieldMeta *null_field = table_->table_meta().null_bitmap_field();
+    common::Bitmap bitmap(const_cast<char *>(record_->data()) + null_field->offset(), null_field->len());
+    if(bitmap.get_bit(index))
+    {
+      //当该值为NULL时
+    cell.set_type(AttrType::NULLS);
+    //cell.set_data(this->record_->data() + null_field->offset(), field_meta->len());
+    //cell.set_data(this->record_->data() + null_field->offset(), field_meta->len());
+    //cell.set_data(this->record_->data() + field_meta->offset(), field_meta->len());
+    return RC::SUCCESS;
+    }
+    else{
     FieldExpr *field_expr = speces_[index];
     const FieldMeta *field_meta = field_expr->field().meta();
+    //TODONULL 在这里加一个判断 如果这个record的null_field指示这个字段为NULL，则返回NOT_FOUND
     cell.set_type(field_meta->type());
     cell.set_data(this->record_->data() + field_meta->offset(), field_meta->len());
     return RC::SUCCESS;
+    }
+   
   }
 
   RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const override
   {
     const char *table_name = spec.table_name();
     const char *field_name = spec.field_name();
-    if (0 != strcmp(table_name, table_->name())) {
+    if (0 != strcmp(table_name, table_->name())) { //表名不对
       return RC::NOTFOUND;
     }
 
@@ -194,7 +209,7 @@ public:
       const FieldExpr *field_expr = speces_[i];
       const Field &field = field_expr->field();
       if (0 == strcmp(field_name, field.field_name())) {
-        return cell_at(i, cell);
+        return cell_at(i, cell);//找到字段后 赋赋值给cell Value类型
       }
     }
     return RC::NOTFOUND;
