@@ -205,9 +205,9 @@ RC LogicalPlanGenerator::create_plan(
     InsertStmt *insert_stmt, unique_ptr<LogicalOperator> &logical_operator)
 {
   Table *table = insert_stmt->table();
-  vector<Value> values(insert_stmt->values(), insert_stmt->values() + insert_stmt->value_amount());
+  vector<ValueRecord> valuerecords(insert_stmt->valuerecords(), insert_stmt->valuerecords() + insert_stmt->valuerecord_amount());
 
-  InsertLogicalOperator *insert_operator = new InsertLogicalOperator(table, values);
+  InsertLogicalOperator *insert_operator = new InsertLogicalOperator(table, valuerecords);
   logical_operator.reset(insert_operator);//重新设置只能指针的指向
   return RC::SUCCESS;
 }
@@ -220,7 +220,7 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
   vector<std::string> value_name = update_stmt->names();
   FilterStmt *filter_stmt = update_stmt->filter_stmt();
   std::vector<Field> fields;
-  for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num(); i++) {
+  for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num()-table->table_meta().extra_filed_num(); i++) {
     const FieldMeta *field_meta = table->table_meta().field(i);
     fields.push_back(Field(table, field_meta));
   }
@@ -255,7 +255,7 @@ RC LogicalPlanGenerator::create_plan(
   Table *table = delete_stmt->table();
   FilterStmt *filter_stmt = delete_stmt->filter_stmt();
   std::vector<Field> fields;
-  for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num(); i++) {
+  for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num()-table->table_meta().extra_filed_num(); i++) {
     const FieldMeta *field_meta = table->table_meta().field(i);
     fields.push_back(Field(table, field_meta));
   }

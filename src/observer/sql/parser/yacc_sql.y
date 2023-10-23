@@ -116,6 +116,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   ConditionSqlNode *                condition;
   std::vector<InnerJoinSqlNode> *   join_lists;
   Value *                           value;
+  std::vector<Value> *              record;
   enum CompOp                       comp;
   enum AggrOp                       aggr;
   RelAttrSqlNode *                  rel_attr;
@@ -125,7 +126,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   std::vector<Expression *> *       expression_list;
   std::vector<Value> *              value_list;
   std::vector<SetVariableSqlNode> * attr_name_a_values;
-  SetVariableSqlNode *               attr_name_value;
+  SetVariableSqlNode *              attr_name_value;
+  std::vector<ValueRecord> *        record_list;
   std::vector<ConditionSqlNode> *   condition_list;
   std::vector<RelAttrSqlNode> *     rel_attr_list;
   std::vector<std::string> *        relation_list;
@@ -146,6 +148,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <number>              type
 %type <condition>           condition
 %type <value>               value
+%type <record>              record
 %type <number>              number
 %type <comp>                comp_op
 %type <aggr>                aggr_func;
@@ -153,6 +156,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <attr_infos>          attr_def_list
 %type <attr_info>           attr_def
 %type <value_list>          value_list
+%type <record_list>         record_list
 %type <condition_list>      where
 %type <condition_list>      condition_list
 %type <condition_list>      on
@@ -458,19 +462,52 @@ type:
     | DATE_T   { $$=DATES; }
     ;
 insert_stmt:        /*insert   语句的语法解析树*/
-    INSERT INTO ID VALUES LBRACE value value_list RBRACE 
+    INSERT INTO ID VALUES record record_list 
     {
       $$ = new ParsedSqlNode(SCF_INSERT);
       $$->insertion.relation_name = $3;
-      if ($7 != nullptr) {
-        $$->insertion.values.swap(*$7);
+      if ($6 != nullptr) {
+        $$->insertion.valuerecords.swap(*$6);
       }
-      $$->insertion.values.emplace_back(*$6);
-      std::reverse($$->insertion.values.begin(), $$->insertion.values.end());
-      delete $6;
+      $$->insertion.valuerecords.emplace_back(*$5);
+      std::reverse($$->insertion.valuerecords.begin(), $$->insertion.valuerecords.end());
+      delete $5;
       free($3);
     }
     ;
+
+record_list:
+    /* empty */
+    {
+      $$ =  nullptr;
+    }
+    | COMMA record record_list {
+        if ($3 != nullptr) {
+        $$ = $3;
+      } else {
+        $$ = new std::vector<ValueRecord>;
+      }
+      ValueRecord current;
+      current.values.swap(*$2);
+      $$->push_back(current);
+      //$$->emplace_back(*$2);
+      free($2);
+    }
+
+record:
+    LBRACE value value_list RBRACE {
+        if ($3 != nullptr) {
+          $$ = $3;
+        }else {
+          $$ = new std::vector<Value>;
+        }
+        //Record current;
+        //current.values.swap(*$2);
+        //$$->push_back(current);
+        $$->emplace_back(*$2);
+        std::reverse($$->begin(), $$->end());
+        delete $2;
+    }
 
 value_list:
     /* empty */

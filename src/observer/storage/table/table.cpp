@@ -323,7 +323,7 @@ const TableMeta &Table::table_meta() const
 RC Table::make_record(int value_num, const Value *values, Record &record)
 {
   // 检查字段类型是否一致
-  if (value_num + table_meta_.sys_field_num() != table_meta_.field_num()) {
+  if (value_num + table_meta_.sys_field_num() != table_meta_.field_num()-table_meta_.extra_filed_num()) {
     LOG_WARN("Input values don't match the table's schema, table name:%s", table_meta_.name());
     return RC::SCHEMA_FIELD_MISSING;
   }
@@ -367,7 +367,7 @@ RC Table::make_record_for_update(int value_num, const Value *values, Record &rec
  //检查字段是否存在 类型是否正确 但是stmt好像也检查了一遍 等下对比一下
  
     
-  int attr_num = table_meta_.field_num() - table_meta_.sys_field_num();//该表的字段数量
+  int attr_num = table_meta_.field_num() - table_meta_.sys_field_num()-table_meta_.extra_filed_num();//该表的字段数量
   const int normal_field_start_index = table_meta_.sys_field_num();
 
   for (int j = 0; j < value_num; j++) {

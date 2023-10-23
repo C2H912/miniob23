@@ -130,9 +130,15 @@ struct CalcSqlNode
  * @ingroup SQLParser
  * @details 于Selects类似，也做了很多简化
  */
+struct ValueRecord
+{
+  std::vector<Value> values;
+};
+
 struct InsertSqlNode
 {
   std::string        relation_name;  ///< Relation to insert into
+  std::vector<ValueRecord> valuerecords;
   std::vector<Value> values;         ///< 要插入的值
 };
 

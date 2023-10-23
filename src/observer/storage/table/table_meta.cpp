@@ -162,7 +162,12 @@ const FieldMeta *TableMeta::find_field_by_offset(int offset) const
 }
 int TableMeta::field_num() const
 {
-  return fields_.size();
+  return fields_.size();//减去null字段
+}
+
+int TableMeta::extra_filed_num() const
+{
+  return 1;
 }
 
 int TableMeta::sys_field_num() const

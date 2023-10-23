@@ -135,7 +135,7 @@ void LoadDataExecutor::load_data(Table *table, const char *file_name, SqlResult 
   struct timespec begin_time;
   clock_gettime(CLOCK_MONOTONIC, &begin_time);
   const int sys_field_num = table->table_meta().sys_field_num();
-  const int field_num = table->table_meta().field_num() - sys_field_num;
+  const int field_num = table->table_meta().field_num() - sys_field_num-table->table_meta().extra_filed_num();
 
   std::vector<Value> record_values(field_num);
   std::string line;

@@ -129,6 +129,7 @@ union YYSTYPE
   ConditionSqlNode *                condition;
   std::vector<InnerJoinSqlNode> *   join_lists;
   Value *                           value;
+  std::vector<Value> *              record;
   enum CompOp                       comp;
   enum AggrOp                       aggr;
   RelAttrSqlNode *                  rel_attr;
@@ -138,7 +139,8 @@ union YYSTYPE
   std::vector<Expression *> *       expression_list;
   std::vector<Value> *              value_list;
   std::vector<SetVariableSqlNode> * attr_name_a_values;
-  SetVariableSqlNode *               attr_name_value;
+  SetVariableSqlNode *              attr_name_value;
+  std::vector<ValueRecord> *        record_list;
   std::vector<ConditionSqlNode> *   condition_list;
   std::vector<RelAttrSqlNode> *     rel_attr_list;
   std::vector<std::string> *        relation_list;
@@ -147,7 +149,7 @@ union YYSTYPE
   int                               number;
   float                             floats;
 
-#line 151 "yacc_sql.hpp"
+#line 153 "yacc_sql.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
