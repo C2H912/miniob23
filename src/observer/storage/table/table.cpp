@@ -412,6 +412,7 @@ RC Table::make_record_for_update(
   // 复制所有字段的值
   int              record_size = table_meta_.record_size();
   char            *record_data = (char *)malloc(record_size);
+
   const FieldMeta *null_field  = table_meta_.null_bitmap_field();
   memcpy(record_data + null_field->offset(),record_in+ null_field->offset(),null_field->len());
   common::Bitmap   bitmap(record_data + null_field->offset(), null_field->len());//你这个bitmap根本就是随便找的
