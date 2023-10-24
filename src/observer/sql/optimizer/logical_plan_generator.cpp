@@ -230,7 +230,9 @@ RC LogicalPlanGenerator::create_plan(
                                          ? static_cast<Expression *>(new ValueExpr(filter_obj_right.value)) :
                                 (filter_obj_right.type == -1
                                          ? static_cast<Expression *>(new SubQueryExpr(sub_table)) :
-                                           static_cast<Expression *>(new ValueListExpr(filter_obj_right.value_list)))));
+                                (filter_obj_right.type == 3
+                                         ? static_cast<Expression *>(new ValueListExpr(filter_obj_right.value_list)) :
+                                           static_cast<Expression *>(new FieldExpr())))));
 
     ComparisonExpr *cmp_expr = new ComparisonExpr(filter_unit->comp(), std::move(left), std::move(right));
     cmp_exprs.emplace_back(cmp_expr);

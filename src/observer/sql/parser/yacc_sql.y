@@ -56,6 +56,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 //标识tokens
 %token  SEMICOLON
         IN
+        IS
         CREATE
         DROP
         TABLE
@@ -991,6 +992,14 @@ condition:
       $$->right_sql = $2;
       $$->comp = $1;
     }
+    | rel_attr comp_op
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 1;
+      $$->left_attr = *$1;
+      $$->right_is_attr = 2;
+      $$->comp = $2;
+    }
     ;
 
 comp_op:
@@ -1003,6 +1012,8 @@ comp_op:
     | LIKE { $$ = REGEX_LIKE; }
     | NOT LIKE { $$ = REGEX_NOT_LIKE; }
     | IN { $$ = IN_QUERY; }
+    | IS NULL_T{ $$ = IS_NULL; }
+    | IS NOT NULL_T{ $$ = IS_NOT_NULL; }
     | NOT IN { $$ = NOT_IN_QUERY; }
     | EXISTS { $$ = EXISTS_QUERY; }
     | NOT EXISTS { $$ = NOT_EXISTS_QUERY; }

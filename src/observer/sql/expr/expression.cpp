@@ -207,7 +207,7 @@ RC ComparisonExpr::try_get_value(Value &cell) const
 
 RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
 {
-  // ------------ IN、EXISTS ------------
+  // ------------ IN、EXISTS、IS_NULL ------------
   //1. IN
   if(comp_ == IN_QUERY || comp_ == NOT_IN_QUERY){
     //读取左值
@@ -274,6 +274,28 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
     }
     else{
       value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+  }
+  //3. IS NULL
+  if(comp_ == IS_NULL || comp_ == IS_NOT_NULL){
+    Value left_v;
+    Value right_v;
+    RC rc = left_->get_value(tuple, left_v);
+    if(left_v.attr_type() == NULLS && comp_ == IS_NULL){
+      value.set_boolean(true);
+      return RC::SUCCESS;
+    }
+    if(left_v.attr_type() != NULLS && comp_ == IS_NULL){
+      value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+    if(left_v.attr_type() == NULLS && comp_ == IS_NOT_NULL){
+      value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+    if(left_v.attr_type() != NULLS && comp_ == IS_NOT_NULL){
+      value.set_boolean(true);
       return RC::SUCCESS;
     }
   }
