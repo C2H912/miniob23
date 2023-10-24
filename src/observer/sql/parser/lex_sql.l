@@ -118,6 +118,7 @@ COMMIT                                  RETURN_TOKEN(TRX_COMMIT);
 ROLLBACK                                RETURN_TOKEN(TRX_ROLLBACK);
 INT                                     RETURN_TOKEN(INT_T);
 CHAR                                    RETURN_TOKEN(STRING_T);
+TEXT                                    RETURN_TOKEN(TEXT);
 UNIQUE                                  RETURN_TOKEN(UNIQUE);
 DATE                                    RETURN_TOKEN(DATE_T);
 FLOAT                                   RETURN_TOKEN(FLOAT_T);
@@ -144,6 +145,7 @@ NULL                                    RETURN_TOKEN(NULL_T);
 "*" |
 "/"                                     { return yytext[0]; }
 {QUOTE}[0-9][0-9][0-9][0-9][-][0-9]*[-][0-9]*{QUOTE}               yylval->string=strdup(yytext); RETURN_TOKEN(DATESSS);
+{QUOTE}(\\\47|[\40\42A-Za-z0-9_/\.\-\%])*{QUOTE}            yylval->string=strdup(yytext); RETURN_TOKEN(SSS);
 \"[^"]*\"                               yylval->string = strdup(yytext); RETURN_TOKEN(SSS);
 '[^']*\'                                yylval->string = strdup(yytext); RETURN_TOKEN(SSS);
 
