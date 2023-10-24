@@ -245,7 +245,7 @@ RC PhysicalPlanGenerator::create_plan(AggreLogicalOperator &aggr_oper, unique_pt
     }
   }
 
-  AggrePhysicalOperator *aggre_operator = new AggrePhysicalOperator(aggr_oper.fields(), aggr_oper.aggr_fields());
+  AggrePhysicalOperator *aggre_operator = new AggrePhysicalOperator(aggr_oper.fields(), aggr_oper.aggr_fields(), aggr_oper.spec());
 
   if (child_phy_oper) {
     aggre_operator->add_child(std::move(child_phy_oper));

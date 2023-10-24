@@ -24,7 +24,8 @@ See the Mulan PSL v2 for more details. */
 class AggreLogicalOperator : public LogicalOperator 
 {
 public:
-  AggreLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields);
+  AggreLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
+                       const std::vector<std::string> &spec);
   virtual ~AggreLogicalOperator() = default;
 
   LogicalOperatorType type() const override
@@ -40,8 +41,14 @@ public:
   {
     return aggr_fields_;
   }
+  const std::vector<std::string> &spec() const
+  {
+    return spec_;
+  }
+  
   
 private:
   std::vector<Field> fields_;
   std::vector<AggrOp> aggr_fields_;
+  std::vector<std::string> spec_;
 };
