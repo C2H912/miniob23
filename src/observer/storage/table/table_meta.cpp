@@ -60,24 +60,28 @@ RC TableMeta::init(int32_t table_id, const char *name, int field_num, const Attr
   int field_offset = 0;
   int trx_field_num = 0;
   const vector<FieldMeta> *trx_fields = TrxKit::instance()->trx_fields();
+  const int extra_filed_num = 1;  // used for __null
   if (trx_fields != nullptr) {
-    fields_.resize(field_num + trx_fields->size());
-
+    fields_.resize(field_num + trx_fields->size() + extra_filed_num);
+   
+   
+  //初始化系统字段
     for (size_t i = 0; i < trx_fields->size(); i++) {
       const FieldMeta &field_meta = (*trx_fields)[i];
-      fields_[i] = FieldMeta(field_meta.name(), field_meta.type(), field_offset, field_meta.len(), false/*visible*/);
+      fields_[i] = FieldMeta(0,field_meta.name(), field_meta.type(), field_offset, field_meta.len(), false,false/*visible*/);
       field_offset += field_meta.len();
     }
 
     trx_field_num = static_cast<int>(trx_fields->size());
   } else {
-    fields_.resize(field_num);
+    fields_.resize(field_num+ extra_filed_num);
   }
-
+//初始化表字段
   for (int i = 0; i < field_num; i++) {
     const AttrInfoSqlNode &attr_info = attributes[i];
-    rc = fields_[i + trx_field_num].init(attr_info.name.c_str(), 
-            attr_info.type, field_offset, attr_info.length, true/*visible*/);
+    //field_meta的id起始为1
+    rc = fields_[i + trx_field_num].init(i +trx_field_num,attr_info.name.c_str(), 
+            attr_info.type, field_offset, attr_info.length, static_cast<bool>(attr_info.nullable), true/*visible*/);
     if (rc != RC::SUCCESS) {
       LOG_ERROR("Failed to init field meta. table name=%s, field name: %s", name, attr_info.name.c_str());
       return rc;
@@ -85,6 +89,16 @@ RC TableMeta::init(int32_t table_id, const char *name, int field_num, const Attr
 
     field_offset += attr_info.length;
   }
+  //在这个vector最后插入一个字段 里面存着NULL的位图，如果某个字段为NULL 那么位图上的对应位就为0；
+  size_t null_field_len = (field_num + trx_field_num - 1) / 8 + 1;  // 计算需要多少个字节
+  rc = fields_[trx_field_num + field_num].init(
+      field_num + trx_field_num, "__null", CHARS, field_offset, null_field_len, false, false);
+  if (RC::SUCCESS != rc) {
+    LOG_ERROR("Failed to init field meta. table name=%s, field name: %s", name, "__null");
+    return rc;
+  }
+  field_offset += null_field_len;
+
 
   record_size_ = field_offset;
 
@@ -108,6 +122,11 @@ const char *TableMeta::name() const
 const FieldMeta *TableMeta::trx_field() const
 {
   return &fields_[0];
+}
+
+const FieldMeta *TableMeta::null_bitmap_field() const
+{
+  return &fields_.back();
 }
 
 const std::pair<const FieldMeta *, int> TableMeta::trx_fields() const
@@ -143,7 +162,12 @@ const FieldMeta *TableMeta::find_field_by_offset(int offset) const
 }
 int TableMeta::field_num() const
 {
-  return fields_.size();
+  return fields_.size();//减去null字段
+}
+
+int TableMeta::extra_filed_num() const
+{
+  return 1;
 }
 
 int TableMeta::sys_field_num() const
@@ -165,10 +189,27 @@ const IndexMeta *TableMeta::index(const char *name) const
   return nullptr;
 }
 
+// const IndexMeta *TableMeta::find_index_by_field(const char *field) const
+// {
+//   for (const IndexMeta &index : indexes_) {
+//     if (0 == strcmp(index.field(), field)) {
+//       return &index;
+//     }
+//   }
+//   return nullptr;
+// }
 const IndexMeta *TableMeta::find_index_by_field(const char *field) const
 {
+  std::string field_name = field;
+  std::vector<std::string> fields;
+  fields.push_back(field_name);
+  return find_index_by_field(fields);
+}
+
+const IndexMeta *TableMeta::find_index_by_field(std::vector<std::string> field) const
+{
   for (const IndexMeta &index : indexes_) {
-    if (0 == strcmp(index.field(), field)) {
+    if (field == *index.field()) {
       return &index;
     }
   }

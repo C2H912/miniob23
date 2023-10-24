@@ -222,7 +222,7 @@ RC PlainCommunicator::write_result_internal(SessionEvent *event, bool &need_disc
   rc = RC::SUCCESS;
   Tuple *tuple = nullptr;
   while (RC::SUCCESS == (rc = sql_result->next_tuple(tuple))) {
-    assert(tuple != nullptr);//这里出问题了
+    assert(tuple != nullptr);
 
     int cell_num = tuple->cell_num();
     for (int i = 0; i < cell_num; i++) {

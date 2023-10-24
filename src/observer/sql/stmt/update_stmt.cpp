@@ -18,14 +18,14 @@ See the Mulan PSL v2 for more details. */
 #include "storage/table/table.h"
 #include "sql/stmt/filter_stmt.h"
 
-UpdateStmt::UpdateStmt(Table *table, Value *values, int value_amount,FilterStmt *filter_stmt, std::vector<std::string> &value_name )
+UpdateStmt::UpdateStmt(Table *table, std::vector<Value> &values, int value_amount,FilterStmt *filter_stmt, std::vector<std::string> &value_name )
     : table_(table), values_(values), value_amount_(value_amount),filter_stmt_(filter_stmt), value_name_(value_name)
 {}
 
 RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
 {
  const char *table_name = update.relation_name.c_str();
-  if (nullptr == db || nullptr == table_name || update.value.length()==0) {
+  if (nullptr == db || nullptr == table_name || update.value.size()==0) {
     // LOG_WARN("invalid argument. db=%p, table_name=%p, value_num=%d",
     //     db, table_name, static_cast<int>(update.values.size()));
     return RC::INVALID_ARGUMENT;
@@ -39,28 +39,34 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
   }
 
   // check the fields number
-  Value *values = (Value *)&update.value;//将const转化成非const
-  const int value_num =1;//update多字段需要修改
+  //Value *values = (Value *)&update.value;//将const转化成非const
+  const int value_num =update.attribute_name.size();//update多字段需要修改
   const TableMeta &table_meta = table->table_meta();
   
   // check fields type
     //const int sys_field_num = table_meta.sys_field_num();
 
     //首先判断有无该字段
-
-    const FieldMeta *field_meta = table_meta.field(update.attribute_name.c_str());
+     //将const转化成非const
+    std::vector<Value> values;
+    for(int i = 0;i<value_num;i++)
+    {
+    const FieldMeta *field_meta = table_meta.field(update.attribute_name[i].c_str());
+    values.emplace_back(update.value[i]);
     if(field_meta==nullptr)
     {
       return RC::SCHEMA_FIELD_MISSING;
     }
     //这里要对表中对应字段进行判断才行
     const AttrType field_type = field_meta->type();
-    const AttrType value_type = update.value.attr_type();
-    if (field_type != value_type) {  // TODO try to convert the value type to field type
+    const AttrType value_type = update.value[i].attr_type();
+    if (field_type != value_type&&value_type!=AttrType::NULLS) {  // TODO try to convert the value type to field type
       LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
           table_name, field_meta->name(), field_type, value_type);
       return RC::SCHEMA_FIELD_TYPE_MISMATCH;
     }
+    }
+  
 
 
 
@@ -79,9 +85,10 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
   //初始化attr_name容器  //储存要更改的变量名
   std::vector<std::string> value_name;
   for(int i = 0;i<value_num;i++){
-    value_name.emplace_back(update.attribute_name);
+    value_name.emplace_back(update.attribute_name[i]);
   }
-
+ 
+  
   // everything alright
   stmt = new UpdateStmt(table, values, value_num,filter_stmt,value_name);
   return RC::SUCCESS;

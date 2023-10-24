@@ -152,9 +152,15 @@ struct CalcSqlNode
  * @ingroup SQLParser
  * @details 于Selects类似，也做了很多简化
  */
+struct ValueRecord
+{
+  std::vector<Value> values;
+};
+
 struct InsertSqlNode
 {
   std::string        relation_name;  ///< Relation to insert into
+  std::vector<ValueRecord> valuerecords;
   std::vector<Value> values;         ///< 要插入的值
 };
 
@@ -175,8 +181,8 @@ struct DeleteSqlNode
 struct UpdateSqlNode
 {
   std::string                   relation_name;         ///< Relation to update
-  std::string                   attribute_name;        ///< 更新的字段，仅支持一个字段
-  Value                         value;                 ///< 更新的值，仅支持一个字段
+  std::vector<std::string>      attribute_name;        ///< 更新的字段，现在支持多个了
+  std::vector<Value>            value;                 ///< 更新的值，现在支持多个了
   std::vector<ConditionSqlNode> conditions;
 };
 
@@ -192,6 +198,7 @@ struct AttrInfoSqlNode
   AttrType    type;       ///< Type of attribute
   std::string name;       ///< Attribute name
   size_t      length;     ///< Length of attribute
+  bool        nullable = true;
 };
 
 /**
@@ -224,7 +231,9 @@ struct CreateIndexSqlNode
 {
   std::string index_name;      ///< Index name
   std::string relation_name;   ///< Relation name
-  std::string attribute_name;  ///< Attribute name
+  //std::string attribute_name;  ///< Attribute name
+  std::vector<std::string> attribute_name; //多列索引需要
+  bool unique;
 };
 
 /**
@@ -259,9 +268,9 @@ struct LoadDataSqlNode
 };
 
 /**
- * @brief 设置变量的值
+ * @brief 设置变量的值 我用来储存update的字段
  * @ingroup SQLParser
- * @note 当前还没有查询变量
+ * @note 当前还没有查询变量 
  */
 struct SetVariableSqlNode
 {

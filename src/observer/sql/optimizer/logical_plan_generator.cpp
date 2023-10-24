@@ -14,7 +14,7 @@ See the Mulan PSL v2 for more details. */
 
 #include "sql/optimizer/logical_plan_generator.h"
 #include "sql/optimizer/optimize_stage.h"
-
+#include "event/sql_debug.h"
 #include "sql/operator/logical_operator.h"
 #include "sql/operator/calc_logical_operator.h"
 #include "sql/operator/project_logical_operator.h"
@@ -250,9 +250,9 @@ RC LogicalPlanGenerator::create_plan(
     InsertStmt *insert_stmt, unique_ptr<LogicalOperator> &logical_operator)
 {
   Table *table = insert_stmt->table();
-  vector<Value> values(insert_stmt->values(), insert_stmt->values() + insert_stmt->value_amount());
+  vector<ValueRecord> valuerecords(insert_stmt->valuerecords(), insert_stmt->valuerecords() + insert_stmt->valuerecord_amount());
 
-  InsertLogicalOperator *insert_operator = new InsertLogicalOperator(table, values);
+  InsertLogicalOperator *insert_operator = new InsertLogicalOperator(table, valuerecords);
   logical_operator.reset(insert_operator);//重新设置只能指针的指向
   return RC::SUCCESS;
 }
@@ -260,11 +260,13 @@ RC LogicalPlanGenerator::create_plan(
 RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<LogicalOperator> &logical_operator)
 {
   Table *table = update_stmt->table();
-  vector<Value> values(update_stmt->values(), update_stmt->values() + update_stmt->value_amount());
+  //vector<Value> values(update_stmt->values(), update_stmt->values() + update_stmt->value_amount());
+  vector<Value> values = update_stmt->values();
   vector<std::string> value_name = update_stmt->names();
   FilterStmt *filter_stmt = update_stmt->filter_stmt();
   std::vector<Field> fields;
-  for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num(); i++) {
+  //这里有待商榷 毕竟null_field也是要存进去的 不需要 因为可以直接修改bit
+  for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num()-table->table_meta().extra_filed_num(); i++) {
     const FieldMeta *field_meta = table->table_meta().field(i);
     fields.push_back(Field(table, field_meta));
   }
@@ -287,6 +289,9 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
   }
 
   logical_operator = std::move(update_oper);
+
+  //输出调试信息 查看增加了哪些索引
+  sql_debug(value_name.data()->c_str());
   return rc;
 }
 
@@ -296,6 +301,7 @@ RC LogicalPlanGenerator::create_plan(
   Table *table = delete_stmt->table();
   FilterStmt *filter_stmt = delete_stmt->filter_stmt();
   std::vector<Field> fields;
+  //删除的话 当然这一行都要删
   for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num(); i++) {
     const FieldMeta *field_meta = table->table_meta().field(i);
     fields.push_back(Field(table, field_meta));

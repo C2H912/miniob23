@@ -79,7 +79,9 @@ RC UpdatePhysicalOperator::next()
     RowTuple *row_tuple = static_cast<RowTuple *>(tuple);
     Record &record = row_tuple->record();//返回给引用变量 可以操作内存 
     char* old_record =  record.data();//返回给非引用变量 复制一份
-
+    size_t length = strlen(old_record);
+    char* old_record_copy = new char[length];//字符串需要加一
+    strcpy(old_record_copy, old_record);//深拷贝
     //需要调换一下顺序，不然record被删除，将会没有数据
     //格式在stmt中判断过了
     //是否需要回退
@@ -101,9 +103,20 @@ RC UpdatePhysicalOperator::next()
 
     rc = trx_->insert_record(table_, new_record);
     if (rc != RC::SUCCESS) {
+      //update失败要回退
+      Record temp_record;
+      int record_size = table_->table_meta().record_size();
+      temp_record.set_data_owner(old_record_copy,record_size);
+      RC rc2 = trx_->insert_record(table_, temp_record);
+      if(rc2 != RC::SUCCESS)
+      {
+         return rc2;
+      }
+      
       LOG_WARN("failed to insert record by transaction. rc=%s", strrc(rc));
        return rc;
     }
+    delete[] old_record_copy;
    
 
   }

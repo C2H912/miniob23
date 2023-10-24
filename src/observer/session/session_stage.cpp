@@ -143,7 +143,7 @@ RC SessionStage::handle_sql(SQLStageEvent *sql_event)
     LOG_TRACE("failed to do resolve. rc=%s", strrc(rc));
     return rc;
   }
-  
+  //DDL语句不进optimize
   rc = optimize_stage_.handle_request(sql_event);
   if (rc != RC::UNIMPLENMENT && rc != RC::SUCCESS) {
     LOG_TRACE("failed to do optimize. rc=%s", strrc(rc));

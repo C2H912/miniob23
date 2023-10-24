@@ -138,8 +138,8 @@ RC PhysicalPlanGenerator::create_plan(TableGetLogicalOperator &table_get_oper, u
       }
     }
   }
-
-  if (index != nullptr) {
+  //今年有一个索引算子
+  if (index != nullptr&&false) {
     ASSERT(value_expr != nullptr, "got an index but value expr is null ?");
 
     const Value &value = value_expr->get_value();
@@ -260,8 +260,8 @@ RC PhysicalPlanGenerator::create_plan(AggreLogicalOperator &aggr_oper, unique_pt
 RC PhysicalPlanGenerator::create_plan(InsertLogicalOperator &insert_oper, unique_ptr<PhysicalOperator> &oper)
 {
   Table *table = insert_oper.table();
-  vector<Value> &values = insert_oper.values();
-  InsertPhysicalOperator *insert_phy_oper = new InsertPhysicalOperator(table, std::move(values));
+  vector<ValueRecord> &valuerecords = insert_oper.valuerecords();
+  InsertPhysicalOperator *insert_phy_oper = new InsertPhysicalOperator(table, std::move(valuerecords));
   oper.reset(insert_phy_oper);
   return RC::SUCCESS;
 }

@@ -72,6 +72,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         LBRACE
         RBRACE
         COMMA
+        UNIQUE
         TRX_BEGIN
         TRX_COMMIT
         TRX_ROLLBACK
@@ -86,6 +87,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         VALUES
         FROM
         WHERE
+        NULL_T
         INNER
         JOIN
         AND
@@ -118,6 +120,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   ConditionSqlNode *                condition;
   std::vector<InnerJoinSqlNode> *   join_lists;
   Value *                           value;
+  std::vector<Value> *              record;
   enum CompOp                       comp;
   enum AggrOp                       aggr;
   RelAttrSqlNode *                  rel_attr;
@@ -126,9 +129,13 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   Expression *                      expression;
   std::vector<Expression *> *       expression_list;
   std::vector<Value> *              value_list;
+  std::vector<SetVariableSqlNode> * attr_name_a_values;
+  SetVariableSqlNode *              attr_name_value;
+  std::vector<ValueRecord> *        record_list;
   std::vector<ConditionSqlNode> *   condition_list;
   std::vector<RelAttrSqlNode> *     rel_attr_list;
   std::vector<std::string> *        relation_list;
+  std::vector<std::string> *        index_attr_list;
   char *                            string;
   int                               number;
   float                             floats;
@@ -145,6 +152,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <number>              type
 %type <condition>           condition
 %type <value>               value
+%type <record>              record
 %type <number>              number
 %type <comp>                comp_op
 %type <aggr>                aggr_func;
@@ -152,12 +160,17 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <attr_infos>          attr_def_list
 %type <attr_info>           attr_def
 %type <value_list>          value_list
+%type <record_list>         record_list
 %type <condition_list>      where
 %type <condition_list>      condition_list
 %type <condition_list>      on
 %type <join_lists>          join_list
 %type <rel_attr_list>       select_attr
 %type <relation_list>       rel_list
+%type <index_attr_list>     id_list
+%type <string>              id
+%type <attr_name_a_values>  update_options
+%type <attr_name_value>     update_option
 %type <rel_attr_list>       attr_list
 %type <expression>          expression
 %type <expression_list>     expression_list
@@ -278,18 +291,73 @@ desc_table_stmt:
     ;
 
 create_index_stmt:    /*create index 语句的语法解析树*/
-    CREATE INDEX ID ON ID LBRACE ID RBRACE
+    CREATE INDEX ID ON ID LBRACE id id_list RBRACE
     {
       $$ = new ParsedSqlNode(SCF_CREATE_INDEX);
       CreateIndexSqlNode &create_index = $$->create_index;
       create_index.index_name = $3;
       create_index.relation_name = $5;
-      create_index.attribute_name = $7;
+      //create_index.attribute_name = $7
+      std::vector<std::string> *src_attrs = $8;
+      if (src_attrs != nullptr) {
+        create_index.attribute_name.swap(*src_attrs);
+      }
+      std::string temp = $7;
+      create_index.attribute_name.emplace_back(temp);
+      std::reverse(create_index.attribute_name.begin(), create_index.attribute_name.end());
+      delete $7;
+    
+      create_index.unique = false;
       free($3);
       free($5);
-      free($7);
+      //free($7);
     }
+    | CREATE UNIQUE INDEX ID ON ID LBRACE id id_list RBRACE 
+		{
+			$$ = new ParsedSqlNode(SCF_CREATE_INDEX);
+      CreateIndexSqlNode &create_index = $$->create_index;
+      create_index.index_name = $4;
+      create_index.relation_name = $6;
+      //create_index.attribute_name = $7
+      std::vector<std::string> *src_attrs = $9;
+      if (src_attrs != nullptr) {
+      create_index.attribute_name.swap(*src_attrs);
+      }
+      std::string temp = $8;
+      create_index.attribute_name.push_back(temp);
+      std::reverse(create_index.attribute_name.begin(), create_index.attribute_name.end());//保持顺序
+      delete $8;
+      create_index.unique = true;
+      free($4);
+      free($6);
+      //free($8);
+      
+		}
     ;
+
+id_list:
+		 /* empty */
+    {
+      $$ = nullptr;
+    }
+    | COMMA id id_list
+    {
+      if ($3 != nullptr) {
+        $$ = $3;
+      } else {
+        $$ = new std::vector<std::string>;
+      }
+      $$->push_back($2);
+      delete $2;
+    }
+id:
+	ID 
+	{
+
+		$$ = $1;
+    //free($1);
+	}
+	;
 
 drop_index_stmt:      /*drop index 语句的语法解析树*/
     DROP INDEX ID ON ID
@@ -345,6 +413,43 @@ attr_def:
       $$->length = $4;
       free($1);
     }
+    | ID type LBRACE number RBRACE NOT NULL_T
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = (AttrType)$2;
+      $$->name = $1;
+      $$->length = $4;
+      $$->nullable = false;
+      free($1);
+    }
+    | ID type LBRACE number RBRACE NULL_T
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = (AttrType)$2;
+      $$->name = $1;
+      $$->length = $4;
+      $$->nullable = true;
+      free($1);
+    }
+    | ID type NOT NULL_T
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = (AttrType)$2;
+      $$->name = $1;
+      $$->length = 4;
+      //$$->nullable = true;
+      $$->nullable = false;
+      free($1);
+    }
+    | ID type NULL_T
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = (AttrType)$2;
+      $$->name = $1;
+      $$->length = 4;
+      $$->nullable = true;
+      free($1);
+    }
     | ID type
     {
       $$ = new AttrInfoSqlNode;
@@ -364,19 +469,52 @@ type:
     | DATE_T   { $$=DATES; }
     ;
 insert_stmt:        /*insert   语句的语法解析树*/
-    INSERT INTO ID VALUES LBRACE value value_list RBRACE 
+    INSERT INTO ID VALUES record record_list 
     {
       $$ = new ParsedSqlNode(SCF_INSERT);
       $$->insertion.relation_name = $3;
-      if ($7 != nullptr) {
-        $$->insertion.values.swap(*$7);
+      if ($6 != nullptr) {
+        $$->insertion.valuerecords.swap(*$6);
       }
-      $$->insertion.values.emplace_back(*$6);
-      std::reverse($$->insertion.values.begin(), $$->insertion.values.end());
-      delete $6;
+      $$->insertion.valuerecords.emplace_back(*$5);
+      std::reverse($$->insertion.valuerecords.begin(), $$->insertion.valuerecords.end());
+      delete $5;
       free($3);
     }
     ;
+
+record_list:
+    /* empty */
+    {
+      $$ =  nullptr;
+    }
+    | COMMA record record_list {
+        if ($3 != nullptr) {
+        $$ = $3;
+      } else {
+        $$ = new std::vector<ValueRecord>;
+      }
+      ValueRecord current;
+      current.values.swap(*$2);
+      $$->push_back(current);
+      //$$->emplace_back(*$2);
+      free($2);
+    }
+
+record:
+    LBRACE value value_list RBRACE {
+        if ($3 != nullptr) {
+          $$ = $3;
+        }else {
+          $$ = new std::vector<Value>;
+        }
+        //Record current;
+        //current.values.swap(*$2);
+        //$$->push_back(current);
+        $$->emplace_back(*$2);
+        std::reverse($$->begin(), $$->end());
+        delete $2;
+    }
 
 value_list:
     /* empty */
@@ -402,6 +540,12 @@ value:
       $$ = new Value((float)$1);
       @$ = @1;
     }
+    | NULL_T{ //要放到SSS的前面
+      //char *tmp = common::substr($1,1,strlen($1)-2);
+      $$ = new Value(0);
+      $$->set_null_value();
+      //free(tmp);
+    }
     |SSS {
       char *tmp = common::substr($1,1,strlen($1)-2);
       $$ = new Value(tmp);
@@ -412,6 +556,7 @@ value:
       $$ = new Value(1, tmp);
       free(tmp);
 		}
+   
     ;
     
 delete_stmt:    /*  delete 语句的语法解析树*/
@@ -427,20 +572,57 @@ delete_stmt:    /*  delete 语句的语法解析树*/
     }
     ;
 update_stmt:      /*  update 语句的语法解析树*/
-    UPDATE ID SET ID EQ value where 
+    UPDATE ID SET update_option update_options where 
     {
       $$ = new ParsedSqlNode(SCF_UPDATE);
       $$->update.relation_name = $2;
-      $$->update.attribute_name = $4;
-      $$->update.value = *$6;
-      if ($7 != nullptr) {
-        $$->update.conditions.swap(*$7);
-        delete $7;
+      //std::vector<SetVariableSqlNode> *u_list;
+      std::vector<SetVariableSqlNode> u_list;
+      if($5!=nullptr){
+          u_list.swap(*$5);
+          delete $5;
+      }
+      u_list.push_back(*$4);
+      for(int i = u_list.size();i>0;i--)
+      {
+        $$->update.attribute_name.push_back(u_list[i-1].name);
+        $$->update.value.push_back(u_list[i-1].value);
+      }
+      //delete u_list;
+     
+      if ($6 != nullptr) {
+        $$->update.conditions.swap(*$6);
+        delete $6;
       }
       free($2);
       free($4);
     }
     ;
+update_options:
+		/* EMPTY */
+    {
+      $$ = nullptr;
+    }
+		| COMMA update_option update_options {
+      if ($3 != nullptr) {
+        $$ = $3;
+      } else {
+        $$ = new std::vector<SetVariableSqlNode>;
+      }
+      $$->emplace_back(*$2);
+       delete $2;
+		};
+update_option:
+		ID EQ value {
+    	$$ = new SetVariableSqlNode();
+      $$->value = *$3;
+      $$->name = $1;
+      free($1);
+      free($3);
+		}
+    ;
+
+
 select_stmt:        /*  select 语句的语法解析树*/
     SELECT select_attr FROM ID rel_list join_list where
     {

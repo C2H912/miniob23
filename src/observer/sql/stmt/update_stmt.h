@@ -34,7 +34,7 @@ class UpdateStmt : public Stmt
 {
 public:
   UpdateStmt() = default;
-  UpdateStmt(Table *table, Value *values, int value_amount, FilterStmt *filter_stmt,std::vector<std::string> &value_name_);
+  UpdateStmt(Table *table, std::vector<Value> &values, int value_amount, FilterStmt *filter_stmt,std::vector<std::string> &value_name_);
 
 public:
   static RC create(Db *db, const UpdateSqlNode &update_sql, Stmt *&stmt);
@@ -45,7 +45,7 @@ public:
   {
     return table_;
   }
-  Value *values() const
+  std::vector<Value> &values() 
   {
     return values_;
   }
@@ -71,7 +71,8 @@ public:
 
 private:
   Table *table_ = nullptr;
-  Value *values_ = nullptr;
+  //Value *values_ = nullptr;
+  std::vector<Value> values_;
   std::vector<std::string> value_name_; 
   int value_amount_ = 0;
   FilterStmt *filter_stmt_ = nullptr;
