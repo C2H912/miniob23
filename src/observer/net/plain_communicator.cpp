@@ -264,6 +264,17 @@ RC PlainCommunicator::write_result_internal(SessionEvent *event, bool &need_disc
   if (rc == RC::RECORD_EOF) {
     rc = RC::SUCCESS;
   }
+  else {
+    //const int buf_size = 2048;
+    //char *buf = new char[buf_size];
+    //const char *result = "FAILURE";
+    //snprintf(buf, buf_size, "%s\n", result);
+    //writer_->writen(buf, strlen(buf) + 1);
+    writer_->clean();
+    sql_result->close();
+    sql_result->set_return_code(rc);
+    return write_state(event, need_disconnect);
+  }
 
   if (cell_num == 0) {
     // 除了select之外，其它的消息通常不会通过operator来返回结果，表头和行数据都是空的
