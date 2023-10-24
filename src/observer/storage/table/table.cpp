@@ -329,6 +329,7 @@ RC Table::make_record(int value_num, const Value *values, Record &record)
   char            *record_data = (char *)malloc(record_size);
   const FieldMeta *null_field  = table_meta_.null_bitmap_field();
   common::Bitmap   bitmap(record_data + null_field->offset(), null_field->len());
+  //common::Bitmap   bitmap(record.data() + null_field->offset(), null_field->len());//你这个bitmap根本就是随便找的
 
   for (int i = 0; i < value_num; i++) {
     int              idx   = i + normal_field_start_index;
@@ -395,6 +396,7 @@ RC Table::make_record_for_update(
             return RC::SCHEMA_FIELD_TYPE_MISMATCH;
           }
         }
+        break;//找到之后之间跳过内层循环
       } else {
         count++;
       }
@@ -410,8 +412,10 @@ RC Table::make_record_for_update(
   // 复制所有字段的值
   int              record_size = table_meta_.record_size();
   char            *record_data = (char *)malloc(record_size);
+  //char            *current_record_data = 
   const FieldMeta *null_field  = table_meta_.null_bitmap_field();
-  common::Bitmap   bitmap(record_data + null_field->offset(), null_field->len());
+  common::Bitmap   bitmap(record_data + null_field->offset(), null_field->len());//你这个bitmap根本就是随便找的
+  //拿的不是record的bitmap
 
   for (int i = 0; i < attr_num; i++) {
     int idx = i + normal_field_start_index;//关键是在整个record中的位置，所以说不是j是i
@@ -445,9 +449,9 @@ RC Table::make_record_for_update(
             }
           }
           memcpy(record_data + field->offset(), value.data(), copy_len);
-          bitmap.clear_bit(idx);
+          bitmap.clear_bit(idx);//匹配完的话，应该跳过该循环，因为字段是一一对应的
         }
-        
+        break;
       } else {
         // 没有匹配的话，就直接用原来的record
         if (j == value_num - 1)  // 最后一次才执行 节约时间

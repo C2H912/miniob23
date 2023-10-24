@@ -4,7 +4,7 @@
 		{
 			"id" : 0,
 			"len" : 4,
-			"name" : "id",
+			"name" : "id1",
 			"nullable" : false,
 			"offset" : 0,
 			"type" : "ints",
@@ -13,7 +13,7 @@
 		{
 			"id" : 1,
 			"len" : 4,
-			"name" : "col1",
+			"name" : "id2",
 			"nullable" : false,
 			"offset" : 4,
 			"type" : "ints",
@@ -22,7 +22,7 @@
 		{
 			"id" : 2,
 			"len" : 4,
-			"name" : "col2",
+			"name" : "col1",
 			"nullable" : false,
 			"offset" : 8,
 			"type" : "ints",
@@ -30,10 +30,19 @@
 		},
 		{
 			"id" : 3,
+			"len" : 4,
+			"name" : "col2",
+			"nullable" : false,
+			"offset" : 12,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 4,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 12,
+			"offset" : 16,
 			"type" : "chars",
 			"visible" : false
 		}
@@ -43,12 +52,21 @@
 		{
 			"field_name" : 
 			[
-				"id"
+				"id1",
+				"id2"
 			],
 			"name" : "index_id",
+			"unique" : true
+		},
+		{
+			"field_name" : 
+			[
+				"id2"
+			],
+			"name" : "index_id2",
 			"unique" : true
 		}
 	],
 	"table_id" : 0,
-	"table_name" : "unique_table1"
+	"table_name" : "unique_table2"
 }
