@@ -12,37 +12,28 @@
 		},
 		{
 			"id" : 1,
-			"len" : 20,
-			"name" : "t_name",
+			"len" : 4,
+			"name" : "col1",
 			"nullable" : false,
 			"offset" : 4,
-			"type" : "chars",
+			"type" : "ints",
 			"visible" : true
 		},
 		{
 			"id" : 2,
 			"len" : 4,
-			"name" : "col1",
+			"name" : "col2",
 			"nullable" : false,
-			"offset" : 24,
+			"offset" : 8,
 			"type" : "ints",
 			"visible" : true
 		},
 		{
 			"id" : 3,
-			"len" : 4,
-			"name" : "col2",
-			"nullable" : false,
-			"offset" : 28,
-			"type" : "ints",
-			"visible" : true
-		},
-		{
-			"id" : 4,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 32,
+			"offset" : 12,
 			"type" : "chars",
 			"visible" : false
 		}
@@ -55,9 +46,9 @@
 				"id"
 			],
 			"name" : "index_id",
-			"unique" : false
+			"unique" : true
 		}
 	],
 	"table_id" : 0,
-	"table_name" : "update_table_1"
+	"table_name" : "unique_table1"
 }

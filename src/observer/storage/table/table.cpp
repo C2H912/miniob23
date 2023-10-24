@@ -515,7 +515,8 @@ RC Table::create_index(Trx *trx, std::vector<FieldMeta> &field_meta, const char 
   }
 
   FieldMeta tmp_field_meat = *table_meta_.null_bitmap_field();
-  field_meta.push_back(tmp_field_meat);//把null_field放最后面
+  //field_meta.push_back(tmp_field_meat);//把null_field放最后面
+  field_meta.insert(field_meta.begin(),tmp_field_meat);
   // 创建索引相关数据
   BplusTreeIndex *index      = new BplusTreeIndex();
   std::string     index_file = table_index_file(base_dir_.c_str(), name(), index_name);

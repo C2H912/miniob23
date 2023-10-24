@@ -73,12 +73,14 @@ public:
     // 这里有问题，就算有多个字段 也只能比较一次
     int rc = 0;
     // int pos = attr_length_[0];//修改
-    int pos = 0;
+    int pos = attr_length_[0];
     //开始考虑null
-    common::Bitmap old_null_bitmap(const_cast<char *>(v1), attr_length_[attr_length_.size()-1]);
-    common::Bitmap new_null_bitmap(const_cast<char *>(v2), attr_length_[attr_length_.size()-1]);
-    for (size_t i = 0; i < attr_length_.size()-1; i++)  // 不考虑NULL
+    //attr_length不是offset 放在最后超级不方便 还是要改
+    common::Bitmap old_null_bitmap(const_cast<char *>(v1), attr_length_[0]);
+    common::Bitmap new_null_bitmap(const_cast<char *>(v2), attr_length_[0]);
+    for (size_t i = 1; i < attr_length_.size(); i++)  // 不考虑NULL
     {
+        int temp = attr_id_[i];//看一下这个位图对不对
         if (new_null_bitmap.get_bit(attr_id_[i])) {
         if (null_as_differnet)  // 这里认为NULL比其它值(包括NULL)都大，返回-1
           return -1;
