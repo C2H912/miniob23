@@ -493,9 +493,6 @@ bool Value::get_boolean() const
     case BOOLEANS: {
       return num_value_.bool_value_;
     } break;
-    case NULLS:{
-      return false;//期望类型是NULL的话 肯定是false
-    }
     default: {
       LOG_WARN("unknown data type. type=%d", attr_type_);
       return false;
