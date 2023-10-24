@@ -1,0 +1,35 @@
+{
+	"fields" : 
+	[
+		{
+			"id" : 0,
+			"len" : 4,
+			"name" : "a",
+			"nullable" : true,
+			"offset" : 0,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 1,
+			"len" : 4,
+			"name" : "b",
+			"nullable" : true,
+			"offset" : 4,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 2,
+			"len" : 1,
+			"name" : "__null",
+			"nullable" : false,
+			"offset" : 8,
+			"type" : "chars",
+			"visible" : false
+		}
+	],
+	"indexes" : null,
+	"table_id" : 2,
+	"table_name" : "qq"
+}

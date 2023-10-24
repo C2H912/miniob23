@@ -414,6 +414,7 @@ attr_def:
       $$->type = (AttrType)$2;
       $$->name = $1;
       $$->length = $4;
+      $$->nullable = false;
       free($1);
     }
     | ID type LBRACE number RBRACE NULL_T
@@ -432,6 +433,7 @@ attr_def:
       $$->name = $1;
       $$->length = 4;
       //$$->nullable = true;
+      $$->nullable = false;
       free($1);
     }
     | ID type NULL_T
