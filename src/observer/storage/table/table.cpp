@@ -356,6 +356,8 @@ RC Table::make_record(int value_num, const Value *values, Record &record)
         }
       }
       memcpy(record_data + field->offset(), value.data(), copy_len);
+      bitmap.clear_bit(idx);
+
     }
   }
 
@@ -443,7 +445,9 @@ RC Table::make_record_for_update(
             }
           }
           memcpy(record_data + field->offset(), value.data(), copy_len);
+          bitmap.clear_bit(idx);
         }
+        
       } else {
         // 没有匹配的话，就直接用原来的record
         if (j == value_num - 1)  // 最后一次才执行 节约时间

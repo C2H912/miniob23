@@ -4,7 +4,7 @@
 		{
 			"id" : 0,
 			"len" : 4,
-			"name" : "a",
+			"name" : "id",
 			"nullable" : false,
 			"offset" : 0,
 			"type" : "ints",
@@ -12,34 +12,33 @@
 		},
 		{
 			"id" : 1,
-			"len" : 4,
-			"name" : "b",
-			"nullable" : true,
+			"len" : 20,
+			"name" : "name",
+			"nullable" : false,
 			"offset" : 4,
-			"type" : "ints",
+			"type" : "chars",
 			"visible" : true
 		},
 		{
 			"id" : 2,
+			"len" : 4,
+			"name" : "age",
+			"nullable" : false,
+			"offset" : 24,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 3,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 8,
+			"offset" : 28,
 			"type" : "chars",
 			"visible" : false
 		}
 	],
-	"indexes" : 
-	[
-		{
-			"field_name" : 
-			[
-				"b"
-			],
-			"name" : "aa",
-			"unique" : false
-		}
-	],
-	"table_id" : 0,
-	"table_name" : "oo"
+	"indexes" : null,
+	"table_id" : 1,
+	"table_name" : "drop_table_3"
 }

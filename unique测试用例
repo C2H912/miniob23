@@ -28,3 +28,21 @@ INSERT INTO unique_table2 VALUES (1,2,1,1);
 INSERT INTO unique_table2 VALUES (2,3,1,1);
 
 1,1,1,1 位置 1 0
+
+SELECT * FROM update_table_1;
+  2 | R7FFOIYO | 33 | 45
+  65 | GU | 93 | 7
+- 69 | E0A4KPRM | 63 | 76
++ NULL | NULL | 63 | 76
+-- below are some requests executed before(partial) --
+-- init data
+CREATE TABLE update_table_1(id int, t_name char(20), col1 int, col2 int);
+CREATE INDEX index_id on update_table_1(id);
+INSERT INTO update_table_1 VALUES (65, 'EYPTH', 93, 7);
+INSERT INTO update_table_1 VALUES (69, 'E0A4KPRM', 63, 73);
+INSERT INTO update_table_1 VALUES (2, 'R7FFOIYO', 33, 45);
+...
+-- update
+UPDATE update_table_1 SET t_name='GU' WHERE id=65;
+-- update2
+UPDATE update_table_1 SET col2=76 WHERE col1=63;

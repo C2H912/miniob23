@@ -1,0 +1,63 @@
+{
+	"fields" : 
+	[
+		{
+			"id" : 0,
+			"len" : 4,
+			"name" : "id",
+			"nullable" : false,
+			"offset" : 0,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 1,
+			"len" : 20,
+			"name" : "t_name",
+			"nullable" : false,
+			"offset" : 4,
+			"type" : "chars",
+			"visible" : true
+		},
+		{
+			"id" : 2,
+			"len" : 4,
+			"name" : "col1",
+			"nullable" : false,
+			"offset" : 24,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 3,
+			"len" : 4,
+			"name" : "col2",
+			"nullable" : false,
+			"offset" : 28,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 4,
+			"len" : 1,
+			"name" : "__null",
+			"nullable" : false,
+			"offset" : 32,
+			"type" : "chars",
+			"visible" : false
+		}
+	],
+	"indexes" : 
+	[
+		{
+			"field_name" : 
+			[
+				"id"
+			],
+			"name" : "index_id",
+			"unique" : false
+		}
+	],
+	"table_id" : 0,
+	"table_name" : "update_table_1"
+}

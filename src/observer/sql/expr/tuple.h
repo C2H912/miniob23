@@ -152,6 +152,9 @@ public:
   void set_record(Record *record)
   {
     this->record_ = record;
+    const Field filed_ = this->speces_.back()->field();
+    const FieldMeta *null_filed_meta = filed_.meta();
+    bitmap_.init(record->data() + null_filed_meta->offset(), null_filed_meta->len());
   }
 
   void set_schema(const Table *table, const std::vector<FieldMeta> *fields)
@@ -175,9 +178,9 @@ public:
       return RC::INVALID_ARGUMENT;
     }
 
-    const FieldMeta *null_field = table_->table_meta().null_bitmap_field();
-    common::Bitmap bitmap(const_cast<char *>(record_->data()) + null_field->offset(), null_field->len());
-    if(bitmap.get_bit(index))
+    //const FieldMeta *null_field = table_->table_meta().null_bitmap_field();
+    //common::Bitmap bitmap(const_cast<char *>(record_->data()) + null_field->offset(), null_field->len());
+    if(table_->table_meta().field(index)->nullable()==true&&bitmap_.get_bit(index))
     {
       //当该值为NULL时
     cell.set_type(AttrType::NULLS);
@@ -238,6 +241,7 @@ public:
   }
 
 private:
+  common::Bitmap bitmap_;
   Record *record_ = nullptr;
   const Table *table_ = nullptr;
   std::vector<FieldExpr *> speces_;
