@@ -63,6 +63,9 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         CALC
         SELECT
         DESC
+        ASC
+        ORDER
+        BY
         SHOW
         SYNC
         INSERT
@@ -132,6 +135,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   std::vector<RelAttrSqlNode> *     rel_attr_list;
   std::vector<std::string> *        relation_list;
   std::vector<std::string> *        index_attr_list;
+  std::vector<OrderBySqlNode> *     order_by
+  OrderBySqlNode *                  order_by_node
   char *                            string;
   int                               number;
   float                             floats;
@@ -165,6 +170,9 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <relation_list>       rel_list
 %type <index_attr_list>     id_list
 %type <string>              id
+%type <order_by>            order_by_list
+%type <order_by>            opt_order_by
+%type <order_by_node>       order_by_unit
 %type <attr_name_a_values>  update_options
 %type <attr_name_value>     update_option
 %type <rel_attr_list>       attr_list
@@ -619,7 +627,7 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT select_attr FROM ID rel_list join_list where
+    SELECT select_attr FROM ID rel_list join_list opt_order_by where
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
       if ($2 != nullptr) {
@@ -637,14 +645,99 @@ select_stmt:        /*  select 语句的语法解析树*/
         delete $6;
         std::reverse($$->selection.joinTables.begin(), $$->selection.joinTables.end());
       }
-
       if ($7 != nullptr) {
-        $$->selection.conditions.swap(*$7);
+        $$->selection.orderBy.swap(*$7);
         delete $7;
+      }
+
+      if ($8 != nullptr) {
+        $$->selection.conditions.swap(*$8);
+        delete $8;
       }
       free($4);
     }
     ;
+
+opt_order_by:
+    {
+      $$ = nullptr;
+    }
+    | ORDER BY order_by_unit order_by_list{
+        if($4!=nullptr){
+          $$ = $4;
+        }
+        else{
+          $$ = new std::vector<OrderBySqlNode>;
+        }
+        $$->emplace_back(*$3);
+        delete $3;
+        std::reverse($$->begin(),$$->end());
+    };
+
+order_by_list:
+    {
+      $$ = nullptr;
+    }
+    | COMMA order_by_unit order_by_list
+    {
+        if($3!=nullptr){
+          $$ = $3;
+        }
+        else{
+          $$ = new std::vector<OrderBySqlNode>;
+        }
+        $$->emplace_back(*$2);
+        delete $2;
+    };
+
+order_by_unit:
+  ID
+	{
+      $$ = new OrderBySqlNode();
+      $$->order_relation = $1;
+      $$->order_relation = NULL;
+	}
+	|
+	ID DOT ID
+	{
+		  $$ = new OrderBySqlNode();
+      $$->order_relation = $3;
+      $$->order_relation = $1;
+	}
+	|
+	ID DESC
+	{
+      $$ = new OrderBySqlNode();
+      $$->order_relation = $1;
+      $$->order_relation = NULL;
+      $$->asc_type = false;
+	}
+	|
+	ID ASC
+	{
+      $$ = new OrderBySqlNode();
+      $$->order_relation = $1;
+      $$->order_relation = NULL;
+	}
+	|
+	ID DOT ID DESC
+	{
+      $$ = new OrderBySqlNode();
+      $$->order_relation = $3;
+      $$->order_relation = $1;
+      $$->asc_type = false;
+	}
+	|
+	ID DOT ID ASC
+	{
+		  $$ = new OrderBySqlNode();
+      $$->order_relation = $3;
+      $$->order_relation = $1;
+	}
+	;
+
+
+
 calc_stmt:
     CALC expression_list
     {

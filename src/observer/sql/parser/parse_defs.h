@@ -106,12 +106,21 @@ struct InnerJoinSqlNode
   std::vector<ConditionSqlNode>   join_conditions;     ///< 查询条件，使用AND串联起来多个条件
 };
 
+struct OrderBySqlNode
+{
+  std::string order_relation;//orderby字段所在的表
+  std::string field;//要排序的字段名
+  bool asc_type = true;//
+};
+
+
 struct SelectSqlNode
 {
   std::vector<RelAttrSqlNode>     attributes;     ///< attributes in select clause
   std::vector<std::string>        relations;      ///< 查询的表
   std::vector<ConditionSqlNode>   conditions;     ///< 查询条件，使用AND串联起来多个条件
   std::vector<InnerJoinSqlNode>   joinTables;     ///< INNER JOIN
+  std::vector<OrderBySqlNode>     orderBy;
 };
 
 /**
