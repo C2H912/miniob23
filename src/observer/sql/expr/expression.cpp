@@ -290,8 +290,8 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
   else{
     std::vector<std::vector<Value>> left_sub_table = left_->sub_table();
     if((int)left_sub_table.size() == 0){
-      LOG_WARN("failed to get table");
-      return RC::INVALID_ARGUMENT;
+      value.set_boolean(false);
+      return RC::SUCCESS;
     }
     if((int)left_sub_table.size() > 1 || (int)left_sub_table[0].size() > 1){
       LOG_WARN("table size is incorrect");
@@ -311,8 +311,8 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
   else{
     std::vector<std::vector<Value>> right_sub_table = right_->sub_table();
     if((int)right_sub_table.size() == 0){
-      LOG_WARN("failed to get table");
-      return RC::INVALID_ARGUMENT;
+      value.set_boolean(false);
+      return RC::SUCCESS;
     }
     if((int)right_sub_table.size() > 1 || (int)right_sub_table[0].size() > 1){
       LOG_WARN("table size is incorrect");
