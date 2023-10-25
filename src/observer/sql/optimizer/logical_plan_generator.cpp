@@ -89,14 +89,14 @@ RC LogicalPlanGenerator::create_sub_query(SelectStmt *stmt, unique_ptr<LogicalOp
     FilterObj left = all_filters[i]->left();
     FilterObj right = all_filters[i]->right();
     if(left.type == 1){
-      Field left_field;
+      Field left_field = left.field;
       const char *left_table_name = left_field.table_name();
       if(0 != strcmp(stmt->tables()[0]->name(), left_table_name)){
         stmt->tables_without_const().push_back(const_cast<Table*>(left_field.table()));
       }
     }
     if(right.type == 1){
-      Field right_field;
+      Field right_field = right.field;
       const char *right_table_name = right_field.table_name();
       if(0 != strcmp(stmt->tables()[0]->name(), right_table_name)){
         stmt->tables_without_const().push_back(const_cast<Table*>(right_field.table()));

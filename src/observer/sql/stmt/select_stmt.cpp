@@ -36,7 +36,7 @@ static void wildcard_fields(Table *table, std::vector<Field> &field_metas)
   }
 }
 
-RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
+RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt, std::unordered_map<std::string, Table *> parents)
 {
   if (nullptr == db) {
     LOG_WARN("invalid argument. db is null");
@@ -212,9 +212,14 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
       all_filters.push_back(select_sql.joinTables[i].join_conditions[j]);
     }
   }
+  //检查复杂子查询中是否有此父表
+  std::unordered_map<std::string, Table *> all_parents = table_map;
+  for(std::pair<std::string, Table *> it : parents){
+    all_parents.insert(it);
+  }
   RC rc = FilterStmt::create(db,
       default_table,
-      &table_map,
+      &all_parents,
       all_filters.data(),
       static_cast<int>(all_filters.size()),
       filter_stmt);

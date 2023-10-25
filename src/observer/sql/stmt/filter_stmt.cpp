@@ -115,7 +115,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     //递归地调用create生成子查询
     Stmt *sub_stmt;
     SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
-    rc = caller->create(db, *condition.left_sql, sub_stmt);
+    rc = caller->create(db, *condition.left_sql, sub_stmt, *tables);
     if(rc != RC::SUCCESS){
       LOG_WARN("sub create stmt fail");
       return rc;
@@ -153,7 +153,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     //递归地调用create生成子查询
     Stmt *sub_stmt;
     SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
-    rc = caller->create(db, *condition.right_sql, sub_stmt);
+    rc = caller->create(db, *condition.right_sql, sub_stmt, *tables);
     if(rc != RC::SUCCESS){
       LOG_WARN("sub create stmt fail");
       return rc;
