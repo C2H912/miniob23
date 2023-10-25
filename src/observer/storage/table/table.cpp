@@ -28,6 +28,7 @@ See the Mulan PSL v2 for more details. */
 #include "storage/index/index.h"
 #include "storage/index/bplus_tree_index.h"
 #include "storage/trx/trx.h"
+#include "sql/parser/typecast.h"
 
 Table::~Table()
 {
@@ -367,7 +368,7 @@ RC Table::make_record(int value_num, const Value *values, Record &record)
 }
 
 RC Table::make_record_for_update(
-    int value_num, const Value *values, Record &record, std::vector<std::string> values_name, char *record_in)
+    int value_num,  Value *values, Record &record, std::vector<std::string> values_name, char *record_in)
 {
   // 由make_record修改而来，修改对应字段的record位置即可
   // 检查字段是否存在 类型是否正确 但是stmt好像也检查了一遍 等下对比一下
@@ -379,7 +380,7 @@ RC Table::make_record_for_update(
   for (int j = 0; j < value_num; j++) {
     // 测试不同字段是否存在于表中
     int          count = 0;
-    const Value &value = values[j];
+    Value &value = values[j];
     for (int i = 0; i < attr_num; i++) {
       int              idx   = i + normal_field_start_index;
       const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
@@ -393,7 +394,8 @@ RC Table::make_record_for_update(
               return RC::SCHEMA_FIELD_TYPE_MISMATCH;
             }
           } else {
-            return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+            //return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+            input_typecast(&value, field->type());
           }
         }
         break;//找到之后之间跳过内层循环
