@@ -17,6 +17,7 @@ See the Mulan PSL v2 for more details. */
 #include "storage/db/db.h"
 #include "storage/table/table.h"
 #include "sql/stmt/filter_stmt.h"
+#include "sql/stmt/insert_stmt.cpp"
 
 UpdateStmt::UpdateStmt(Table *table, std::vector<Value> &values, int value_amount,FilterStmt *filter_stmt, std::vector<std::string> &value_name )
     : table_(table), values_(values), value_amount_(value_amount),filter_stmt_(filter_stmt), value_name_(value_name)
@@ -69,9 +70,10 @@ RC UpdateStmt::create(Db *db, UpdateSqlNode &update, Stmt *&stmt)
           return RC::SCHEMA_FIELD_TYPE_MISMATCH;
       }
       else if(value_type!=AttrType::NULLS){
-         LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
-          table_name, field_meta->name(), field_type, value_type);
-          return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+        //  LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+        //   table_name, field_meta->name(), field_type, value_type);
+        //   return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+        input_typecast(&update.value[i], field_type);
       }
     }
     }
