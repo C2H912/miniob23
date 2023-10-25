@@ -36,7 +36,7 @@ RC OrderByStmt::create(Db *db, Table *default_table, std::unordered_map<std::str
 
 
 RC OrderByStmt::create_orderby_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
-    const OrderBySqlNode &orderby, OrderByUnit *&orderby_unit)
+     OrderBySqlNode &orderby, OrderByUnit *&orderby_unit)
 {
   RC rc = RC::SUCCESS;
 
