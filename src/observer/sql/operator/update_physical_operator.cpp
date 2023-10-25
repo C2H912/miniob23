@@ -79,9 +79,11 @@ RC UpdatePhysicalOperator::next()
     RowTuple *row_tuple = static_cast<RowTuple *>(tuple);
     Record &record = row_tuple->record();//返回给引用变量 可以操作内存 
     char* old_record =  record.data();//返回给非引用变量 复制一份
-    size_t length = strlen(old_record);
+    //size_t length = strlen(old_record);
+    int length = table_->table_meta().record_size();
     char* old_record_copy = new char[length];//字符串需要加一
-    strcpy(old_record_copy, old_record);//深拷贝
+    //strcpy(old_record_copy, old_record);//深拷贝
+    memcpy(old_record_copy, old_record,length);
     //需要调换一下顺序，不然record被删除，将会没有数据
     //格式在stmt中判断过了
     //是否需要回退

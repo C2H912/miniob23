@@ -37,7 +37,7 @@ public:
   UpdateStmt(Table *table, std::vector<Value> &values, int value_amount, FilterStmt *filter_stmt,std::vector<std::string> &value_name_);
 
 public:
-  static RC create(Db *db, const UpdateSqlNode &update_sql, Stmt *&stmt);
+  static RC create(Db *db, UpdateSqlNode &update_sql, Stmt *&stmt);
 
   
 public:

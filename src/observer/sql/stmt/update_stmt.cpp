@@ -22,7 +22,8 @@ UpdateStmt::UpdateStmt(Table *table, std::vector<Value> &values, int value_amoun
     : table_(table), values_(values), value_amount_(value_amount),filter_stmt_(filter_stmt), value_name_(value_name)
 {}
 
-RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
+
+RC UpdateStmt::create(Db *db, UpdateSqlNode &update, Stmt *&stmt)
 {
  const char *table_name = update.relation_name.c_str();
   if (nullptr == db || nullptr == table_name || update.value.size()==0) {
@@ -60,10 +61,18 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
     //这里要对表中对应字段进行判断才行
     const AttrType field_type = field_meta->type();
     const AttrType value_type = update.value[i].attr_type();
-    if (field_type != value_type&&value_type!=AttrType::NULLS) {  // TODO try to convert the value type to field type
-      LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
-          table_name, field_meta->name(), field_type, value_type);
-      return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+    if (field_type != value_type) {  // TODO try to convert the value type to field type
+      // LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",table_name, field_meta->name(), field_type, value_type);
+      // return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      if(value_type==AttrType::NULLS&&(!field_meta->nullable())){
+          LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",table_name, field_meta->name(), field_type, value_type);
+          return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      }
+      else if(value_type!=AttrType::NULLS){
+          LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",table_name, field_meta->name(), field_type, value_type);
+          return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      }     
+      //input_typecast(&update.value[i], field_type);//需不需要类型转换呢
     }
     }
   

@@ -55,6 +55,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 
 //标识tokens
 %token  SEMICOLON
+        NULLABLE
         IN
         IS
         CREATE
@@ -412,6 +413,7 @@ attr_def:
       $$->type = (AttrType)$2;
       $$->name = $1;
       $$->length = $4;
+      $$->nullable = false;
       free($1);
     }
     | ID type LBRACE number RBRACE NOT NULL_T
@@ -423,7 +425,7 @@ attr_def:
       $$->nullable = false;
       free($1);
     }
-    | ID type LBRACE number RBRACE NULL_T
+    | ID type LBRACE number RBRACE NULLABLE
     {
       $$ = new AttrInfoSqlNode;
       $$->type = (AttrType)$2;
@@ -442,7 +444,7 @@ attr_def:
       $$->nullable = false;
       free($1);
     }
-    | ID type NULL_T
+    | ID type NULLABLE
     {
       $$ = new AttrInfoSqlNode;
       $$->type = (AttrType)$2;
@@ -457,6 +459,7 @@ attr_def:
       $$->type = (AttrType)$2;
       $$->name = $1;
       $$->length = 4;
+      $$->nullable = false;
       free($1);
     }
     ;
