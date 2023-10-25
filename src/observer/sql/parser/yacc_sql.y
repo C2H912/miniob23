@@ -1000,6 +1000,14 @@ condition:
       $$->right_is_attr = 2;
       $$->comp = $2;
     }
+    | value comp_op
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 0;
+      $$->left_value = *$1;
+      $$->right_is_attr = 2;
+      $$->comp = $2;
+    }
     ;
 
 comp_op:
