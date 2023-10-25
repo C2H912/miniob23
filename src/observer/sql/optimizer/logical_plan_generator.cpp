@@ -131,7 +131,7 @@ RC LogicalPlanGenerator::create_plan(
 
   unique_ptr<LogicalOperator> aggr_oper;
   if (aggr_fields[0] != UNKNOWN) {
-    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields));
+    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs));
   }
 
   unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs));
