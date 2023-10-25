@@ -47,17 +47,7 @@
 			"visible" : false
 		}
 	],
-	"indexes" : 
-	[
-		{
-			"field_name" : 
-			[
-				"num"
-			],
-			"name" : "index_num",
-			"unique" : false
-		}
-	],
+	"indexes" : null,
 	"table_id" : 0,
 	"table_name" : "null_table"
 }
