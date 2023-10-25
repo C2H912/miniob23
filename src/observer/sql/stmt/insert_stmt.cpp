@@ -62,12 +62,23 @@ RC InsertStmt::create(Db *db, InsertSqlNode &inserts, Stmt *&stmt)
       const FieldMeta *field_meta = table_meta.field(i + sys_field_num);
       const AttrType field_type = field_meta->type();
       const AttrType value_type = values_ptr[i].attr_type();
-      if ((field_type != value_type)&&(value_type!=AttrType::NULLS)) {  // TODO try to convert the value type to field type
+      if ((field_type != value_type)) {  // TODO try to convert the value type to field type
         //LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
         //    table_name, field_meta->name(), field_type, value_type);
         //return RC::SCHEMA_FIELD_TYPE_MISMATCH;
-        
+        if(value_type==AttrType::NULLS&&!(field_meta->nullable())) //如果value为null且该字段不能为空 返回failure 如果为null 返回failure
+      {
+           LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+          table_name, field_meta->name(), field_type, value_type);
+          return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      }
+      else if(value_type!=AttrType::NULLS){
+        //  LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+        //   table_name, field_meta->name(), field_type, value_type);
+        //   return RC::SCHEMA_FIELD_TYPE_MISMATCH;
         input_typecast(&values_ptr[i], field_type);
+      }
+        //input_typecast(&values_ptr[i], field_type);
       }
     }
   }
