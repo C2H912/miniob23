@@ -48,6 +48,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 1,
-	"table_name" : "null_table2"
+	"table_id" : 2,
+	"table_name" : "null_table"
 }

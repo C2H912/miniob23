@@ -118,6 +118,12 @@ ComparisonExpr::~ComparisonExpr()
 RC ComparisonExpr::compare_value(const Value &left, const Value &right, bool &result) const
 {
   RC rc = RC::SUCCESS;
+
+  if(IS_NULL==comp_&&left.attr_type()==AttrType::NULLS)//NULL IS NULL
+  {
+    result =true;
+    return rc;
+  }
   if(left.attr_type()==AttrType::NULLS||right.attr_type()==AttrType::NULLS){
     result =false;
     return rc;
@@ -184,7 +190,7 @@ RC ComparisonExpr::compare_value(const Value &left, const Value &right, bool &re
   return rc;
 }
 
-RC ComparisonExpr::try_get_value(Value &cell) const
+RC ComparisonExpr::try_get_value(Value &cell) const //尝试直接获取表达式的值
 {
   if (left_->type() == ExprType::VALUE && right_->type() == ExprType::VALUE) {
     ValueExpr *left_value_expr = static_cast<ValueExpr *>(left_.get());
