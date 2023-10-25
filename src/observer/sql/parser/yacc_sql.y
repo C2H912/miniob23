@@ -928,6 +928,16 @@ condition:
       delete $3;
     }
   
+    | sub_select_stmt comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = -1;
+      $$->left_sql = $1;
+      $$->right_is_attr = -1;
+      $$->right_sql = $3;
+      $$->comp = $2;
+
+    }
     | rel_attr comp_op sub_select_stmt
     {
       $$ = new ConditionSqlNode;
