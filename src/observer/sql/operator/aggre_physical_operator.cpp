@@ -110,7 +110,7 @@ RC AggrePhysicalOperator::do_aggre_func(std::vector<std::vector<Value>>& all_tup
         continue;
       }
     }
-    switch(all_tuple[0][i].attr_type()){
+    switch(fields_[i].attr_type()){
     case INTS:{
       ret_tuple.push_back(do_int(all_tuple, i));
       break;
