@@ -110,6 +110,7 @@ struct OrderBySqlNode
 {
   std::string order_relation;//orderby字段所在的表
   std::string field;//要排序的字段名
+  //RelAttrSqlNode orderRelAttr;
   bool asc_type = true;//
 };
 

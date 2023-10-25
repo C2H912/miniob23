@@ -59,7 +59,7 @@ public:
 
 public:
   static RC create(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
-      const OrderBySqlNode *orderbys, int orderby_num, OrderByStmt *&stmt);
+      std::vector<OrderBySqlNode> &orderbys, int orderby_num, OrderByStmt *&stmt);
 
 //   // the func used for creating orderby_stmt for groupby
 //   static RC create(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,

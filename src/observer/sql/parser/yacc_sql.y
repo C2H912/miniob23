@@ -694,21 +694,21 @@ order_by_unit:
   ID
 	{
       $$ = new OrderBySqlNode();
-      $$->order_relation = $1;
+      $$->field = $1;
       $$->order_relation = NULL;
 	}
 	|
 	ID DOT ID
 	{
 		  $$ = new OrderBySqlNode();
-      $$->order_relation = $3;
+      $$->field = $3;
       $$->order_relation = $1;
 	}
 	|
 	ID DESC
 	{
       $$ = new OrderBySqlNode();
-      $$->order_relation = $1;
+      $$->field = $1;
       $$->order_relation = NULL;
       $$->asc_type = false;
 	}
@@ -716,14 +716,14 @@ order_by_unit:
 	ID ASC
 	{
       $$ = new OrderBySqlNode();
-      $$->order_relation = $1;
+      $$->field = $1;
       $$->order_relation = NULL;
 	}
 	|
 	ID DOT ID DESC
 	{
       $$ = new OrderBySqlNode();
-      $$->order_relation = $3;
+      $$->field = $3;
       $$->order_relation = $1;
       $$->asc_type = false;
 	}
@@ -731,7 +731,7 @@ order_by_unit:
 	ID DOT ID ASC
 	{
 		  $$ = new OrderBySqlNode();
-      $$->order_relation = $3;
+      $$->field = $3;
       $$->order_relation = $1;
 	}
 	;
