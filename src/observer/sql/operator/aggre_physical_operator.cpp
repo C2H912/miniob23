@@ -194,10 +194,20 @@ Value AggrePhysicalOperator::do_int(std::vector<std::vector<Value>>& all_tuple, 
     ret = min_value;
   }
   if(aggr_fields_[index] == SUMF){
-    ret.set_int(sum);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_int(sum);
+    }
   }
   if(aggr_fields_[index] == AVGF){
-    ret.set_float(avg);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(avg);
+    }
   }
 
   return ret;
@@ -259,10 +269,20 @@ Value AggrePhysicalOperator::do_char(std::vector<std::vector<Value>>& all_tuple,
     ret = min_value;
   }
   if(aggr_fields_[index] == SUMF){
-    ret.set_float(sum);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(sum);
+    }
   }
   if(aggr_fields_[index] == AVGF){
-    ret.set_float(avg);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(avg);
+    }
   }
 
   return ret;
@@ -325,10 +345,20 @@ Value AggrePhysicalOperator::do_float(std::vector<std::vector<Value>>& all_tuple
     ret = min_value;
   }
   if(aggr_fields_[index] == SUMF){
-    ret.set_float(sum);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(sum);
+    }
   }
   if(aggr_fields_[index] == AVGF){
-    ret.set_float(avg);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(avg);
+    }
   }
 
   return ret;
@@ -393,10 +423,20 @@ Value AggrePhysicalOperator::do_date(std::vector<std::vector<Value>>& all_tuple,
     ret = min_value;
   }
   if(aggr_fields_[index] == SUMF){
-    ret.set_int(sum);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(sum);
+    }
   }
   if(aggr_fields_[index] == AVGF){
-    ret.set_float(avg);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(avg);
+    }
   }
 
   return ret;

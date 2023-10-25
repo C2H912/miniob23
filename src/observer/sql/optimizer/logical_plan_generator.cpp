@@ -83,6 +83,27 @@ RC LogicalPlanGenerator::create_sub_query(SelectStmt *stmt, unique_ptr<LogicalOp
 {
   RC rc = RC::SUCCESS;
 
+  //复杂子查询
+  std::vector<FilterUnit*> all_filters = stmt->filter_stmt()->filter_units();
+  for(size_t i = 0; i < all_filters.size(); i++){
+    FilterObj left = all_filters[i]->left();
+    FilterObj right = all_filters[i]->right();
+    if(left.type == 1){
+      Field left_field;
+      const char *left_table_name = left_field.table_name();
+      if(0 != strcmp(stmt->tables()[0]->name(), left_table_name)){
+        stmt->tables_without_const().push_back(const_cast<Table*>(left_field.table()));
+      }
+    }
+    if(right.type == 1){
+      Field right_field;
+      const char *right_table_name = right_field.table_name();
+      if(0 != strcmp(stmt->tables()[0]->name(), right_table_name)){
+        stmt->tables_without_const().push_back(const_cast<Table*>(right_field.table()));
+      }
+    }
+  }
+
   rc = create_plan(stmt, logical_operator);
 
   return rc;
