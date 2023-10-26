@@ -144,7 +144,7 @@ RC LogicalPlanGenerator::create_plan(
   }
 
   unique_ptr<LogicalOperator> predicate_oper;
-  RC rc = create_plan(select_stmt->filter_stmt(), predicate_oper);
+  RC rc = create_plan(select_stmt->filter_stmt(), predicate_oper, select_stmt->conjunction_flag());
   if (rc != RC::SUCCESS) {
     LOG_WARN("failed to create predicate logical plan. rc=%s", strrc(rc));
     return rc;
@@ -187,7 +187,7 @@ RC LogicalPlanGenerator::create_plan(
 }
 
 RC LogicalPlanGenerator::create_plan(
-    FilterStmt *filter_stmt, unique_ptr<LogicalOperator> &logical_operator)
+    FilterStmt *filter_stmt, unique_ptr<LogicalOperator> &logical_operator, int conjunction_flag)
 {
   std::vector<unique_ptr<Expression>> cmp_exprs;
   const std::vector<FilterUnit *> &filter_units = filter_stmt->filter_units();
@@ -291,8 +291,14 @@ RC LogicalPlanGenerator::create_plan(
 
   unique_ptr<PredicateLogicalOperator> predicate_oper;
   if (!cmp_exprs.empty()) {
-    unique_ptr<ConjunctionExpr> conjunction_expr(new ConjunctionExpr(ConjunctionExpr::Type::AND, cmp_exprs));
-    predicate_oper = unique_ptr<PredicateLogicalOperator>(new PredicateLogicalOperator(std::move(conjunction_expr)));
+    if(conjunction_flag == 0){
+      unique_ptr<ConjunctionExpr> conjunction_expr(new ConjunctionExpr(ConjunctionExpr::Type::AND, cmp_exprs));
+      predicate_oper = unique_ptr<PredicateLogicalOperator>(new PredicateLogicalOperator(std::move(conjunction_expr)));
+    }
+    else{
+      unique_ptr<ConjunctionExpr> conjunction_expr(new ConjunctionExpr(ConjunctionExpr::Type::OR, cmp_exprs));
+      predicate_oper = unique_ptr<PredicateLogicalOperator>(new PredicateLogicalOperator(std::move(conjunction_expr)));
+    }
   }
 
   logical_operator = std::move(predicate_oper);
@@ -326,7 +332,7 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
   unique_ptr<LogicalOperator> table_get_oper(new TableGetLogicalOperator(table, fields, false/*readonly*/));
 
   unique_ptr<LogicalOperator> predicate_oper;
-  RC rc = create_plan(filter_stmt, predicate_oper);
+  RC rc = create_plan(filter_stmt, predicate_oper, 0);  //先默认是AND
   if (rc != RC::SUCCESS) {
     return rc;
   }
@@ -362,7 +368,7 @@ RC LogicalPlanGenerator::create_plan(
   unique_ptr<LogicalOperator> table_get_oper(new TableGetLogicalOperator(table, fields, false/*readonly*/));
 
   unique_ptr<LogicalOperator> predicate_oper;
-  RC rc = create_plan(filter_stmt, predicate_oper);
+  RC rc = create_plan(filter_stmt, predicate_oper, 0); //先默认是AND
   if (rc != RC::SUCCESS) {
     return rc;
   }

@@ -58,6 +58,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         NULLABLE
         IN
         IS
+        OR
         CREATE
         DROP
         TABLE
@@ -874,6 +875,13 @@ condition_list:
     }
     | condition AND condition_list {
       $$ = $3;
+      $1->conjunction = 0;
+      $$->emplace_back(*$1);
+      delete $1;
+    }
+    | condition OR condition_list {
+      $$ = $3;
+      $1->conjunction = 1;
       $$->emplace_back(*$1);
       delete $1;
     }

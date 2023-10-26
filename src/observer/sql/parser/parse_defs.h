@@ -93,6 +93,7 @@ struct ConditionSqlNode
   std::vector<Value>  left_list;
   SelectSqlNode*      left_sql;
   CompOp              comp;            ///< comparison operator
+  int                 conjunction;     ///< AND / OR
 
   int                 right_is_attr;   ///< TRUE if right-hand side is an attribute
                                    ///< 1时，操作符右边是属性名，0时，是属性值，-1时，是子表达式，

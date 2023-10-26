@@ -69,11 +69,16 @@ public:
   {
     return filter_stmt_;
   }
+  int conjunction_flag() const
+  {
+    return conjunction_flag_;
+  }
 
 private:
   std::vector<Field> query_fields_;
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> aggr_specs_;
   std::vector<Table *> tables_;
+  int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
 };
