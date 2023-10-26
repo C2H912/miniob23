@@ -55,6 +55,9 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 
 //标识tokens
 %token  SEMICOLON
+        NULLABLE
+        IN
+        IS
         CREATE
         DROP
         TABLE
@@ -112,10 +115,13 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         LE
         GE
         NE
+        EXISTS
+
 
 /** union 中定义各种数据类型，真实生成的代码也是union类型，所以不能有非POD类型的数据 **/
 %union {
   ParsedSqlNode *                   sql_node;
+  SelectSqlNode *                   sub_sql_node;
   ConditionSqlNode *                condition;
   std::vector<InnerJoinSqlNode> *   join_lists;
   Value *                           value;
@@ -180,6 +186,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <expression_list>     expression_list
 %type <sql_node>            calc_stmt
 %type <sql_node>            select_stmt
+%type <sub_sql_node>        sub_select_stmt
 %type <sql_node>            insert_stmt
 %type <sql_node>            update_stmt
 %type <sql_node>            delete_stmt
@@ -414,6 +421,7 @@ attr_def:
       $$->type = (AttrType)$2;
       $$->name = $1;
       $$->length = $4;
+      //$$->nullable = false;
       free($1);
     }
     | ID type LBRACE number RBRACE NOT NULL_T
@@ -459,6 +467,7 @@ attr_def:
       $$->type = (AttrType)$2;
       $$->name = $1;
       $$->length = 4;
+      //$$->nullable = false;
       free($1);
     }
     ;
@@ -738,6 +747,28 @@ order_by_unit:
 
 
 
+sub_select_stmt:        /*  select 语句的语法解析树*/
+    LBRACE SELECT select_attr FROM ID rel_list where RBRACE
+    {
+      $$ = new SelectSqlNode;
+      if ($3 != nullptr) {
+        $$->attributes.swap(*$3);
+        delete $3;
+      }
+      if ($6 != nullptr) {
+        $$->relations.swap(*$6);
+        delete $6;
+      }
+      $$->relations.push_back($5);
+      std::reverse($$->relations.begin(), $$->relations.end());
+
+      if ($7 != nullptr) {
+        $$->conditions.swap(*$7);
+        delete $7;
+      }
+      free($5);
+    }
+    ;
 calc_stmt:
     CALC expression_list
     {
@@ -989,6 +1020,100 @@ condition:
       delete $1;
       delete $3;
     }
+  
+    | sub_select_stmt comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = -1;
+      $$->left_sql = $1;
+      $$->right_is_attr = -1;
+      $$->right_sql = $3;
+      $$->comp = $2;
+
+    }
+    | rel_attr comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 1;
+      $$->left_attr = *$1;
+      $$->right_is_attr = -1;
+      $$->right_sql = $3;
+      $$->comp = $2;
+
+      delete $1;
+    }
+    | sub_select_stmt comp_op rel_attr
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = -1;
+      $$->left_sql = $1;
+      $$->right_is_attr = 1;
+      $$->right_attr = *$3;
+      $$->comp = $2;
+
+      delete $3;
+    }
+    | value comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 0;
+      $$->left_value = *$1;
+      $$->right_is_attr = -1;
+      $$->right_sql = $3;
+      $$->comp = $2;
+
+      delete $1;
+    }
+    | sub_select_stmt comp_op value
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = -1;
+      $$->left_sql = $1;
+      $$->right_is_attr = 0;
+      $$->right_value = *$3;
+      $$->comp = $2;
+
+      delete $3;
+    }
+    | rel_attr comp_op LBRACE value value_list RBRACE
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 1;
+      $$->left_attr = *$1;
+      $$->right_is_attr = 3;
+      if ($5 != nullptr) {
+        $$->right_list.swap(*$5);
+      }
+      $$->right_list.emplace_back(*$4);
+      std::reverse($$->right_list.begin(), $$->right_list.end());
+      $$->comp = $2;
+
+      delete $1;
+    }
+    | comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 2;
+      $$->right_is_attr = -1;
+      $$->right_sql = $2;
+      $$->comp = $1;
+    }
+    | rel_attr comp_op
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 1;
+      $$->left_attr = *$1;
+      $$->right_is_attr = 2;
+      $$->comp = $2;
+    }
+    | value comp_op
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 0;
+      $$->left_value = *$1;
+      $$->right_is_attr = 2;
+      $$->comp = $2;
+    }
     ;
 
 comp_op:
@@ -1000,6 +1125,12 @@ comp_op:
     | NE { $$ = NOT_EQUAL; }
     | LIKE { $$ = REGEX_LIKE; }
     | NOT LIKE { $$ = REGEX_NOT_LIKE; }
+    | IN { $$ = IN_QUERY; }
+    | IS NULL_T{ $$ = IS_NULL; }
+    | IS NOT NULL_T{ $$ = IS_NOT_NULL; }
+    | NOT IN { $$ = NOT_IN_QUERY; }
+    | EXISTS { $$ = EXISTS_QUERY; }
+    | NOT EXISTS { $$ = NOT_EXISTS_QUERY; }
     ;
 
 load_data_stmt:

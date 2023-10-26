@@ -46,6 +46,10 @@ public:
   static RC create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt);
 
 public:
+  std::vector<Table *> &tables_without_const()
+  {
+    return tables_;
+  }
   const std::vector<Table *> &tables() const
   {
     return tables_;

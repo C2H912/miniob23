@@ -35,6 +35,7 @@ public:
   virtual ~LogicalPlanGenerator() = default;
 
   RC create(Stmt *stmt, std::unique_ptr<LogicalOperator> &logical_operator);
+  RC create_sub_query(SelectStmt *stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   //RC create_plan(
   //  const std::vector<Field> &all_fields, const std::vector<AggrOp> &aggr_fields, 
   //  std::unique_ptr<LogicalOperator> &logical_operator);

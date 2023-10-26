@@ -16,6 +16,7 @@ See the Mulan PSL v2 for more details. */
 #include "common/log/log.h"
 #include "common/lang/string.h"
 #include "sql/stmt/filter_stmt.h"
+#include "sql/stmt/select_stmt.h"
 #include "storage/db/db.h"
 #include "storage/table/table.h"
 
@@ -89,8 +90,8 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   }
 
   filter_unit = new FilterUnit;
-  //只需要找到value的那边
-  if (condition.left_is_attr) {
+  
+  if (condition.left_is_attr == 1) {
     Table *table = nullptr;
     const FieldMeta *field = nullptr;
     rc = get_table_and_field(db, default_table, tables, condition.left_attr, table, field);
@@ -101,7 +102,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     FilterObj filter_obj;
     filter_obj.init_attr(Field(table, field));
     filter_unit->set_left(filter_obj);
-  } else {
+  } else if (condition.left_is_attr == 0) {
     if(condition.left_value.attr_type() == UNDEFINED){
       LOG_WARN("attr_type invalid");
       return RC::INVALID_ARGUMENT;
@@ -110,8 +111,24 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     filter_obj.init_value(condition.left_value);
     filter_unit->set_left(filter_obj);
   }
+  else if (condition.left_is_attr == -1){
+    //递归地调用create生成子查询
+    Stmt *sub_stmt;
+    SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
+    rc = caller->create(db, *condition.left_sql, sub_stmt, *tables);
+    if(rc != RC::SUCCESS){
+      LOG_WARN("sub create stmt fail");
+      return rc;
+    }
+    FilterObj filter_obj;
+    filter_obj.init_stmt(static_cast<SelectStmt*>(sub_stmt));
+    filter_unit->set_left(filter_obj);
+  }
+  else{
+    //exists的左边,无
+  }
 
-  if (condition.right_is_attr) {
+  if (condition.right_is_attr == 1) {
     Table *table = nullptr;
     const FieldMeta *field = nullptr;
     rc = get_table_and_field(db, default_table, tables, condition.right_attr, table, field);
@@ -122,7 +139,8 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     FilterObj filter_obj;
     filter_obj.init_attr(Field(table, field));
     filter_unit->set_right(filter_obj);
-  } else {
+  } 
+  else if (condition.right_is_attr == 0) {
     if(condition.right_value.attr_type() == UNDEFINED){
       LOG_WARN("attr_type invalid");
       return RC::INVALID_ARGUMENT;
@@ -130,6 +148,27 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     FilterObj filter_obj;
     filter_obj.init_value(condition.right_value);
     filter_unit->set_right(filter_obj);
+  }
+  else if (condition.right_is_attr == -1) {
+    //递归地调用create生成子查询
+    Stmt *sub_stmt;
+    SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
+    rc = caller->create(db, *condition.right_sql, sub_stmt, *tables);
+    if(rc != RC::SUCCESS){
+      LOG_WARN("sub create stmt fail");
+      return rc;
+    }
+    FilterObj filter_obj;
+    filter_obj.init_stmt(static_cast<SelectStmt*>(sub_stmt));
+    filter_unit->set_right(filter_obj);
+  }
+  else if (condition.right_is_attr == 3) {
+    FilterObj filter_obj;
+    filter_obj.init_value_list(condition.right_list);
+    filter_unit->set_right(filter_obj);
+  }
+  else {
+    //无
   }
 
   filter_unit->set_comp(comp);

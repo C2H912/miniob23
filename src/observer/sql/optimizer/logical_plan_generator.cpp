@@ -13,8 +13,8 @@ See the Mulan PSL v2 for more details. */
 //
 
 #include "sql/optimizer/logical_plan_generator.h"
+#include "sql/optimizer/optimize_stage.h"
 #include "event/sql_debug.h"
-
 #include "sql/operator/logical_operator.h"
 #include "sql/operator/calc_logical_operator.h"
 #include "sql/operator/project_logical_operator.h"
@@ -81,6 +81,36 @@ RC LogicalPlanGenerator::create(Stmt *stmt, unique_ptr<LogicalOperator> &logical
   return rc;
 }
 
+RC LogicalPlanGenerator::create_sub_query(SelectStmt *stmt, unique_ptr<LogicalOperator> &logical_operator)
+{
+  RC rc = RC::SUCCESS;
+
+  //复杂子查询
+  std::vector<FilterUnit*> all_filters = stmt->filter_stmt()->filter_units();
+  for(size_t i = 0; i < all_filters.size(); i++){
+    FilterObj left = all_filters[i]->left();
+    FilterObj right = all_filters[i]->right();
+    if(left.type == 1){
+      Field left_field = left.field;
+      const char *left_table_name = left_field.table_name();
+      if(0 != strcmp(stmt->tables()[0]->name(), left_table_name)){
+        stmt->tables_without_const().push_back(const_cast<Table*>(left_field.table()));
+      }
+    }
+    if(right.type == 1){
+      Field right_field = right.field;
+      const char *right_table_name = right_field.table_name();
+      if(0 != strcmp(stmt->tables()[0]->name(), right_table_name)){
+        stmt->tables_without_const().push_back(const_cast<Table*>(right_field.table()));
+      }
+    }
+  }
+
+  rc = create_plan(stmt, logical_operator);
+
+  return rc;
+}
+
 RC LogicalPlanGenerator::create_plan(CalcStmt *calc_stmt, std::unique_ptr<LogicalOperator> &logical_operator)
 {
   logical_operator.reset(new CalcLogicalOperator(std::move(calc_stmt->expressions())));
@@ -124,7 +154,7 @@ RC LogicalPlanGenerator::create_plan(
 
   unique_ptr<LogicalOperator> aggr_oper;
   if (aggr_fields[0] != UNKNOWN) {
-    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields));
+    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs));
   }
 
   unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs));
@@ -179,13 +209,95 @@ RC LogicalPlanGenerator::create_plan(
     const FilterObj &filter_obj_left = filter_unit->left();
     const FilterObj &filter_obj_right = filter_unit->right();
 
-    unique_ptr<Expression> left(filter_obj_left.is_attr
-                                         ? static_cast<Expression *>(new FieldExpr(filter_obj_left.field))
-                                         : static_cast<Expression *>(new ValueExpr(filter_obj_left.value)));
+    //递归地生成子查询的火山
+    unique_ptr<PhysicalOperator> left_volcano;
+    unique_ptr<PhysicalOperator> right_volcano;
+    if(filter_obj_left.type == -1){
+      OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
+      RC rc = caller.create_sub_request(filter_obj_left.stmt, left_volcano);
+    }
+    if(filter_obj_right.type == -1){
+      OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
+      RC rc = caller.create_sub_request(filter_obj_right.stmt, right_volcano);
+    }
+    //这里拿到火山后马上执行，把子表读到SubQueryExpr中，因为expression表达式如果再包含PhysicalOperator.h
+    //的话会形成自包含，编译不通过
+    std::vector<std::vector<Value>> left_table;
+    if(left_volcano){
+      RC rc = RC::SUCCESS;
+      //把子表读进sub_table中
+      left_volcano->open(nullptr);
+      while (RC::SUCCESS == (rc = left_volcano->next())) {
+        Tuple * tuple = left_volcano->current_tuple();
+        std::vector<Value> row;
+        for(int i = 0; i < tuple->cell_num(); i++){
+          Value value;
+          rc = tuple->cell_at(i, value);
+          if (rc != RC::SUCCESS) {
+            left_volcano->close();
+            LOG_WARN("failed to get SUB TABLE from operator");
+            return rc;
+          }
+          row.push_back(value);
+        }
+        left_table.push_back(row);
+      }
+      left_volcano->close();
+      if (rc == RC::RECORD_EOF) {
+        rc = RC::SUCCESS;
+      }
+      else{
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
+    }
+    std::vector<std::vector<Value>> right_table;
+    if(right_volcano){
+      RC rc = RC::SUCCESS;
+      //把子表读进sub_table中
+      right_volcano->open(nullptr);
+      while (RC::SUCCESS == (rc = right_volcano->next())) {
+        Tuple * tuple = right_volcano->current_tuple();
+        std::vector<Value> row;
+        for(int i = 0; i < tuple->cell_num(); i++){
+          Value value;
+          rc = tuple->cell_at(i, value);
+          if (rc != RC::SUCCESS) {
+            right_volcano->close();
+            LOG_WARN("failed to get SUB TABLE from operator");
+            return rc;
+          }
+          row.push_back(value);
+        }
+        right_table.push_back(row);
+      }
+      right_volcano->close();
+      if (rc == RC::RECORD_EOF) {
+        rc = RC::SUCCESS;
+      }
+      else{
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
+    }
 
-    unique_ptr<Expression> right(filter_obj_right.is_attr
-                                          ? static_cast<Expression *>(new FieldExpr(filter_obj_right.field))
-                                          : static_cast<Expression *>(new ValueExpr(filter_obj_right.value)));
+    unique_ptr<Expression> left(filter_obj_left.type == 1
+                                         ? static_cast<Expression *>(new FieldExpr(filter_obj_left.field)) :
+                                (filter_obj_left.type == 0
+                                         ? static_cast<Expression *>(new ValueExpr(filter_obj_left.value)) :
+                                (filter_obj_left.type == -1
+                                         ? static_cast<Expression *>(new SubQueryExpr(left_table)) :
+                                           static_cast<Expression *>(new FieldExpr()))));
+
+    unique_ptr<Expression> right(filter_obj_right.type == 1
+                                          ? static_cast<Expression *>(new FieldExpr(filter_obj_right.field)) :
+                                (filter_obj_right.type == 0
+                                         ? static_cast<Expression *>(new ValueExpr(filter_obj_right.value)) :
+                                (filter_obj_right.type == -1
+                                         ? static_cast<Expression *>(new SubQueryExpr(right_table)) :
+                                (filter_obj_right.type == 3
+                                         ? static_cast<Expression *>(new ValueListExpr(filter_obj_right.value_list)) :
+                                           static_cast<Expression *>(new FieldExpr())))));
 
     ComparisonExpr *cmp_expr = new ComparisonExpr(filter_unit->comp(), std::move(left), std::move(right));
     cmp_exprs.emplace_back(cmp_expr);
@@ -200,20 +312,6 @@ RC LogicalPlanGenerator::create_plan(
   logical_operator = std::move(predicate_oper);
   return RC::SUCCESS;
 }
-
-#if 0
-RC LogicalPlanGenerator::create_plan(
-    const std::vector<Field> &all_fields, const std::vector<AggrOp> &aggr_fields, unique_ptr<LogicalOperator> &logical_operator)
-{
-  unique_ptr<AggreLogicalOperator> aggre_oper;
-  if (aggr_fields[0] != UNKNOWN) {
-    aggre_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields));
-  }
-
-  logical_operator = std::move(aggre_oper);
-  return RC::SUCCESS;
-}
-#endif
 
 RC LogicalPlanGenerator::create_plan(
     InsertStmt *insert_stmt, unique_ptr<LogicalOperator> &logical_operator)

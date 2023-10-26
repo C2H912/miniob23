@@ -29,7 +29,35 @@ RC ValueExpr::get_value(const Tuple &tuple, Value &value) const
   return RC::SUCCESS;
 }
 
+//注意这里只提供一个get_value()的接口实现了纯虚函数的多态，实际上这个函数应该永远也不被调用！
+RC ValueListExpr::get_value(const Tuple &tuple, Value &value) const
+{
+  return RC::SUCCESS;
+}
+
+//注意这里只提供一个get_value()的接口实现了纯虚函数的多态，实际上这个函数应该永远也不被调用！
+RC SubQueryExpr::get_value(const Tuple &tuple, Value &value) const
+{
+  return RC::SUCCESS;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
+ValueListExpr::ValueListExpr(const std::vector<Value> &value_list)
+  : value_list_(value_list)
+{}
+
+ValueListExpr::~ValueListExpr()
+{}
+
+SubQueryExpr::SubQueryExpr(std::vector<std::vector<Value>> &sub_table)
+  : sub_table_(sub_table)
+{}
+
+SubQueryExpr::~SubQueryExpr()
+{}
+
+/////////////////////////////////////////////////////////////////////////////////
+
 CastExpr::CastExpr(unique_ptr<Expression> child, AttrType cast_type)
     : child_(std::move(child)), cast_type_(cast_type)
 {}
@@ -90,6 +118,12 @@ ComparisonExpr::~ComparisonExpr()
 RC ComparisonExpr::compare_value(const Value &left, const Value &right, bool &result) const
 {
   RC rc = RC::SUCCESS;
+
+  if(IS_NULL==comp_&&left.attr_type()==AttrType::NULLS)//NULL IS NULL
+  {
+    result =true;
+    return rc;
+  }
   if(left.attr_type()==AttrType::NULLS||right.attr_type()==AttrType::NULLS){
     result =false;
     return rc;
@@ -156,7 +190,7 @@ RC ComparisonExpr::compare_value(const Value &left, const Value &right, bool &re
   return rc;
 }
 
-RC ComparisonExpr::try_get_value(Value &cell) const
+RC ComparisonExpr::try_get_value(Value &cell) const //尝试直接获取表达式的值
 {
   if (left_->type() == ExprType::VALUE && right_->type() == ExprType::VALUE) {
     ValueExpr *left_value_expr = static_cast<ValueExpr *>(left_.get());
@@ -179,18 +213,144 @@ RC ComparisonExpr::try_get_value(Value &cell) const
 
 RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
 {
+  // ------------ IN、EXISTS、IS_NULL ------------
+  //1. IN
+  if(comp_ == IN_QUERY || comp_ == NOT_IN_QUERY){
+    //读取左值
+    Value left_value;
+    RC rc = left_->get_value(tuple, left_value);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      return rc;
+    }
+    //返回子表
+    std::vector<std::vector<Value>> sub_table = right_->sub_table();
+    if ((int)sub_table.size() == 0) {
+      if(comp_ == NOT_IN_QUERY){
+        value.set_boolean(true);
+        return RC::SUCCESS;
+      }
+      else{
+        value.set_boolean(false);
+        return RC::SUCCESS;
+      }
+    }
+    if(sub_table[0].size() > 1){
+      LOG_WARN("IN column is more than one!");
+      return RC::INVALID_ARGUMENT;
+    }
+    //判断是否IN
+    size_t i = 0;
+    for(i = 0; i < sub_table.size(); i++){
+      Value right_value = sub_table[i][0];
+      int cmp_result = left_value.compare(right_value);
+      if(cmp_result == 0){
+        break;
+      }
+    }
+    if(i == sub_table.size()){
+      if(comp_ == IN_QUERY){
+        value.set_boolean(false);
+        return RC::SUCCESS;
+      }
+      if(comp_ == NOT_IN_QUERY){
+        value.set_boolean(true);
+        return RC::SUCCESS;
+      }
+    }
+    else{
+      if(comp_ == IN_QUERY){
+        value.set_boolean(true);
+        return RC::SUCCESS;
+      }
+      if(comp_ == NOT_IN_QUERY){
+        value.set_boolean(false);
+        return RC::SUCCESS;
+      }
+    }
+  }
+  //2. EXISTS
+  if(comp_ == EXISTS_QUERY || comp_ == NOT_EXISTS_QUERY){
+    //返回子表
+    std::vector<std::vector<Value>> sub_table = right_->sub_table();
+    //判断
+    if((int)sub_table.size() > 0){
+      value.set_boolean(true);
+      return RC::SUCCESS;
+    }
+    else{
+      value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+  }
+  //3. IS NULL
+  if(comp_ == IS_NULL || comp_ == IS_NOT_NULL){
+    Value left_v;
+    Value right_v;
+    RC rc = left_->get_value(tuple, left_v);
+    if(left_v.attr_type() == NULLS && comp_ == IS_NULL){
+      value.set_boolean(true);
+      return RC::SUCCESS;
+    }
+    if(left_v.attr_type() != NULLS && comp_ == IS_NULL){
+      value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+    if(left_v.attr_type() == NULLS && comp_ == IS_NOT_NULL){
+      value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+    if(left_v.attr_type() != NULLS && comp_ == IS_NOT_NULL){
+      value.set_boolean(true);
+      return RC::SUCCESS;
+    }
+  }
+
+  // ---------- 一般的比较语句 -----------
   Value left_value;
   Value right_value;
+  RC rc = RC::SUCCESS;
 
-  RC rc = left_->get_value(tuple, left_value);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
-    return rc;
+  int left_type = left_->expr_type();
+  if(left_type == 1 || left_type == 0){
+    rc = left_->get_value(tuple, left_value);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      return rc;
+    }
   }
-  rc = right_->get_value(tuple, right_value);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of right expression. rc=%s", strrc(rc));
-    return rc;
+  else{
+    std::vector<std::vector<Value>> left_sub_table = left_->sub_table();
+    if((int)left_sub_table.size() == 0){
+      value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+    if((int)left_sub_table.size() > 1 || (int)left_sub_table[0].size() > 1){
+      LOG_WARN("table size is incorrect");
+      return RC::INVALID_ARGUMENT;
+    }
+    left_value = left_sub_table[0][0];
+  }
+
+  int right_type = right_->expr_type();
+  if(right_type == 1 || right_type == 0){
+    rc = right_->get_value(tuple, right_value);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      return rc;
+    }
+  }
+  else{
+    std::vector<std::vector<Value>> right_sub_table = right_->sub_table();
+    if((int)right_sub_table.size() == 0){
+      value.set_boolean(false);
+      return RC::SUCCESS;
+    }
+    if((int)right_sub_table.size() > 1 || (int)right_sub_table[0].size() > 1){
+      LOG_WARN("table size is incorrect");
+      return RC::INVALID_ARGUMENT;
+    }
+    right_value = right_sub_table[0][0];
   }
 
   bool bool_value = false;

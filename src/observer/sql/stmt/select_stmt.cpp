@@ -53,9 +53,10 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt)
     return RC::INVALID_ARGUMENT;
   }
 
-  // ---------- collect tables in `from` statement ----------
+// ---------- collect tables in `from` statement ----------
   std::vector<Table *> tables;
   std::unordered_map<std::string, Table *> table_map;
+  //位于from里的所有表
   for (size_t i = 0; i < select_sql.relations.size(); i++) {
     const char *table_name = select_sql.relations[i].c_str();
     if (nullptr == table_name) {
@@ -72,6 +73,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt)
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
   }
+  //位于join里的所有表
   for(int i = 0; i < (int)select_sql.joinTables.size(); i++){
     InnerJoinSqlNode temp_node = select_sql.joinTables[i];
     const char *table_name = temp_node.join_relations.c_str();
@@ -90,7 +92,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt)
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
   }
 
-  // ---------- collect query fields in `select` statement ----------
+// ---------- collect query fields in `select` statement ----------
   std::vector<Field> query_fields;
   std::vector<AggrOp> aggr_fields;
   std::vector<std::string> aggr_specs;
@@ -207,20 +209,27 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt)
     default_table = tables[0];
   }
 
-  // ---------- create filter statement in `where` statement ----------
+// ---------- create filter statement in `where` statement ----------
   FilterStmt *filter_stmt = nullptr;
   std::vector<ConditionSqlNode> all_filters;
+  //一般的where条件
   for(size_t i = 0; i < select_sql.conditions.size(); i++){
     all_filters.push_back(select_sql.conditions[i]);
   }
+  //join里面的on条件
   for(size_t i = 0; i < select_sql.joinTables.size(); i++){
     for(size_t j = 0; j < select_sql.joinTables[i].join_conditions.size(); j++){
       all_filters.push_back(select_sql.joinTables[i].join_conditions[j]);
     }
   }
+  //检查复杂子查询中是否有此父表
+  std::unordered_map<std::string, Table *> all_parents = table_map;
+  for(std::pair<std::string, Table *> it : parents){
+    all_parents.insert(it);
+  }
   RC rc = FilterStmt::create(db,
       default_table,
-      &table_map,
+      &all_parents,
       all_filters.data(),
       static_cast<int>(all_filters.size()),
       filter_stmt);
