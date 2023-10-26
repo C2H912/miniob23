@@ -201,10 +201,19 @@ RC LogicalPlanGenerator::create_plan(
     if(filter_obj_left.type == -1){
       OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
       RC rc = caller.create_sub_request(filter_obj_left.stmt, left_volcano);
+      if(rc != RC::SUCCESS){
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
+
     }
     if(filter_obj_right.type == -1){
       OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
       RC rc = caller.create_sub_request(filter_obj_right.stmt, right_volcano);
+      if(rc != RC::SUCCESS){
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
     }
     //这里拿到火山后马上执行，把子表读到SubQueryExpr中，因为expression表达式如果再包含PhysicalOperator.h
     //的话会形成自包含，编译不通过

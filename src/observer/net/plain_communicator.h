@@ -30,7 +30,7 @@ public:
   virtual ~PlainCommunicator() = default;
 
   RC read_event(SessionEvent *&event) override;
-  RC write_result(SessionEvent *event, bool &need_disconnect) override;
+  RC write_result(SessionEvent *event, bool &need_disconnect, RC rc) override;
 
 private:
   RC write_state(SessionEvent *event, bool &need_disconnect);
