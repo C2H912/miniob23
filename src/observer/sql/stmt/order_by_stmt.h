@@ -66,11 +66,13 @@ public:
 //       const GroupBy *groupbys, int groupby_num, OrderByStmt *&stmt);
 
   static RC create_orderby_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
-      const OrderBySqlNode &orderby, OrderByUnit *&orderby_unit);
+      OrderBySqlNode &orderby, OrderByUnit *&orderby_unit);
 
 //   static RC create_orderby_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
 //       const GroupBy &groupby, OrderByUnit *&orderby_unit);
 
 private:
   std::vector<OrderByUnit *> orderby_units_;
+  //std::vector<Field> orderby_fields_;
+  //std::vector<bool> orderby_asc_;
 };

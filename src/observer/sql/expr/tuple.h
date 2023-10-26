@@ -279,6 +279,19 @@ public:
   {
     return speces_.size();
   }
+  //  void get_record(CompoundRecord &record) const override
+  // {
+  //   record.emplace_back(record_);
+  // }
+  // Tuple* getTuple() const
+  // {
+  //   return tuple_;
+  // }
+  // std::vector<TupleCellSpec *> getspeces_() const
+  // {
+  //   return speces_;
+  // }
+
 
   RC cell_at(int index, Value &cell) const override
   {
@@ -455,3 +468,6 @@ private:
   Tuple *left_ = nullptr;
   Tuple *right_ = nullptr;
 };
+
+//typedef std::vector<ProjectTuple*> CompoundTuple;
+

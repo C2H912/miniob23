@@ -57,5 +57,7 @@ RC OrderByStmt::create_orderby_unit(Db *db, Table *default_table, std::unordered
   orderby_unit = new OrderByUnit;
   orderby_unit->set_sort_type(sort_type);
   orderby_unit->set_expr(expr);
+
+  
   return rc;
 }

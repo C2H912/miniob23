@@ -46,7 +46,7 @@ static void wildcard_fields(Table *table, std::vector<Field> &field_metas)
   }
 }
 
-RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
+RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt)
 {
   if (nullptr == db) {
     LOG_WARN("invalid argument. db is null");
@@ -247,6 +247,7 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt)
   select_stmt->aggr_fields_.swap(aggr_fields);
   select_stmt->aggr_specs_.swap(aggr_specs);
   select_stmt->filter_stmt_ = filter_stmt;
+  select_stmt->order_by_stmt_ = orderby_stmt;
   stmt = select_stmt;
   return RC::SUCCESS;
 }

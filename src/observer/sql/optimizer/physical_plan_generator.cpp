@@ -36,6 +36,8 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/calc_physical_operator.h"
 #include "sql/operator/aggre_logical_operator.h"
 #include "sql/operator/aggre_physical_operator.h"
+#include "sql/operator/order_logical_operator.h"
+#include "sql/operator/order_physical_operator.h"
 #include "sql/expr/expression.h"
 #include "common/log/log.h"
 
@@ -84,6 +86,10 @@ RC PhysicalPlanGenerator::create(LogicalOperator &logical_operator, unique_ptr<P
 
     case LogicalOperatorType::JOIN: {
       return create_plan(static_cast<JoinLogicalOperator &>(logical_operator), oper);
+    } break;
+
+    case LogicalOperatorType::ORDER: {
+      return create_plan(static_cast<OrderLogicalOperator &>(logical_operator), oper);
     } break;
 
     default: {
@@ -367,6 +373,34 @@ RC PhysicalPlanGenerator::create_plan(CalcLogicalOperator &logical_oper, std::un
   RC rc = RC::SUCCESS;
   CalcPhysicalOperator *calc_oper = new CalcPhysicalOperator(std::move(logical_oper.expressions()));
   oper.reset(calc_oper);
+  return rc;
+}
+
+RC PhysicalPlanGenerator::create_plan(OrderLogicalOperator &order_oper, std::unique_ptr<PhysicalOperator> &oper)
+{
+   vector<unique_ptr<LogicalOperator>> &child_opers = order_oper.children();
+
+  unique_ptr<PhysicalOperator> child_phy_oper;
+
+  RC rc = RC::SUCCESS;
+  if (!child_opers.empty()) {
+    LogicalOperator *child_oper = child_opers.front().get();
+    rc = create(*child_oper, child_phy_oper);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to create aggre logical operator's child physical operator. rc=%s", strrc(rc));
+      return rc;
+    }
+  }
+
+  OrderPhysicalOperator *order_operator = new OrderPhysicalOperator(order_oper.orderby_stmt());
+
+  if (child_phy_oper) {
+    order_operator->add_child(std::move(child_phy_oper));
+  }
+
+  oper = unique_ptr<PhysicalOperator>(order_operator);
+
+  LOG_TRACE("create a aggre physical operator");
   return rc;
 }
 
