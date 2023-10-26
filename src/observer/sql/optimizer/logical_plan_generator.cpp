@@ -196,38 +196,68 @@ RC LogicalPlanGenerator::create_plan(
     const FilterObj &filter_obj_right = filter_unit->right();
 
     //递归地生成子查询的火山
-    unique_ptr<PhysicalOperator> sub_volcano;
+    unique_ptr<PhysicalOperator> left_volcano;
+    unique_ptr<PhysicalOperator> right_volcano;
     if(filter_obj_left.type == -1){
       OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
-      RC rc = caller.create_sub_request(filter_obj_left.stmt, sub_volcano);
+      RC rc = caller.create_sub_request(filter_obj_left.stmt, left_volcano);
     }
     if(filter_obj_right.type == -1){
       OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
-      RC rc = caller.create_sub_request(filter_obj_right.stmt, sub_volcano);
+      RC rc = caller.create_sub_request(filter_obj_right.stmt, right_volcano);
     }
     //这里拿到火山后马上执行，把子表读到SubQueryExpr中，因为expression表达式如果再包含PhysicalOperator.h
     //的话会形成自包含，编译不通过
-    std::vector<std::vector<Value>> sub_table;
-    if(sub_volcano){
+    std::vector<std::vector<Value>> left_table;
+    if(left_volcano){
       RC rc = RC::SUCCESS;
       //把子表读进sub_table中
-      sub_volcano->open(nullptr);
-      while (RC::SUCCESS == (rc = sub_volcano->next())) {
-        Tuple * tuple = sub_volcano->current_tuple();
+      left_volcano->open(nullptr);
+      while (RC::SUCCESS == (rc = left_volcano->next())) {
+        Tuple * tuple = left_volcano->current_tuple();
         std::vector<Value> row;
         for(int i = 0; i < tuple->cell_num(); i++){
           Value value;
           rc = tuple->cell_at(i, value);
           if (rc != RC::SUCCESS) {
-            sub_volcano->close();
+            left_volcano->close();
             LOG_WARN("failed to get SUB TABLE from operator");
             return rc;
           }
           row.push_back(value);
         }
-        sub_table.push_back(row);
+        left_table.push_back(row);
       }
-      sub_volcano->close();
+      left_volcano->close();
+      if (rc == RC::RECORD_EOF) {
+        rc = RC::SUCCESS;
+      }
+      else{
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
+    }
+    std::vector<std::vector<Value>> right_table;
+    if(left_volcano){
+      RC rc = RC::SUCCESS;
+      //把子表读进sub_table中
+      right_volcano->open(nullptr);
+      while (RC::SUCCESS == (rc = right_volcano->next())) {
+        Tuple * tuple = right_volcano->current_tuple();
+        std::vector<Value> row;
+        for(int i = 0; i < tuple->cell_num(); i++){
+          Value value;
+          rc = tuple->cell_at(i, value);
+          if (rc != RC::SUCCESS) {
+            right_volcano->close();
+            LOG_WARN("failed to get SUB TABLE from operator");
+            return rc;
+          }
+          row.push_back(value);
+        }
+        right_table.push_back(row);
+      }
+      right_volcano->close();
       if (rc == RC::RECORD_EOF) {
         rc = RC::SUCCESS;
       }
@@ -242,7 +272,7 @@ RC LogicalPlanGenerator::create_plan(
                                 (filter_obj_left.type == 0
                                          ? static_cast<Expression *>(new ValueExpr(filter_obj_left.value)) :
                                 (filter_obj_left.type == -1
-                                         ? static_cast<Expression *>(new SubQueryExpr(sub_table)) :
+                                         ? static_cast<Expression *>(new SubQueryExpr(left_table)) :
                                            static_cast<Expression *>(new FieldExpr()))));
 
     unique_ptr<Expression> right(filter_obj_right.type == 1
@@ -250,7 +280,7 @@ RC LogicalPlanGenerator::create_plan(
                                 (filter_obj_right.type == 0
                                          ? static_cast<Expression *>(new ValueExpr(filter_obj_right.value)) :
                                 (filter_obj_right.type == -1
-                                         ? static_cast<Expression *>(new SubQueryExpr(sub_table)) :
+                                         ? static_cast<Expression *>(new SubQueryExpr(right_table)) :
                                 (filter_obj_right.type == 3
                                          ? static_cast<Expression *>(new ValueListExpr(filter_obj_right.value_list)) :
                                            static_cast<Expression *>(new FieldExpr())))));
