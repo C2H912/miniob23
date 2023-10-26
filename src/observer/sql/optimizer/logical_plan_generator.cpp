@@ -238,7 +238,7 @@ RC LogicalPlanGenerator::create_plan(
       }
     }
     std::vector<std::vector<Value>> right_table;
-    if(left_volcano){
+    if(right_volcano){
       RC rc = RC::SUCCESS;
       //把子表读进sub_table中
       right_volcano->open(nullptr);
