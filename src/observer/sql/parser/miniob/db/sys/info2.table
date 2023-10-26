@@ -3,8 +3,8 @@
 	[
 		{
 			"id" : 0,
-			"len" : 4,
-			"name" : "char1",
+			"len" : 65535,
+			"name" : "info",
 			"nullable" : false,
 			"offset" : 0,
 			"type" : "chars",
@@ -15,12 +15,12 @@
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 4,
+			"offset" : 65535,
 			"type" : "chars",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
 	"table_id" : 0,
-	"table_name" : "char1"
+	"table_name" : "info2"
 }
