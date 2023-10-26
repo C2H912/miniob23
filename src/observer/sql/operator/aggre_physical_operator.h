@@ -27,8 +27,10 @@ class FilterStmt;
 class AggrePhysicalOperator : public PhysicalOperator
 {
 public:
-  AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields);
-
+AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields);
+// AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields) 
+// : fields_(fields), aggr_fields_(aggr_fields)
+// {}
   virtual ~AggrePhysicalOperator() = default;
 
   PhysicalOperatorType type() const override
