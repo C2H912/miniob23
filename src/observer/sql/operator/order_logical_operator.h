@@ -3,7 +3,6 @@
 #include <vector>
 #include "sql/parser/parse.h"
 #include "sql/operator/logical_operator.h"
-#include "rc.h"
 
 class OrderByStmt;
 

@@ -158,6 +158,15 @@ RC LogicalPlanGenerator::create_plan(
   }
 
   unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs));
+  unique_ptr<LogicalOperator> order_oper;
+  if(select_stmt->order_by_stmt()!=nullptr)
+  {
+    //初始化order算子
+    order_oper = unique_ptr<OrderLogicalOperator>(new OrderLogicalOperator(select_stmt->order_by_stmt()));
+    // order_oper->add_child(std::move(project_oper));
+    // logical_operator.swap(order_oper);
+  }
+ 
   if (aggr_oper) {
     if (predicate_oper) {
       if (table_oper) {
@@ -170,6 +179,9 @@ RC LogicalPlanGenerator::create_plan(
       }
     }
     project_oper->add_child(std::move(aggr_oper));
+    if(order_oper){
+    order_oper->add_child(std::move(project_oper));
+    }
   }
   else{
     if (predicate_oper) {
@@ -177,24 +189,28 @@ RC LogicalPlanGenerator::create_plan(
         predicate_oper->add_child(std::move(table_oper));
       }
       project_oper->add_child(std::move(predicate_oper));
+      if(order_oper){
+      order_oper->add_child(std::move(project_oper));
+    }
     } else {
       if (table_oper) {
         project_oper->add_child(std::move(table_oper));
+        if(order_oper){
+        order_oper->add_child(std::move(project_oper));
+    }
       }
     }
   }
-  if(select_stmt->order_by_stmt()!=nullptr)
-  {
-    //初始化order算子
-    unique_ptr<LogicalOperator> order_oper(new OrderLogicalOperator(select_stmt->order_by_stmt()));
-    order_oper->add_child(std::move(project_oper));
+
+  if(order_oper){
     logical_operator.swap(order_oper);
   }
   else{
     logical_operator.swap(project_oper);
   }
+  // unique_ptr<LogicalOperator> order_oper(new OrderLogicalOperator(select_stmt->order_by_stmt()));
+  // order_oper->add_child(std::move(project_oper));
   
- 
 
   
   return RC::SUCCESS;

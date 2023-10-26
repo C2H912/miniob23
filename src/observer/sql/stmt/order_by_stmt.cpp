@@ -1,4 +1,4 @@
-#include "rc.h"
+
 #include "common/log/log.h"
 #include "common/lang/string.h"
 #include "sql/stmt/order_by_stmt.h"

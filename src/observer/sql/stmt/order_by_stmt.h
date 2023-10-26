@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <unordered_map>
-#include "rc.h"
 #include "sql/parser/parse_defs.h"
 #include "sql/stmt/stmt.h"
 #include "sql/expr/expression.h"

@@ -43,7 +43,7 @@ public:
   }
 
 public:
-  static RC create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt);
+  static RC create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unordered_map<std::string,Table* > parents);
 
 public:
   std::vector<Table *> &tables_without_const()

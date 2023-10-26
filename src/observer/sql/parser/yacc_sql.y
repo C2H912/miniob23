@@ -141,8 +141,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   std::vector<RelAttrSqlNode> *     rel_attr_list;
   std::vector<std::string> *        relation_list;
   std::vector<std::string> *        index_attr_list;
-  std::vector<OrderBySqlNode> *     order_by
-  OrderBySqlNode *                  order_by_node
+  std::vector<OrderBySqlNode> *     order_by;
+  OrderBySqlNode *                  order_by_node;
   char *                            string;
   int                               number;
   float                             floats;
@@ -704,7 +704,7 @@ order_by_unit:
 	{
       $$ = new OrderBySqlNode();
       $$->field = $1;
-      $$->order_relation = NULL;
+      //$$->order_relation = NULL;
 	}
 	|
 	ID DOT ID
@@ -718,7 +718,7 @@ order_by_unit:
 	{
       $$ = new OrderBySqlNode();
       $$->field = $1;
-      $$->order_relation = NULL;
+      //$$->order_relation = NULL;
       $$->asc_type = false;
 	}
 	|
@@ -726,7 +726,7 @@ order_by_unit:
 	{
       $$ = new OrderBySqlNode();
       $$->field = $1;
-      $$->order_relation = NULL;
+      //$$->order_relation = NULL;
 	}
 	|
 	ID DOT ID DESC
