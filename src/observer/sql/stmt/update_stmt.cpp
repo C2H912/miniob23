@@ -60,6 +60,11 @@ RC UpdateStmt::create(Db *db, UpdateSqlNode &update, Stmt *&stmt)
     {
       return RC::SCHEMA_FIELD_MISSING;
     }
+    if(update.value[i].length()>65535){
+      
+      return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      //update.value[i].set_type(AttrType::UNDEFINED);
+    }
     //这里要对表中对应字段进行判断才行
     const AttrType field_type = field_meta->type();
     const AttrType value_type = update.value[i].attr_type();
