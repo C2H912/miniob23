@@ -143,6 +143,10 @@ void Value::set_string(const char *s, int len /*= 0*/)
     str_value_.assign(s);
   }
   length_ = str_value_.length();
+  if (length_ > 65535){
+    attr_type_ = UNDEFINED;
+    length_ = 0;
+  }
 }
 
 void Value::set_date(const char *s){
