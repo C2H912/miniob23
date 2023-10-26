@@ -28,8 +28,8 @@ FilterStmt::~FilterStmt()
   filter_units_.clear();
 }
 
-RC FilterStmt::create(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
-    const ConditionSqlNode *conditions, int condition_num, FilterStmt *&stmt)
+RC FilterStmt::create(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *current_table,
+    std::unordered_map<std::string, Table *> *parents, const ConditionSqlNode *conditions, int condition_num, FilterStmt *&stmt)
 {
   RC rc = RC::SUCCESS;
   stmt = nullptr;
@@ -37,7 +37,7 @@ RC FilterStmt::create(Db *db, Table *default_table, std::unordered_map<std::stri
   FilterStmt *tmp_stmt = new FilterStmt();
   for (int i = 0; i < condition_num; i++) {
     FilterUnit *filter_unit = nullptr;
-    rc = create_filter_unit(db, default_table, tables, conditions[i], filter_unit);
+    rc = create_filter_unit(db, default_table, current_table, parents, conditions[i], filter_unit);
     if (rc != RC::SUCCESS) {
       delete tmp_stmt;
       LOG_WARN("failed to create filter unit. condition index=%d", i);
@@ -78,8 +78,8 @@ RC get_table_and_field(Db *db, Table *default_table, std::unordered_map<std::str
   return RC::SUCCESS;
 }
 
-RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
-    const ConditionSqlNode &condition, FilterUnit *&filter_unit)
+RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *current_table,
+      std::unordered_map<std::string, Table *> *parents, const ConditionSqlNode &condition, FilterUnit *&filter_unit)
 {
   RC rc = RC::SUCCESS;
 
@@ -94,7 +94,12 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   if (condition.left_is_attr == 1) {
     Table *table = nullptr;
     const FieldMeta *field = nullptr;
-    rc = get_table_and_field(db, default_table, tables, condition.left_attr, table, field);
+    //检查复杂子查询中是否有此父表
+    std::unordered_map<std::string, Table *> all_table = *current_table;
+    for(std::pair<std::string, Table *> it : *parents){
+      all_table.insert(it);
+    }
+    rc = get_table_and_field(db, default_table, &all_table, condition.left_attr, table, field);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr");
       return rc;
@@ -115,7 +120,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     //递归地调用create生成子查询
     Stmt *sub_stmt;
     SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
-    rc = caller->create(db, *condition.left_sql, sub_stmt, *tables);
+    rc = caller->create(db, *condition.left_sql, sub_stmt, *current_table);
     if(rc != RC::SUCCESS){
       LOG_WARN("sub create stmt fail");
       return rc;
@@ -131,7 +136,12 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   if (condition.right_is_attr == 1) {
     Table *table = nullptr;
     const FieldMeta *field = nullptr;
-    rc = get_table_and_field(db, default_table, tables, condition.right_attr, table, field);
+    //检查复杂子查询中是否有此父表
+    std::unordered_map<std::string, Table *> all_table = *current_table;
+    for(std::pair<std::string, Table *> it : *parents){
+      all_table.insert(it);
+    }
+    rc = get_table_and_field(db, default_table, &all_table, condition.right_attr, table, field);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr");
       return rc;
@@ -153,7 +163,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     //递归地调用create生成子查询
     Stmt *sub_stmt;
     SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
-    rc = caller->create(db, *condition.right_sql, sub_stmt, *tables);
+    rc = caller->create(db, *condition.right_sql, sub_stmt, *current_table);
     if(rc != RC::SUCCESS){
       LOG_WARN("sub create stmt fail");
       return rc;

@@ -217,14 +217,10 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt, std:
       all_filters.push_back(select_sql.joinTables[i].join_conditions[j]);
     }
   }
-  //检查复杂子查询中是否有此父表
-  std::unordered_map<std::string, Table *> all_parents = table_map;
-  for(std::pair<std::string, Table *> it : parents){
-    all_parents.insert(it);
-  }
   RC rc = FilterStmt::create(db,
       default_table,
-      &all_parents,
+      &table_map,
+      &parents,
       all_filters.data(),
       static_cast<int>(all_filters.size()),
       filter_stmt);

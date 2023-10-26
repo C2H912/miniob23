@@ -79,6 +79,6 @@ private:
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> aggr_specs_;
   std::vector<Table *> tables_;
-  int conjunction_flag_;    //0: AND, 1: OR
+  int conjunction_flag_ = -1;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
 };
