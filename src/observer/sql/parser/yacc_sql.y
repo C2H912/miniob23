@@ -85,6 +85,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         STRING_T
         DATE_T
         FLOAT_T
+        TEXT
         HELP
         EXIT
         DOT //QUOTE
@@ -459,6 +460,14 @@ attr_def:
       $$->name = $1;
       $$->length = 4;
       $$->nullable = true;
+      free($1);
+    }
+    | ID TEXT
+    {
+      $$ = new AttrInfoSqlNode;
+      $$->type = CHARS;
+      $$->name = $1;
+      $$->length = 65535;
       free($1);
     }
     | ID type

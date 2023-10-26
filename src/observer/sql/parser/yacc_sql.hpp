@@ -85,43 +85,44 @@ extern int yydebug;
     STRING_T = 286,                /* STRING_T  */
     DATE_T = 287,                  /* DATE_T  */
     FLOAT_T = 288,                 /* FLOAT_T  */
-    HELP = 289,                    /* HELP  */
-    EXIT = 290,                    /* EXIT  */
-    DOT = 291,                     /* DOT  */
-    INTO = 292,                    /* INTO  */
-    VALUES = 293,                  /* VALUES  */
-    FROM = 294,                    /* FROM  */
-    WHERE = 295,                   /* WHERE  */
-    NULL_T = 296,                  /* NULL_T  */
-    INNER = 297,                   /* INNER  */
-    JOIN = 298,                    /* JOIN  */
-    AND = 299,                     /* AND  */
-    NOT = 300,                     /* NOT  */
-    LIKE = 301,                    /* LIKE  */
-    MAX = 302,                     /* MAX  */
-    MIN = 303,                     /* MIN  */
-    SUM = 304,                     /* SUM  */
-    AVG = 305,                     /* AVG  */
-    COUNT = 306,                   /* COUNT  */
-    SET = 307,                     /* SET  */
-    ON = 308,                      /* ON  */
-    LOAD = 309,                    /* LOAD  */
-    DATA = 310,                    /* DATA  */
-    INFILE = 311,                  /* INFILE  */
-    EXPLAIN = 312,                 /* EXPLAIN  */
-    EQ = 313,                      /* EQ  */
-    LT = 314,                      /* LT  */
-    GT = 315,                      /* GT  */
-    LE = 316,                      /* LE  */
-    GE = 317,                      /* GE  */
-    NE = 318,                      /* NE  */
-    EXISTS = 319,                  /* EXISTS  */
-    NUMBER = 320,                  /* NUMBER  */
-    FLOAT = 321,                   /* FLOAT  */
-    ID = 322,                      /* ID  */
-    SSS = 323,                     /* SSS  */
-    DATESSS = 324,                 /* DATESSS  */
-    UMINUS = 325                   /* UMINUS  */
+    TEXT = 289,                    /* TEXT  */
+    HELP = 290,                    /* HELP  */
+    EXIT = 291,                    /* EXIT  */
+    DOT = 292,                     /* DOT  */
+    INTO = 293,                    /* INTO  */
+    VALUES = 294,                  /* VALUES  */
+    FROM = 295,                    /* FROM  */
+    WHERE = 296,                   /* WHERE  */
+    NULL_T = 297,                  /* NULL_T  */
+    INNER = 298,                   /* INNER  */
+    JOIN = 299,                    /* JOIN  */
+    AND = 300,                     /* AND  */
+    NOT = 301,                     /* NOT  */
+    LIKE = 302,                    /* LIKE  */
+    MAX = 303,                     /* MAX  */
+    MIN = 304,                     /* MIN  */
+    SUM = 305,                     /* SUM  */
+    AVG = 306,                     /* AVG  */
+    COUNT = 307,                   /* COUNT  */
+    SET = 308,                     /* SET  */
+    ON = 309,                      /* ON  */
+    LOAD = 310,                    /* LOAD  */
+    DATA = 311,                    /* DATA  */
+    INFILE = 312,                  /* INFILE  */
+    EXPLAIN = 313,                 /* EXPLAIN  */
+    EQ = 314,                      /* EQ  */
+    LT = 315,                      /* LT  */
+    GT = 316,                      /* GT  */
+    LE = 317,                      /* LE  */
+    GE = 318,                      /* GE  */
+    NE = 319,                      /* NE  */
+    EXISTS = 320,                  /* EXISTS  */
+    NUMBER = 321,                  /* NUMBER  */
+    FLOAT = 322,                   /* FLOAT  */
+    ID = 323,                      /* ID  */
+    SSS = 324,                     /* SSS  */
+    DATESSS = 325,                 /* DATESSS  */
+    UMINUS = 326                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -130,7 +131,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 122 "yacc_sql.y"
+#line 123 "yacc_sql.y"
 
   ParsedSqlNode *                   sql_node;
   SelectSqlNode *                   sub_sql_node;
@@ -159,7 +160,7 @@ union YYSTYPE
   int                               number;
   float                             floats;
 
-#line 163 "yacc_sql.hpp"
+#line 164 "yacc_sql.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

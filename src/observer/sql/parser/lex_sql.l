@@ -11,6 +11,21 @@ typedef int yy_size_t;
 #define YY_USER_INIT                                         \
   yycolumn = 0;
 
+/* Size of default input buffer. */
+#ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+//#define YY_BUF_SIZE 32768
+#define YY_BUF_SIZE 524288
+#else
+//#define YY_BUF_SIZE 16384
+#define YY_BUF_SIZE 524288
+#endif /* __ia64__ */
+#endif
+
 /* 参考生成的lex_sql.cpp代码，这个宏定义会放在解析一个token之后，也可以在网上找到大量的参考资料 */
 /* 我们在这里设置当前解析的token的位置信息，这样在yacc中就可以使用这些信息了 */
 #define YY_USER_ACTION                                       \
@@ -121,6 +136,7 @@ COMMIT                                  RETURN_TOKEN(TRX_COMMIT);
 ROLLBACK                                RETURN_TOKEN(TRX_ROLLBACK);
 INT                                     RETURN_TOKEN(INT_T);
 CHAR                                    RETURN_TOKEN(STRING_T);
+TEXT                                    RETURN_TOKEN(TEXT);
 UNIQUE                                  RETURN_TOKEN(UNIQUE);
 DATE                                    RETURN_TOKEN(DATE_T);
 FLOAT                                   RETURN_TOKEN(FLOAT_T);
@@ -151,6 +167,7 @@ ASC                                     RETURN_TOKEN(ASC);
 "*" |
 "/"                                     { return yytext[0]; }
 {QUOTE}[0-9][0-9][0-9][0-9][-][0-9]*[-][0-9]*{QUOTE}               yylval->string=strdup(yytext); RETURN_TOKEN(DATESSS);
+{QUOTE}(\\\47|[\40\42A-Za-z0-9_/\.\-\%])*{QUOTE}            yylval->string=strdup(yytext); RETURN_TOKEN(SSS);
 \"[^"]*\"                               yylval->string = strdup(yytext); RETURN_TOKEN(SSS);
 '[^']*\'                                yylval->string = strdup(yytext); RETURN_TOKEN(SSS);
 
