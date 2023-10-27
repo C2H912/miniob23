@@ -23,7 +23,7 @@ RC OrderPhysicalOperator::open(Trx *trx)
 RC OrderPhysicalOperator::fetch_and_OrderPhysical_table()
 {
   RC rc = RC::SUCCESS;
-
+  bool flag = true;
   int index = 0;
   typedef std::pair<std::vector<Value>, int> CmpPair;
   std::vector<CmpPair> cell_index_table;
@@ -31,8 +31,16 @@ RC OrderPhysicalOperator::fetch_and_OrderPhysical_table()
 
   auto &units = orderby_stmt_->orderby_units();
   while (RC::SUCCESS == (rc = children_[0]->next())) {
-    // construct pair OrderPhysical table
-    // 1 cons vector<Value>
+   if(flag)
+   {
+    std::vector<TupleCellSpec*> tmp = children_[0]->current_tuple()->getspeces_();//储存表头
+    for(TupleCellSpec* tcs:tmp){
+    TupleCellSpec* temp = new TupleCellSpec(tcs->table_name(),tcs->field_name(),tcs->alias());
+    speces_.push_back(temp);
+    flag = false;
+   }
+   }
+  
     pair_cell.clear();
     for (const OrderByUnit *unit : units) { //把排序字段拿出来
       Expression *expr = unit->expr();//这个是FieldExpr
@@ -43,10 +51,30 @@ RC OrderPhysicalOperator::fetch_and_OrderPhysical_table()
     // 2 cons pair
     // 3 cons pair vector
     cell_index_table.emplace_back(std::make_pair(pair_cell, index++));//index应该就是用来标识不同的tuple
-   
+
     //拷贝一份下层传上来的tuple
-    st_.emplace_back(children_[0]->current_tuple());//不需要深拷贝了 因为只用到一次
+    //有tuple和
+    //std::vector<TupleCellSpec*> spec = children_[0]->current_tuple()->getspeces_();
+    
+    Tuple* tuple =  children_[0]->current_tuple();
+    int cell_num = tuple->cell_num();
+    std::vector<Value> st_;
+    for (int i = 0; i < cell_num; i++) {
+    
+      Value value;
+      rc = tuple->cell_at(i, value);
+      st_.emplace_back(value);
+      if (rc != RC::SUCCESS) {
+        return rc;
+      }
+    }
+    all_tuple.emplace_back(st_);//存一行数据 all_tuple是一个表要打印的字段
+    //st_.push_back(temp);//
   }
+  
+   
+  
+  
   if (RC::RECORD_EOF != rc) {
     LOG_ERROR("Fetch Table Error In OrderPhysicalOperator. RC: %d", rc);
     return rc;
@@ -120,7 +148,18 @@ RC OrderPhysicalOperator::next()
 
   if (ordered_idx_.end() != it_) {
     // NOTE: PAY ATTENTION HERE
-    tuple_ = st_[*it_];
+    std::vector<Value> values = all_tuple[*it_];//读出一行数据
+    valueTuple_.set_cells(values);//放进一个valuelisttuple
+    std::vector<Field> temp;
+    for(int i = 0;i<values.size();i++)
+    {
+      Field *field = new Field();
+      temp.push_back(*field);
+
+    }
+    valueTuple_.set_specs(temp);//试试不用
+    tuple_.set_speces(speces_);//设置project的表头
+    tuple_.set_tuple(static_cast<Tuple*>(&valueTuple_));//将project的指针指向这个tuple
     it_++;
     return RC::SUCCESS;
   }
@@ -137,5 +176,5 @@ RC OrderPhysicalOperator::close()
 
 Tuple *OrderPhysicalOperator::current_tuple()
 {
-  return tuple_;
+  return static_cast<Tuple*>(&tuple_);
 }

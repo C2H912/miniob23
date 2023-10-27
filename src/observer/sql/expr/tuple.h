@@ -96,6 +96,9 @@ public:
    */
   virtual int cell_num() const = 0;
 
+  virtual int type() const = 0;
+  //为了深拷贝 来选择派生类类型来构造函数
+
   /**
    * @brief 获取指定位置的Cell
    * 
@@ -103,6 +106,9 @@ public:
    * @param[out] cell  返回的Cell
    */
   virtual RC cell_at(int index, Value &cell) const = 0;
+
+  virtual Tuple* getTuple()  = 0;
+  virtual std::vector<TupleCellSpec *> &getspeces_() = 0;
 
   /**
    * @brief 根据cell的描述，获取cell的值
@@ -148,6 +154,14 @@ public:
     }
     speces_.clear();
   }
+  Tuple* getTuple()
+  {
+      return nullptr;
+  }
+  std::vector<TupleCellSpec *> &getspeces_(){
+    std::vector<TupleCellSpec *> aa;
+    return aa;
+  }
 
   void set_record(Record *record)
   {
@@ -155,6 +169,11 @@ public:
     const Field filed_ = this->speces_.back()->field();
     const FieldMeta *null_filed_meta = filed_.meta();
     bitmap_.init(record->data() + null_filed_meta->offset(), null_filed_meta->len());
+  }
+
+  int type() const
+  {
+    return 0;
   }
 
   void set_schema(const Table *table, const std::vector<FieldMeta> *fields)
@@ -217,6 +236,8 @@ public:
     }
     return RC::NOTFOUND;
   }
+ 
+  
 
 #if 0
   RC cell_spec_at(int index, const TupleCellSpec *&spec) const override
@@ -271,6 +292,17 @@ public:
     this->tuple_ = tuple;
   }
 
+   void set_speces(std::vector<TupleCellSpec *> &speces)
+  {
+    this->speces_ = speces;
+  }
+
+  
+  int type() const
+  {
+    return 1;
+  }
+
   void add_cell_spec(TupleCellSpec *spec)
   {
     speces_.push_back(spec);
@@ -283,14 +315,26 @@ public:
   // {
   //   record.emplace_back(record_);
   // }
-  // Tuple* getTuple() const
-  // {
-  //   return tuple_;
-  // }
-  // std::vector<TupleCellSpec *> getspeces_() const
-  // {
-  //   return speces_;
-  // }
+  Tuple* getTuple()
+  {
+
+    return tuple_;
+  }
+
+  Tuple* setMyTuple(Tuple *tuple)
+  {
+    switch(tuple->type())
+    {
+      case 0:{
+        RowTuple *tuple = new RowTuple();
+        
+      }
+    }
+  }
+  std::vector<TupleCellSpec *> &getspeces_()
+  {
+    return speces_;
+  }
 
 
   RC cell_at(int index, Value &cell) const override
@@ -336,6 +380,20 @@ public:
   
   virtual ~ExpressionTuple()
   {
+  }
+  
+   Tuple* getTuple()
+  {
+      return nullptr;
+  }
+  std::vector<TupleCellSpec *> &getspeces_(){
+    std::vector<TupleCellSpec *> aa;
+    return aa;
+  }
+
+  int type() const
+  {
+    return 2;
   }
 
   int cell_num() const override
@@ -388,9 +446,23 @@ public:
     spec_ = specs;
   }
 
+   Tuple* getTuple()
+  {
+      return nullptr;
+  }
+  std::vector<TupleCellSpec *> &getspeces_(){
+    std::vector<TupleCellSpec *> aa;
+    return aa;
+  }
+
   virtual int cell_num() const override
   {
     return static_cast<int>(cells_.size());
+  }
+
+  int type() const
+  {
+    return 3;
   }
 
   virtual RC cell_at(int index, Value &cell) const override
@@ -438,6 +510,20 @@ public:
   int cell_num() const override
   {
     return left_->cell_num() + right_->cell_num();
+  }
+
+  int type() const
+  {
+    return 4;
+  }
+
+   Tuple* getTuple()
+  {
+      return nullptr;
+  }
+  std::vector<TupleCellSpec *> &getspeces_(){
+    std::vector<TupleCellSpec *> aa;
+    return aa;
   }
 
   RC cell_at(int index, Value &value) const override

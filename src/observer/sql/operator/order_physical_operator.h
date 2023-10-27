@@ -35,8 +35,10 @@ private:
 private:
   OrderByStmt *orderby_stmt_ = nullptr;
   bool is_first_ = true;//是否打开？
-  std::vector<Tuple*> st_;
-  Tuple *tuple_;
   std::vector<int> ordered_idx_;
   std::vector<int>::iterator it_;
+  std::vector<TupleCellSpec*> speces_;
+  std::vector<std::vector<Value>> all_tuple;
+  ProjectTuple tuple_;
+  ValueListTuple valueTuple_;
 };
