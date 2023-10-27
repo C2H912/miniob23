@@ -164,23 +164,13 @@ RC ComparisonExpr::compare_value(const Value &left, const Value &right, bool &re
   result = false;
   switch (comp_) {
     case EQUAL_TO: {
-      if(cmp_result <= 0.002){
-        result = 1;
-      }
-      else{
-        result = 0;
-      }
+      result = (0 == cmp_result);
     } break;
     case LESS_EQUAL: {
       result = (cmp_result <= 0);
     } break;
     case NOT_EQUAL: {
-      if(cmp_result > 0.002){
-        result = 1;
-      }
-      else{
-        result = 0;
-      }
+      result = (cmp_result != 0);
     } break;
     case LESS_THAN: {
       result = (cmp_result < 0);
