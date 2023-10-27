@@ -23,6 +23,7 @@ See the Mulan PSL v2 for more details. */
 enum AttrType
 {
   UNDEFINED,
+  UPDATE_FAIL,    ///< 表示update中子查询返回的value多于一个，标志当前value无效
   CHARS,          ///< 字符串类型
   INTS,           ///< 整数类型(4字节)
   DATES,

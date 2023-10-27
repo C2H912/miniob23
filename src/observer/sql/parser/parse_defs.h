@@ -177,6 +177,12 @@ struct DeleteSqlNode
   std::vector<ConditionSqlNode> conditions;
 };
 
+struct value_list{
+  int type;
+  Value value;
+  SelectSqlNode* sub_query;
+};
+
 /**
  * @brief 描述一个update语句
  * @ingroup SQLParser
@@ -185,7 +191,7 @@ struct UpdateSqlNode
 {
   std::string                   relation_name;         ///< Relation to update
   std::vector<std::string>      attribute_name;        ///< 更新的字段，现在支持多个了
-  std::vector<Value>            value;                 ///< 更新的值，现在支持多个了
+  std::vector<value_list>       values;                 ///< 更新的值，现在支持多个了
   std::vector<ConditionSqlNode> conditions;
 };
 
@@ -277,8 +283,10 @@ struct LoadDataSqlNode
  */
 struct SetVariableSqlNode
 {
+  int type;       //0:value, 1:sub_query
   std::string name;
   Value       value;
+  SelectSqlNode* query;
 };
 
 class ParsedSqlNode;

@@ -20,7 +20,7 @@ See the Mulan PSL v2 for more details. */
 using namespace std;
 
 UpdatePhysicalOperator::UpdatePhysicalOperator(Table *table, vector<Value> values,std::vector<std::string> value_name)
-    :table_(table), values_(values),value_name_(value_name)
+    :table_(table), values_(values), value_name_(value_name)
 {}
 
 RC UpdatePhysicalOperator::open(Trx *trx)
@@ -28,7 +28,7 @@ RC UpdatePhysicalOperator::open(Trx *trx)
   //update单条语句应该和insert一样 一个open解决 但是有点破坏火山模型
   //不对 可能会存在多个需要修改的record
   //所以模仿delete来写
-   if (children_.empty()) {
+  if (children_.empty()) {
     return RC::SUCCESS;
   }
 
@@ -42,7 +42,6 @@ RC UpdatePhysicalOperator::open(Trx *trx)
   trx_ = trx;
 
   return RC::SUCCESS;
-
 
   // Record record;
   // RC rc = table_->make_record(static_cast<int>(values_.size()), values_.data(), record);
@@ -78,29 +77,27 @@ RC UpdatePhysicalOperator::next()
     //先删除record
     RowTuple *row_tuple = static_cast<RowTuple *>(tuple);
     Record &record = row_tuple->record();//返回给引用变量 可以操作内存 
+
     char* old_record =  record.data();//返回给非引用变量 复制一份
-    //size_t length = strlen(old_record);
     int record_size = table_->table_meta().record_size();
     char* old_record_copy = new char[record_size];//字符串需要加一
     memcpy(old_record_copy, old_record,record_size);//深拷贝
+
     //需要调换一下顺序，不然record被删除，将会没有数据
     //格式在stmt中判断过了
     //是否需要回退
     Record new_record;
-    RC rc = table_->make_record_for_update(static_cast<int>(values_.size()), values_.data(), new_record,value_name_,old_record);
+    RC rc = table_->make_record_for_update(static_cast<int>(values_.size()), values_.data(), new_record, value_name_, old_record);
     if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to make record. rc=%s", strrc(rc));
-    return rc;
+      LOG_WARN("failed to make record. rc=%s", strrc(rc));
+      return rc;
     }
-
 
     rc = trx_->delete_record(table_, record);
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to delete record: %s", strrc(rc));
       return rc;
     }
-
-    
 
     rc = trx_->insert_record(table_, new_record);
     if (rc != RC::SUCCESS) {
@@ -109,22 +106,16 @@ RC UpdatePhysicalOperator::next()
       int record_size = table_->table_meta().record_size();
       temp_record.set_data_owner(old_record_copy,record_size);
       RC rc2 = trx_->insert_record(table_, temp_record);
-      if(rc2 != RC::SUCCESS)
-      {
+      if(rc2 != RC::SUCCESS){
          return rc2;
       }
-      
       LOG_WARN("failed to insert record by transaction. rc=%s", strrc(rc));
-       return rc;
+      return rc;
     }
     delete[] old_record_copy;
-   
-
   }
 
   return RC::RECORD_EOF;
-
-
 }
 
 RC UpdatePhysicalOperator::close()

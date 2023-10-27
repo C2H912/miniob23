@@ -328,13 +328,77 @@ RC LogicalPlanGenerator::create_plan(
 RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<LogicalOperator> &logical_operator)
 {
   Table *table = update_stmt->table();
-  //vector<Value> values(update_stmt->values(), update_stmt->values() + update_stmt->value_amount());
-  vector<Value> values = update_stmt->values();
-  vector<std::string> value_name = update_stmt->names();
+  std::vector<update_list> update_values = update_stmt->valueList();
+  std::vector<std::string> value_name = update_stmt->names();
   FilterStmt *filter_stmt = update_stmt->filter_stmt();
+
+  //用于update更新的所有Value，包括子查询解析出来的Value
+  std::vector<Value> all_values;
+
+  for(size_t i = 0; i < update_values.size(); i++){
+    //case1. 子查询, 生成并运行子火山
+    if(update_values[i].type == 1){
+      unique_ptr<PhysicalOperator> sub_volcano;
+      OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
+      RC rc = caller.create_sub_request(update_values[i].sub_query, sub_volcano);
+      if(rc != RC::SUCCESS){
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
+      //这里拿到火山后马上执行，把子表读到SubQueryExpr中，因为expression表达式如果再包含PhysicalOperator.h
+      //的话会形成自包含，编译不通过
+      std::vector<std::vector<Value>> sub_table;
+      if(sub_volcano){
+        RC rc = RC::SUCCESS;
+        //把子表读进sub_table中
+        sub_volcano->open(nullptr);
+        while (RC::SUCCESS == (rc = sub_volcano->next())) {
+          Tuple * tuple = sub_volcano->current_tuple();
+          std::vector<Value> row;
+          for(int i = 0; i < tuple->cell_num(); i++){
+            Value value;
+            rc = tuple->cell_at(i, value);
+            if (rc != RC::SUCCESS) {
+              sub_volcano->close();
+              LOG_WARN("failed to get SUB TABLE from operator");
+              return rc;
+            }
+            row.push_back(value);
+          }
+          sub_table.push_back(row);
+        }
+        sub_volcano->close();
+        if (rc == RC::RECORD_EOF) {
+          rc = RC::SUCCESS;
+        }
+        else{
+          LOG_WARN("failed to get SUB TABLE from operator");
+          return rc;
+        }
+      }
+      if((int)sub_table.size() == 0){
+        Value invalid_value(-1);
+        invalid_value.set_type(UPDATE_FAIL);
+        all_values.push_back(invalid_value);
+      }
+      else if((int)sub_table.size() > 1 || (int)sub_table[0].size() > 1){
+        Value invalid_value(-1);
+        invalid_value.set_type(UPDATE_FAIL);
+        all_values.push_back(invalid_value);
+      }
+      else{
+        all_values.push_back(sub_table[0][0]);
+      }
+    }
+    //case2. 一般的value
+    else{
+      all_values.push_back(update_values[i].value);
+    }
+  }
+
   std::vector<Field> fields;
   //这里有待商榷 毕竟null_field也是要存进去的 不需要 因为可以直接修改bit
-  for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num()-table->table_meta().extra_filed_num(); i++) {
+  for (int i = table->table_meta().sys_field_num(); i < table->table_meta().field_num() - table->table_meta().extra_filed_num(); i++) {
     const FieldMeta *field_meta = table->table_meta().field(i);
     fields.push_back(Field(table, field_meta));
   }
@@ -346,8 +410,8 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
     return rc;
   }
 
-//新增一个update逻辑算子
-  unique_ptr<LogicalOperator> update_oper(new UpdateLogicalOperator(table, values,value_name));
+  //新增一个update逻辑算子
+  unique_ptr<LogicalOperator> update_oper(new UpdateLogicalOperator(table, all_values, value_name));
 
   if (predicate_oper) {
     predicate_oper->add_child(std::move(table_get_oper));

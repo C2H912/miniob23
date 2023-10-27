@@ -145,7 +145,6 @@ void Value::set_string(const char *s, int len /*= 0*/)
   length_ = str_value_.length();
   if (length_ > 65535){
     attr_type_ = UNDEFINED;
-    length_ = 0;
   }
 }
 
