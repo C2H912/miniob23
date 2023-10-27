@@ -53,6 +53,6 @@ enum
 static const char FILE_PATH_SPLIT = '/';
 static const char FILE_PATH_SPLIT_STR[] = "/";
 
-#define EPSILON (1E-3)
+#define EPSILON (1E-6)
 
 }  // namespace common
