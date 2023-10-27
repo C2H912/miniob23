@@ -18,8 +18,6 @@ See the Mulan PSL v2 for more details. */
 #include "storage/table/table.h"
 #include "sql/parser/typecast.h"
 
-
-
 InsertStmt::InsertStmt(Table *table, const ValueRecord *valuerecords, int valuerecord_amount)
     : table_(table), valuerecords_(valuerecords), valuerecord_amount_(valuerecord_amount)
 {}
@@ -41,10 +39,11 @@ RC InsertStmt::create(Db *db, InsertSqlNode &inserts, Stmt *&stmt)
   }
 
   // check the fields number
-  const int valuerecord_num = static_cast<int>(inserts.valuerecords.size());
-  const TableMeta &table_meta = table->table_meta();
-  const int field_num = table_meta.field_num() - table_meta.sys_field_num()-table_meta.extra_filed_num();//减去null字段
-  for (int i = 0; i < valuerecord_num; i++){
+  const int        valuerecord_num = static_cast<int>(inserts.valuerecords.size());
+  const TableMeta &table_meta      = table->table_meta();
+  const int        field_num =
+      table_meta.field_num() - table_meta.sys_field_num() - table_meta.extra_filed_num();  // 减去null字段
+  for (int i = 0; i < valuerecord_num; i++) {
     // Value *values_ptr = inserts.valuerecords[i].values.data();
     int tmp_value_num = static_cast<int>(inserts.valuerecords[i].values.size());
     if (field_num != tmp_value_num) {
@@ -53,39 +52,44 @@ RC InsertStmt::create(Db *db, InsertSqlNode &inserts, Stmt *&stmt)
     }
   }
   const int value_num = static_cast<int>(inserts.valuerecords[0].values.size());
-  
+
   // check fields type
   const int sys_field_num = table_meta.sys_field_num();
-  for (int j = 0; j < valuerecord_num; j++){
+  for (int j = 0; j < valuerecord_num; j++) {
     Value *values_ptr = inserts.valuerecords[j].values.data();
     for (int i = 0; i < value_num; i++) {
-      const FieldMeta *field_meta = table_meta.field(i + sys_field_num);
-      const AttrType field_type = field_meta->type();
-      const AttrType value_type = values_ptr[i].attr_type();
+      const FieldMeta *field_meta             = table_meta.field(i + sys_field_num);
+      const AttrType   field_type             = field_meta->type();
+      const AttrType   value_type             = values_ptr[i].attr_type();
+      const int        value_length_istoolong = values_ptr[i].length();
+      if (value_length_istoolong > 65535) {
+        LOG_WARN("text is too long to insert.");
+        return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      }
       if ((field_type != value_type)) {  // TODO try to convert the value type to field type
-        //LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
-        //    table_name, field_meta->name(), field_type, value_type);
-        //return RC::SCHEMA_FIELD_TYPE_MISMATCH;
-        if(value_type==AttrType::NULLS&&!(field_meta->nullable())) //如果value为null且该字段不能为空 返回failure 如果为null 返回failure
-      {
-           LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+        // LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+        //     table_name, field_meta->name(), field_type, value_type);
+        // return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+        if (value_type == AttrType::NULLS &&
+            !(field_meta->nullable()))  // 如果value为null且该字段不能为空 返回failure 如果为null 返回failure
+        {
+          LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
           table_name, field_meta->name(), field_type, value_type);
           return RC::SCHEMA_FIELD_TYPE_MISMATCH;
-      }
-      else if(value_type!=AttrType::NULLS){
-        //  LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
-        //   table_name, field_meta->name(), field_type, value_type);
-        //   return RC::SCHEMA_FIELD_TYPE_MISMATCH;
-        input_typecast(&values_ptr[i], field_type);
-      }
-        //input_typecast(&values_ptr[i], field_type);
+        } else if (value_type != AttrType::NULLS) {
+          //  LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+          //   table_name, field_meta->name(), field_type, value_type);
+          //   return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+          input_typecast(&values_ptr[i], field_type);
+        }
+        // input_typecast(&values_ptr[i], field_type);
       }
     }
   }
 
-  Value *values_ptr = inserts.valuerecords[0].values.data();
+  Value       *values_ptr       = inserts.valuerecords[0].values.data();
   ValueRecord *valuerecords_ptr = inserts.valuerecords.data();
-  
+
   // everything alright
   stmt = new InsertStmt(table, valuerecords_ptr, valuerecord_num);
   return RC::SUCCESS;
