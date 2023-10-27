@@ -60,11 +60,6 @@ RC UpdateStmt::create(Db *db, UpdateSqlNode &update, Stmt *&stmt)
     // 这里要对表中对应字段进行判断才行
     const AttrType field_type             = field_meta->type();
     const AttrType value_type             = update.value[i].attr_type();
-    const int      value_length_istoolong = update.value[i].length();
-    if (value_length_istoolong > 65535) {
-      LOG_WARN("text is too long to insert.");
-      return RC::SCHEMA_FIELD_TYPE_MISMATCH;
-    }
     if (field_type != value_type) {  // TODO try to convert the value type to field type
       if (value_type == AttrType::NULLS &&
           !(field_meta->nullable()))  // 如果value为null且该字段不能为空 返回failure 如果为null 返回failure
@@ -72,7 +67,13 @@ RC UpdateStmt::create(Db *db, UpdateSqlNode &update, Stmt *&stmt)
         LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
           table_name, field_meta->name(), field_type, value_type);
         return RC::SCHEMA_FIELD_TYPE_MISMATCH;
-      } else if (value_type != AttrType::NULLS) {
+      } 
+      else if(value_type == AttrType::UNDEFINED){
+        LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+          table_name, field_meta->name(), field_type, value_type);
+        return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      }
+      else if (value_type != AttrType::NULLS) {
         //  LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
         //   table_name, field_meta->name(), field_type, value_type);
         //   return RC::SCHEMA_FIELD_TYPE_MISMATCH;

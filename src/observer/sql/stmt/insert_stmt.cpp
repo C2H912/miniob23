@@ -61,11 +61,6 @@ RC InsertStmt::create(Db *db, InsertSqlNode &inserts, Stmt *&stmt)
       const FieldMeta *field_meta             = table_meta.field(i + sys_field_num);
       const AttrType   field_type             = field_meta->type();
       const AttrType   value_type             = values_ptr[i].attr_type();
-      const int        value_length_istoolong = values_ptr[i].length();
-      if (value_length_istoolong > 65535) {
-        LOG_WARN("text is too long to insert.");
-        return RC::SCHEMA_FIELD_TYPE_MISMATCH;
-      }
       if ((field_type != value_type)) {  // TODO try to convert the value type to field type
         // LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
         //     table_name, field_meta->name(), field_type, value_type);
