@@ -40,14 +40,14 @@ RC PredicatePhysicalOperator::next()
 
   while (RC::SUCCESS == (rc = oper->next())) {
     Tuple *tuple = oper->current_tuple();
-    if (nullptr == tuple) {
+    if (nullptr == tuple) { //读到空才会停下来
       rc = RC::INTERNAL;
       LOG_WARN("failed to get tuple from operator");
       break;
     }
 
     Value value;
-    rc = expression_->get_value(*tuple, value);
+    rc = expression_->get_value(*tuple, value);//通过tuple计算value的值
     if (rc != RC::SUCCESS) {
       return rc;
     }

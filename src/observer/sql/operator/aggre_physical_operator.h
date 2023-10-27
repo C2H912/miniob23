@@ -27,7 +27,8 @@ class FilterStmt;
 class AggrePhysicalOperator : public PhysicalOperator
 {
 public:
-  AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields);
+  AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
+      const std::vector<std::string> &spec);
 
   virtual ~AggrePhysicalOperator() = default;
 
@@ -50,6 +51,7 @@ public:
 private:
   std::vector<Field> fields_;
   std::vector<AggrOp> aggr_fields_;
+  std::vector<std::string> spec_;
   ValueListTuple tuple_;
   bool enter_flag_ = false;
 };

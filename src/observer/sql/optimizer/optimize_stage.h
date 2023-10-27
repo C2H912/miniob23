@@ -39,6 +39,7 @@ class OptimizeStage
 {
 public:
   RC handle_request(SQLStageEvent *event);
+  RC create_sub_request(SelectStmt *stmt, std::unique_ptr<PhysicalOperator> &subExpr);
 
 private:
   /**

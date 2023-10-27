@@ -42,9 +42,13 @@ public:
   }
 
 public:
-  static RC create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt);
+  static RC create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt, std::unordered_map<std::string, Table *> parents);
 
 public:
+  std::vector<Table *> &tables_without_const()
+  {
+    return tables_;
+  }
   const std::vector<Table *> &tables() const
   {
     return tables_;
@@ -65,11 +69,16 @@ public:
   {
     return filter_stmt_;
   }
+  int conjunction_flag() const
+  {
+    return conjunction_flag_;
+  }
 
 private:
   std::vector<Field> query_fields_;
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> aggr_specs_;
   std::vector<Table *> tables_;
+  int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
 };

@@ -48,7 +48,7 @@ public:
    * @param[in] event 任务数据，包括处理的结果
    * @param[out] need_disconnect 是否需要断开连接
    */
-  virtual RC write_result(SessionEvent *event, bool &need_disconnect) override;
+  virtual RC write_result(SessionEvent *event, bool &need_disconnect, RC sql_rc) override;
 
 private:
   /**

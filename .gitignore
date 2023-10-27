@@ -9,6 +9,7 @@
 ./docs/doxy/
 build/*
 build_*
+build_release
 cmake-build-*/*
 build
 .cache/*

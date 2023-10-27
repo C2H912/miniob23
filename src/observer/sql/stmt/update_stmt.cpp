@@ -17,12 +17,15 @@ See the Mulan PSL v2 for more details. */
 #include "storage/db/db.h"
 #include "storage/table/table.h"
 #include "sql/stmt/filter_stmt.h"
+#include "sql/parser/typecast.h"
+
 
 UpdateStmt::UpdateStmt(Table *table, std::vector<Value> &values, int value_amount,FilterStmt *filter_stmt, std::vector<std::string> &value_name )
     : table_(table), values_(values), value_amount_(value_amount),filter_stmt_(filter_stmt), value_name_(value_name)
 {}
 
-RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
+
+RC UpdateStmt::create(Db *db, UpdateSqlNode &update, Stmt *&stmt)
 {
  const char *table_name = update.relation_name.c_str();
   if (nullptr == db || nullptr == table_name || update.value.size()==0) {
@@ -61,14 +64,20 @@ RC UpdateStmt::create(Db *db, const UpdateSqlNode &update, Stmt *&stmt)
     const AttrType field_type = field_meta->type();
     const AttrType value_type = update.value[i].attr_type();
     if (field_type != value_type) {  // TODO try to convert the value type to field type
-      LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+      if(value_type==AttrType::NULLS&&!(field_meta->nullable())) //如果value为null且该字段不能为空 返回failure 如果为null 返回failure
+      {
+           LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
           table_name, field_meta->name(), field_type, value_type);
-      return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+          return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+      }
+      else if(value_type!=AttrType::NULLS){
+        //  LOG_WARN("field type mismatch. table=%s, field=%s, field type=%d, value_type=%d",
+        //   table_name, field_meta->name(), field_type, value_type);
+        //   return RC::SCHEMA_FIELD_TYPE_MISMATCH;
+        input_typecast(&update.value[i], field_type);
+      }
     }
     }
-  
-
-
 
   //过滤条件
   std::unordered_map<std::string, Table *> table_map;

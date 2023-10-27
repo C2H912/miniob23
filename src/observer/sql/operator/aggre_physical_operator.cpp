@@ -18,8 +18,9 @@ See the Mulan PSL v2 for more details. */
 #include "sql/stmt/filter_stmt.h"
 #include "storage/field/field.h"
 
-AggrePhysicalOperator::AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields)
-: fields_(fields), aggr_fields_(aggr_fields)
+AggrePhysicalOperator::AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
+    const std::vector<std::string> &spec)
+: fields_(fields), aggr_fields_(aggr_fields),spec_(spec)
 {}
 
 RC AggrePhysicalOperator::open(Trx *trx)
@@ -65,6 +66,9 @@ RC AggrePhysicalOperator::next()
     all_tuple.push_back(one_tuple);
   }
   
+  if((int)all_tuple.size() == 0){
+    return RC::RECORD_EOF;
+  }
   rc = do_aggre_func(all_tuple);
   if (rc != RC::SUCCESS) {
     return rc;
@@ -84,12 +88,29 @@ RC AggrePhysicalOperator::do_aggre_func(std::vector<std::vector<Value>>& all_tup
     ret_field.set_field(fields_[i].meta());
     ret_specs.push_back(ret_field);
     if(aggr_fields_[i] == COUNTF){
-      Value ret;
-      ret.set_int((int)all_tuple.size());
-      ret_tuple.push_back(ret);
-      continue;
+      if(spec_[i] == "*"){
+        Value ret;
+        ret.set_int((int)all_tuple.size());
+        ret_tuple.push_back(ret);
+        continue;
+      }
+      else{
+        int count = 0;
+        for(int j = 0; j < (int)all_tuple.size(); j++){
+          if(all_tuple[j][i].attr_type() == NULLS){
+            continue;
+          }
+          else{
+            count++;
+          }
+        }
+        Value ret;
+        ret.set_int(count);
+        ret_tuple.push_back(ret);
+        continue;
+      }
     }
-    switch(all_tuple[0][i].attr_type()){
+    switch(fields_[i].attr_type()){
     case INTS:{
       ret_tuple.push_back(do_int(all_tuple, i));
       break;
@@ -118,41 +139,75 @@ RC AggrePhysicalOperator::do_aggre_func(std::vector<std::vector<Value>>& all_tup
 
 Value AggrePhysicalOperator::do_int(std::vector<std::vector<Value>>& all_tuple, int index)
 {
-  int max_value = all_tuple[0][index].get_int();
-  int min_value = all_tuple[0][index].get_int();
+  Value max_value(all_tuple[0][index]);
+  Value min_value(all_tuple[0][index]);
   int sum = 0;
   float avg = 0.0;
 
   int size = all_tuple.size();
   for(int i = 0; i < size; i++){
     Value tuplecell = all_tuple[i][index];
-    int temp = tuplecell.get_int();
-    if(max_value < temp){
-      max_value = temp;
+    if(tuplecell.attr_type() == NULLS){
+      continue;
     }
-    if(min_value > temp){
-      min_value = temp;
+    int temp = tuplecell.get_int();
+    if(max_value.attr_type() == NULLS){
+      max_value = tuplecell;
+    }
+    else{
+      if(max_value.get_int() < temp){
+        max_value = tuplecell;
+      }
+    }
+    if(min_value.attr_type() == NULLS){
+      //
+    }
+    else{
+      if(min_value.get_int() > temp){
+        min_value = tuplecell;
+      }
     }
     sum += temp;
   }
-  avg = (float)sum / (float)all_tuple.size();
+
+  int count = 0;
+  for(int j = 0; j < (int)all_tuple.size(); j++){
+    if(all_tuple[j][index].attr_type() == NULLS){
+      continue;
+    }
+    else{
+      count++;
+    }
+  }
+  if(count == 0){
+    avg = 0.0;
+  }
+  else{
+    avg = (float)sum / (float)count;
+  }
 
   Value ret;
   if(aggr_fields_[index] == MAXF){
-    ret.set_type(INTS);
-    ret.set_int(max_value);
+    ret = max_value;
   }
   if(aggr_fields_[index] == MINF){
-    ret.set_type(INTS);
-    ret.set_int(min_value);
+    ret = min_value;
   }
   if(aggr_fields_[index] == SUMF){
-    ret.set_type(INTS);
-    ret.set_int(sum);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_int(sum);
+    }
   }
   if(aggr_fields_[index] == AVGF){
-    ret.set_type(FLOATS);
-    ret.set_float(avg);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(avg);
+    }
   }
 
   return ret;
@@ -168,15 +223,43 @@ Value AggrePhysicalOperator::do_char(std::vector<std::vector<Value>>& all_tuple,
   int size = all_tuple.size();
   for(int i = 0; i < size; i++){
     Value tuplecell(all_tuple[i][index]);
-    if((max_value.compare(tuplecell)) < 0){
+    if(tuplecell.attr_type() == NULLS){
+      continue;
+    }
+    if(max_value.attr_type() == NULLS){
       max_value = tuplecell;
     }
-    if((min_value.compare(tuplecell)) > 0){
-      min_value = tuplecell;
+    else{
+      if((max_value.compare(tuplecell)) < 0){
+        max_value = tuplecell;
+      }
+    }
+    if(min_value.attr_type() == NULLS){
+      //
+    }
+    else{
+      if((min_value.compare(tuplecell)) > 0){
+        min_value = tuplecell;
+      }
     }
     sum += strtod(tuplecell.data(), nullptr);
   }
-  avg = (float)sum / (float)all_tuple.size();
+
+  int count = 0;
+  for(int j = 0; j < (int)all_tuple.size(); j++){
+    if(all_tuple[j][index].attr_type() == NULLS){
+      continue;
+    }
+    else{
+      count++;
+    }
+  }
+  if(count == 0){
+    avg = 0.0;
+  }
+  else{
+    avg = (float)sum / (float)count;
+  }
 
   Value ret;
   if(aggr_fields_[index] == MAXF){
@@ -186,12 +269,20 @@ Value AggrePhysicalOperator::do_char(std::vector<std::vector<Value>>& all_tuple,
     ret = min_value;
   }
   if(aggr_fields_[index] == SUMF){
-    ret.set_type(FLOATS);
-    ret.set_float(sum);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(sum);
+    }
   }
   if(aggr_fields_[index] == AVGF){
-    ret.set_type(FLOATS);
-    ret.set_float(avg);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(avg);
+    }
   }
 
   return ret;
@@ -199,41 +290,75 @@ Value AggrePhysicalOperator::do_char(std::vector<std::vector<Value>>& all_tuple,
 
 Value AggrePhysicalOperator::do_float(std::vector<std::vector<Value>>& all_tuple, int index)
 {
-  float max_value = all_tuple[0][index].get_float();
-  float min_value = all_tuple[0][index].get_float();
+  Value max_value(all_tuple[0][index]);
+  Value min_value(all_tuple[0][index]);
   float sum = 0;
   float avg = 0;
 
   int size = all_tuple.size();
   for(int i = 0; i < size; i++){
     Value tuplecell = all_tuple[i][index];
-    float temp = tuplecell.get_float();
-    if(max_value < temp){
-      max_value = temp;
+    if(tuplecell.attr_type() == NULLS){
+      continue;
     }
-    if(min_value > temp){
-      min_value = temp;
+    float temp = tuplecell.get_float();
+    if(max_value.attr_type() == NULLS){
+      max_value = tuplecell;
+    }
+    else{
+      if(max_value.get_float() < temp){
+        max_value = tuplecell;
+      }
+    }
+    if(min_value.attr_type() == NULLS){
+      //
+    }
+    else{
+      if(min_value.get_float() > temp){
+        min_value = tuplecell;
+      }
     }
     sum += temp;
   }
-  avg = (float)sum / (float)all_tuple.size();
+
+  int count = 0;
+  for(int j = 0; j < (int)all_tuple.size(); j++){
+    if(all_tuple[j][index].attr_type() == NULLS){
+      continue;
+    }
+    else{
+      count++;
+    }
+  }
+  if(count == 0){
+    avg = 0.0;
+  }
+  else{
+    avg = (float)sum / (float)count;
+  }
 
   Value ret;
   if(aggr_fields_[index] == MAXF){
-    ret.set_type(FLOATS);
-    ret.set_float(max_value);
+    ret = max_value;
   }
   if(aggr_fields_[index] == MINF){
-    ret.set_type(FLOATS);
-    ret.set_float(min_value);
+    ret = min_value;
   }
   if(aggr_fields_[index] == SUMF){
-    ret.set_type(FLOATS);
-    ret.set_float(sum);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(sum);
+    }
   }
   if(aggr_fields_[index] == AVGF){
-    ret.set_type(FLOATS);
-    ret.set_float(avg);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(avg);
+    }
   }
 
   return ret;
@@ -249,18 +374,46 @@ Value AggrePhysicalOperator::do_date(std::vector<std::vector<Value>>& all_tuple,
   int size = all_tuple.size();
   for(int i = 0; i < size; i++){
     Value tuplecell = all_tuple[i][index];
+    if(tuplecell.attr_type() == NULLS){
+      continue;
+    }
     char* tmp = (char *)tuplecell.ret_str().c_str();
     int tempdate = date2int(tmp);
     tuplecell.set_only_int(tempdate);
-    if(max_value.compare(tuplecell) < 0){
+    if(max_value.attr_type() == NULLS){
       max_value = tuplecell;
     }
-    if(min_value.compare(tuplecell) > 0){
-      min_value = tuplecell;
+    else{
+      if(max_value.compare(tuplecell) < 0){
+        max_value = tuplecell;
+      }
+    }
+    if(min_value.attr_type() == NULLS){
+      //
+    }
+    else{
+      if(min_value.compare(tuplecell) > 0){
+        min_value = tuplecell;
+      }
     }
     sum += tempdate;
   }
-  avg = (float)sum / (float)all_tuple.size();
+
+  int count = 0;
+  for(int j = 0; j < (int)all_tuple.size(); j++){
+    if(all_tuple[j][index].attr_type() == NULLS){
+      continue;
+    }
+    else{
+      count++;
+    }
+  }
+  if(count == 0){
+    avg = 0.0;
+  }
+  else{
+    avg = (float)sum / (float)count;
+  }
 
   Value ret;
   if(aggr_fields_[index] == MAXF){
@@ -270,12 +423,20 @@ Value AggrePhysicalOperator::do_date(std::vector<std::vector<Value>>& all_tuple,
     ret = min_value;
   }
   if(aggr_fields_[index] == SUMF){
-    ret.set_type(INTS);
-    ret.set_int(sum);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(sum);
+    }
   }
   if(aggr_fields_[index] == AVGF){
-    ret.set_type(FLOATS);
-    ret.set_float(avg);
+    if(count == 0){
+      ret.set_null_value();
+    }
+    else{
+      ret.set_float(avg);
+    }
   }
 
   return ret;

@@ -39,6 +39,8 @@ enum class ExprType
   STAR,         ///< 星号，表示所有字段
   FIELD,        ///< 字段。在实际执行时，根据行数据内容提取对应字段的值
   VALUE,        ///< 常量值
+  VALUELIST,        ///< 常量列
+  QUERY,        ///< 子查询
   CAST,         ///< 需要做类型转换的表达式
   COMPARISON,   ///< 需要做比较的表达式
   CONJUNCTION,  ///< 多个表达式使用同一种关系(AND或OR)来联结
@@ -94,6 +96,16 @@ public:
   virtual std::string name() const { return name_; }
   virtual void set_name(std::string name) { name_ = name; }
 
+  /**
+   * 返回子表
+   */
+  virtual std::vector<std::vector<Value>> sub_table() const = 0;
+
+  /**
+   * 返回操作符类型
+   */
+  virtual int expr_type() const = 0;
+
 private:
   std::string  name_;
 };
@@ -126,6 +138,20 @@ public:
 
   RC get_value(const Tuple &tuple, Value &value) const override;
 
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    Value ret(10000);
+    std::vector<Value> ret1;
+    ret1.push_back(ret);
+    std::vector<std::vector<Value>> ret2;
+    ret2.push_back(ret1);
+    return ret2;
+  }
+
+  int expr_type() const override {
+    return 1;
+  }
+
 private:
   Field field_;
 };
@@ -154,8 +180,94 @@ public:
 
   const Value &get_value() const { return value_; }
 
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    Value ret(10000);
+    std::vector<Value> ret1;
+    ret1.push_back(ret);
+    std::vector<std::vector<Value>> ret2;
+    ret2.push_back(ret1);
+    return ret2;
+  }
+
+  int expr_type() const override {
+    return 0;
+  }
+
 private:
   Value value_;
+};
+
+/**
+ * @brief 常量值列表达式
+ * @ingroup Expression
+ */
+class ValueListExpr : public Expression 
+{
+public:
+  ValueListExpr(const std::vector<Value> &value_list);
+  virtual ~ValueListExpr();
+
+  RC get_value(const Tuple &tuple, Value &value) const override;
+
+  RC try_get_value(Value &value) const override { return RC::SUCCESS; }
+
+  ExprType type() const override { return ExprType::VALUELIST; }
+
+  AttrType value_type() const override { return INTS; }
+
+  std::vector<std::vector<Value>> sub_table() const override {
+    std::vector<std::vector<Value>> ret;
+    for(size_t i = 0; i < value_list_.size(); i++){
+      std::vector<Value> temp;
+      temp.push_back(value_list_[i]);
+      ret.push_back(temp);
+    }
+    return ret;
+  }
+
+  int expr_type() const override {
+    return 3;
+  }
+
+private:
+  std::vector<Value> value_list_;
+};
+
+/**
+ * @brief 子查询表达式
+ * @ingroup Expression
+ */
+class SubQueryExpr : public Expression 
+{
+public:
+  //explicit SubQueryExpr(const SelectStmt &stmt, std::unique_ptr<PhysicalOperator> oper) 
+  //  : sub_query_(stmt), operator_(std::move(oper))
+  //{}
+  SubQueryExpr(std::vector<std::vector<Value>> &sub_table);
+  virtual ~SubQueryExpr();
+
+  RC get_value(const Tuple &tuple, Value &value) const override;
+
+  ExprType type() const override { return ExprType::QUERY; }
+
+  AttrType value_type() const override { return INTS; }
+
+  //void get_stmt(SelectStmt &stmt) const { stmt = sub_query_; }
+
+  //const SelectStmt &get_stmt() const { return sub_query_; }
+
+  RC try_get_value(Value &value) const override { return RC::SUCCESS; }
+
+  std::vector<std::vector<Value>> sub_table() const override { return sub_table_; }
+
+  int expr_type() const override {
+    return -1;
+  }
+
+private:
+  //SelectStmt sub_query_;
+  std::vector<std::vector<Value>> sub_table_;
 };
 
 /**
@@ -179,6 +291,20 @@ public:
   AttrType value_type() const override { return cast_type_; }
 
   std::unique_ptr<Expression> &child() { return child_; }
+
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    Value ret(10000);
+    std::vector<Value> ret1;
+    ret1.push_back(ret);
+    std::vector<std::vector<Value>> ret2;
+    ret2.push_back(ret1);
+    return ret2;
+  }
+
+  int expr_type() const override {
+    return 4;
+  }
 
 private:
   RC cast(const Value &value, Value &cast_value) const;
@@ -204,6 +330,16 @@ public:
 
   AttrType value_type() const override { return BOOLEANS; }
 
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    Value ret(10000);
+    std::vector<Value> ret1;
+    ret1.push_back(ret);
+    std::vector<std::vector<Value>> ret2;
+    ret2.push_back(ret1);
+    return ret2;
+  }
+
   CompOp comp() const { return comp_; }
 
   std::unique_ptr<Expression> &left()  { return left_;  }
@@ -220,6 +356,10 @@ public:
    * @param value the result of comparison
    */
   RC compare_value(const Value &left, const Value &right, bool &value) const;
+
+  int expr_type() const override {
+    return 5;
+  }
 
 private:
   CompOp comp_;
@@ -251,9 +391,23 @@ public:
 
   RC get_value(const Tuple &tuple, Value &value) const override;
 
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    Value ret(10000);
+    std::vector<Value> ret1;
+    ret1.push_back(ret);
+    std::vector<std::vector<Value>> ret2;
+    ret2.push_back(ret1);
+    return ret2;
+  }
+
   Type conjunction_type() const { return conjunction_type_; }
 
   std::vector<std::unique_ptr<Expression>> &children() { return children_; }
+
+  int expr_type() const override {
+    return 6;
+  }
 
 private:
   Type conjunction_type_;
@@ -286,6 +440,20 @@ public:
 
   RC get_value(const Tuple &tuple, Value &value) const override;
   RC try_get_value(Value &value) const override;
+
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    Value ret(10000);
+    std::vector<Value> ret1;
+    ret1.push_back(ret);
+    std::vector<std::vector<Value>> ret2;
+    ret2.push_back(ret1);
+    return ret2;
+  }
+
+  int expr_type() const override {
+    return 7;
+  }
 
   Type arithmetic_type() const { return arithmetic_type_; }
 
