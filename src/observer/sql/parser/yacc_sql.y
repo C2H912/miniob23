@@ -645,7 +645,7 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT select_attr FROM ID rel_list join_list opt_order_by where
+    SELECT select_attr FROM ID rel_list join_list where opt_order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
       if ($2 != nullptr) {
@@ -663,14 +663,14 @@ select_stmt:        /*  select 语句的语法解析树*/
         delete $6;
         std::reverse($$->selection.joinTables.begin(), $$->selection.joinTables.end());
       }
-      if ($7 != nullptr) {
-        $$->selection.orderBy.swap(*$7);
-        delete $7;
+      if ($8 != nullptr) {
+        $$->selection.orderBy.swap(*$8);
+        delete $8;
       }
 
-      if ($8 != nullptr) {
-        $$->selection.conditions.swap(*$8);
-        delete $8;
+      if ($7 != nullptr) {
+        $$->selection.conditions.swap(*$7);
+        delete $7;
       }
       free($4);
     }
