@@ -88,4 +88,5 @@ private:
   int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
   OrderByStmt *order_by_stmt_ = nullptr;
+  std::vector<std::unique_ptr<Expression>> expressions_;
 };

@@ -39,11 +39,13 @@ enum class ExprType
   STAR,         ///< 星号，表示所有字段
   FIELD,        ///< 字段。在实际执行时，根据行数据内容提取对应字段的值
   VALUE,        ///< 常量值
-  VALUELIST,        ///< 常量列
+  VALUELIST,    ///< 常量列
   QUERY,        ///< 子查询
   CAST,         ///< 需要做类型转换的表达式
   COMPARISON,   ///< 需要做比较的表达式
   CONJUNCTION,  ///< 多个表达式使用同一种关系(AND或OR)来联结
+  ALU,
+  AGGRE,
   ARITHMETIC,   ///< 算术运算
 };
 
@@ -467,4 +469,92 @@ private:
   Type arithmetic_type_;
   std::unique_ptr<Expression> left_;
   std::unique_ptr<Expression> right_;
+};
+
+/**
+ * @brief 我自己的算术表达式，不想破坏原有的结构
+ * @ingroup Expression
+ */
+class ALUExpr : public Expression 
+{
+public:
+  enum class Type2 {
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    NEGATIVE,
+  };
+
+public:
+  ALUExpr(Type2 type, Expression *left, Expression *right);
+  virtual ~ALUExpr() = default;
+
+  ExprType type() const override { return ExprType::ALU; }
+
+  AttrType value_type() const override;
+
+  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC try_get_value(Value &value) const override;
+
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    std::vector<std::vector<Value>> ret;
+    return ret;
+  }
+
+  int expr_type() const override {
+    return 8;
+  }
+
+  Type2 alu_type() const { return alu_type_; }
+
+  Expression* left() { return left_; }
+  Expression* right() { return right_; }
+
+private:
+  RC calc_value(const Value &left_value, const Value &right_value, Value &value) const;
+  
+private:
+  Type2 alu_type_;
+  Expression* left_;
+  Expression* right_;
+};
+
+/**
+ * @brief 聚合表达式
+ * @ingroup Expression
+ */
+class AggreExpr : public Expression 
+{
+public:
+  AggreExpr(AggrOp type, Expression *child);
+  virtual ~AggreExpr() = default;
+
+  ExprType type() const override { return ExprType::AGGRE; }
+
+  AttrType value_type() const override { return AttrType::UNDEFINED; }
+
+  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC try_get_value(Value &value) const override;
+
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    std::vector<std::vector<Value>> ret;
+    return ret;
+  }
+
+  int expr_type() const override {
+    return 9;
+  }
+
+  AggrOp aggre_type() const { return aggre_type_; }
+  Expression* child() { return child_; }
+
+private:
+  RC calc_value(const Value &left_value, const Value &right_value, Value &value) const;
+  
+private:
+  AggrOp aggre_type_;
+  Expression* child_;
 };

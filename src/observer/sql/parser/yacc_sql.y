@@ -166,6 +166,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <comp>                comp_op
 %type <aggr>                aggr_func;
 %type <rel_attr>            rel_attr
+%type <rel_attr>            cal_attr
 %type <attr_infos>          attr_def_list
 %type <attr_info>           attr_def
 %type <value_list>          value_list
@@ -665,33 +666,39 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT select_attr FROM ID rel_list join_list where opt_order_by
+    SELECT expression_list FROM ID rel_list join_list where opt_order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
+
       if ($2 != nullptr) {
-        $$->selection.attributes.swap(*$2);
+        std::reverse($2->begin(), $2->end());
+        $$->selection.expressions.swap(*$2);
         delete $2;
       }
+
       if ($5 != nullptr) {
         $$->selection.relations.swap(*$5);
         delete $5;
       }
       $$->selection.relations.push_back($4);
       std::reverse($$->selection.relations.begin(), $$->selection.relations.end());
+
       if ($6 != nullptr) {
         $$->selection.joinTables.swap(*$6);
         delete $6;
         std::reverse($$->selection.joinTables.begin(), $$->selection.joinTables.end());
-      }
-      if ($8 != nullptr) {
-        $$->selection.orderBy.swap(*$8);
-        delete $8;
       }
 
       if ($7 != nullptr) {
         $$->selection.conditions.swap(*$7);
         delete $7;
       }
+
+      if ($8 != nullptr) {
+        $$->selection.orderBy.swap(*$8);
+        delete $8;
+      }
+
       free($4);
     }
     ;
@@ -850,8 +857,55 @@ expression:
       $$->set_name(token_name(sql_string, &@$));
       delete $1;
     }
+    | cal_attr {
+      std::string table = $1->relation_name;
+      std::string attribute = $1->attribute_name;
+      AggrOp aggre = $1->aggr_func;
+      $$ = new FieldExpr(table, attribute, aggre);
+      $$->set_name(token_name(sql_string, &@$));
+      delete $1;
+    }
     ;
-
+cal_attr:
+    ID {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $1;
+      $$->aggr_func = UNKNOWN;
+      @$ = @1;
+      free($1);
+    }
+    | ID DOT ID {
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $1;
+      $$->attribute_name = $3;
+      $$->aggr_func = UNKNOWN;
+      @$ = @1;
+      free($1);
+      free($3);
+    }
+    | aggr_func LBRACE '*' RBRACE {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = "*";
+      $$->aggr_func = $1;
+      @$ = @1;
+    }
+    | aggr_func LBRACE ID RBRACE {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $3;
+      $$->aggr_func = $1;
+      @$ = @1;
+      free($3);
+    }
+    | aggr_func LBRACE ID DOT ID RBRACE {
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $3;
+      $$->attribute_name = $5;
+      $$->aggr_func = $1;
+      @$ = @1;
+      free($3);
+      free($5);
+    }
+    ;
 select_attr:
     '*' {
       $$ = new std::vector<RelAttrSqlNode>;
