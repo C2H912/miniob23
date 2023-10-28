@@ -67,7 +67,7 @@ void input_typecast(Value *input, AttrType output_type)
       int tempi = 0;
       float tempf = 0.0;
       string2number2(input->ret_str().c_str(), tempi, tempf);
-      input->set_float(tempi);
+      input->set_float(tempf);
       break;
     } 
     }

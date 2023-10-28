@@ -59,8 +59,6 @@ RC UpdatePhysicalOperator::open(Trx *trx)
 
 RC UpdatePhysicalOperator::next()
 {
-  //return RC::RECORD_EOF;
-
   RC rc = RC::RECORD_EOF;
   if (children_.empty()) {
     return RC::RECORD_EOF;

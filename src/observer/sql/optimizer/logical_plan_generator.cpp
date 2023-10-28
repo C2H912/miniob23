@@ -423,7 +423,7 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
   logical_operator = std::move(update_oper);
 
   //输出调试信息 查看增加了哪些索引
-  sql_debug(value_name.data()->c_str());
+  //sql_debug(value_name.data()->c_str());
   return rc;
 }
 
