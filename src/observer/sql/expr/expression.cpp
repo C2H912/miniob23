@@ -665,18 +665,12 @@ RC AggreExpr::get_value(const Tuple &tuple, Value &value) const
   RC rc = RC::SUCCESS;
 
   Value left_value;
-  Value right_value;
-
-  rc = left_->get_value(tuple, left_value);
+  rc = child_->get_value(tuple, left_value);
   if (rc != RC::SUCCESS) {
     LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
     return rc;
   }
-  rc = right_->get_value(tuple, right_value);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of right expression. rc=%s", strrc(rc));
-    return rc;
-  }
+
   return calc_value(left_value, right_value, value);
 }
 

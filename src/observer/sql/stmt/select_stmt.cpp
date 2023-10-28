@@ -269,7 +269,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 }
 #endif
 
-void dfs(std::unique_ptr<Expression> current, std::vector<RelAttrSqlNode>& attr, std::vector<std::string>& relation)
+void dfs(Expression* current, std::vector<RelAttrSqlNode>& attr, std::vector<std::string>& relation)
 {
   if(current->type() == ExprType::VALUE){
     return;
