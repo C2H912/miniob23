@@ -18,6 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include <memory>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include "sql/parser/value.h"
 
@@ -135,7 +136,7 @@ struct SelectSqlNode
 {
   std::vector<RelAttrSqlNode>     attributes;     ///< attributes in select clause
   std::vector<std::string>        relations;      ///< 查询的表
-  std::vector<std::string>        rel_alias;      ///< 表别名
+  std::unordered_map<std::string,std::string>        rel_alias;///< 表别名
   std::vector<ConditionSqlNode>   conditions;     ///< 查询条件，使用AND串联起来多个条件
   std::vector<InnerJoinSqlNode>   joinTables;     ///< INNER JOIN
   std::vector<OrderBySqlNode>     orderBy;

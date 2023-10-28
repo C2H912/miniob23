@@ -69,4 +69,5 @@ public:
 private:
   const Table *table_ = nullptr;
   const FieldMeta *field_ = nullptr;
+  //std::string alias;
 };
