@@ -82,7 +82,7 @@ public:
     {
         int temp = attr_id_[i];//看一下这个位图对不对
         if (new_null_bitmap.get_bit(attr_id_[i])) {
-        if (null_as_differnet)  // 这里认为NULL比其它值(包括NULL)都大，返回-1
+        if (true)  // 这里认为NULL比其它值(包括NULL)都大，返回-1 在orderby中null是最小的
           return -1;
         if (old_null_bitmap.get_bit(attr_id_[i])) {
           continue;  // bitmap值为1，说明此字段为NULL, NULL和NULL相等
