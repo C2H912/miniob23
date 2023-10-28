@@ -99,6 +99,44 @@ public:
     return str_value_;
   }
 
+  bool is_null() const
+  {
+    if(AttrType::NULLS==attr_type_)
+    return true;
+    return false;
+  }
+
+  bool operator==(const Value &other) const
+  {
+    return 0 == compare(other);
+  }
+
+  bool operator!=(const Value &other) const
+  {
+    return 0 != compare(other);
+  }
+
+  bool operator<(const Value &other) const
+  {
+    return 0 > compare(other);
+  }
+
+  bool operator<=(const Value &other) const
+  {
+    return 0 >= compare(other);
+  }
+
+  bool operator>(const Value &other) const
+  {
+    return 0 < compare(other);
+  }
+
+  bool operator>=(const Value &other) const
+  {
+    return 0 <= compare(other);
+  }
+
+
 public:
   /**
    * 获取对应的值

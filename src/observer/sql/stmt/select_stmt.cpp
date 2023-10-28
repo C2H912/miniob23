@@ -11,6 +11,13 @@ See the Mulan PSL v2 for more details. */
 //
 // Created by Wangyunlai on 2022/6/6.
 //
+// #define DEFER_WHEN_NOT_NULL(ptr) \
+//   DEFER([ptr]() {                \
+//     if (nullptr != (ptr)) {      \
+//       delete (ptr);              \
+//     }                            \
+//   });
+
 
 #include "sql/stmt/select_stmt.h"
 #include "sql/stmt/filter_stmt.h"
@@ -18,6 +25,9 @@ See the Mulan PSL v2 for more details. */
 #include "common/lang/string.h"
 #include "storage/db/db.h"
 #include "storage/table/table.h"
+#include "sql/stmt/order_by_stmt.h"
+
+
 
 SelectStmt::~SelectStmt()
 {
@@ -36,7 +46,7 @@ static void wildcard_fields(Table *table, std::vector<Field> &field_metas)
   }
 }
 
-RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt, std::unordered_map<std::string, Table *> parents)
+RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unordered_map<std::string,Table* > parents)
 {
   if (nullptr == db) {
     LOG_WARN("invalid argument. db is null");
@@ -233,7 +243,17 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt, std:
     return rc;
   }
 
-// -------------- everything alright ----------------
+  OrderByStmt *orderby_stmt = nullptr;
+  //DEFER_WHEN_NOT_NULL(orderby_stmt);//在离开作用域时，检查orderby_stmt,如果不为空 delete
+  if (0 != select_sql.orderBy.size()) {
+    rc = OrderByStmt::create(db, default_table, &table_map, select_sql.orderBy, select_sql.orderBy.size(), orderby_stmt);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("cannot construct order by stmt");
+      return rc;
+    }
+  }
+
+  // everything alright
   SelectStmt *select_stmt = new SelectStmt();
   // TODO add expression copy
   select_stmt->tables_.swap(tables);
@@ -242,6 +262,7 @@ RC SelectStmt::create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt, std:
   select_stmt->aggr_specs_.swap(aggr_specs);
   select_stmt->filter_stmt_ = filter_stmt;
   select_stmt->conjunction_flag_ = conjunction_flag;
+  select_stmt->order_by_stmt_ = orderby_stmt;
   stmt = select_stmt;
   return RC::SUCCESS;
 }

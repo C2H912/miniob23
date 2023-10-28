@@ -25,6 +25,7 @@ class FieldMeta;
 class FilterStmt;
 class Db;
 class Table;
+class OrderByStmt;
 
 /**
  * @brief 表示select语句
@@ -42,7 +43,7 @@ public:
   }
 
 public:
-  static RC create(Db *db, const SelectSqlNode &select_sql, Stmt *&stmt, std::unordered_map<std::string, Table *> parents);
+  static RC create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unordered_map<std::string,Table* > parents);
 
 public:
   std::vector<Table *> &tables_without_const()
@@ -74,6 +75,11 @@ public:
     return conjunction_flag_;
   }
 
+  OrderByStmt *order_by_stmt()
+  {
+    return order_by_stmt_;
+  }
+
 private:
   std::vector<Field> query_fields_;
   std::vector<AggrOp> aggr_fields_;
@@ -81,4 +87,5 @@ private:
   std::vector<Table *> tables_;
   int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
+  OrderByStmt *order_by_stmt_ = nullptr;
 };

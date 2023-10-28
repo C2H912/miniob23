@@ -20,7 +20,7 @@ See the Mulan PSL v2 for more details. */
 
 AggrePhysicalOperator::AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
     const std::vector<std::string> &spec)
-: fields_(fields), aggr_fields_(aggr_fields),spec_(spec)
+:fields_(fields), aggr_fields_(aggr_fields),spec_(spec)
 {}
 
 RC AggrePhysicalOperator::open(Trx *trx)
