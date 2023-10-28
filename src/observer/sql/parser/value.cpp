@@ -145,7 +145,6 @@ void Value::set_string(const char *s, int len /*= 0*/)
   length_ = str_value_.length();
   if (length_ > 65535){
     attr_type_ = UNDEFINED;
-    length_ = 0;
   }
 }
 
@@ -334,7 +333,6 @@ int Value::compare(const Value &other) const
         char* tmp = (char *)this->str_value_.c_str();
         int tempdate = date2int(tmp);
         void* datetocomp = &tempdate;
-
         return common::compare_int(datetocomp, (void *)&other.num_value_.int_value_);
       } break;
       case CHARS: {
@@ -356,7 +354,7 @@ int Value::compare(const Value &other) const
   } else if (this->attr_type_ == FLOATS && other.attr_type_ == INTS) {
     float other_data = other.num_value_.int_value_;
     return common::compare_float((void *)&this->num_value_.float_value_, (void *)&other_data);
-  } else if (this->attr_type_ == CHARS && other.attr_type_ == FLOATS) {   //
+  } else if (this->attr_type_ == CHARS && other.attr_type_ == FLOATS) {   //.
     const char *this_data = this->ret_str().c_str();
     int ret1 = -1;
     float ret2 = -1.0;

@@ -212,6 +212,11 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 // ---------- create filter statement in `where` statement ----------
   FilterStmt *filter_stmt = nullptr;
   std::vector<ConditionSqlNode> all_filters;
+  int conjunction_flag = -1;
+  //conjunction flag
+  if((int)select_sql.conditions.size() > 1){
+    conjunction_flag = select_sql.conditions[1].conjunction;
+  }
   //一般的where条件
   for(size_t i = 0; i < select_sql.conditions.size(); i++){
     all_filters.push_back(select_sql.conditions[i]);
@@ -257,6 +262,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   select_stmt->aggr_specs_.swap(aggr_specs);
   select_stmt->filter_stmt_ = filter_stmt;
   select_stmt->order_by_stmt_ = orderby_stmt;
+  select_stmt->conjunction_flag_ = conjunction_flag;
   stmt = select_stmt;
   return RC::SUCCESS;
 }

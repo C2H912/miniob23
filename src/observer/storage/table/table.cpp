@@ -373,18 +373,22 @@ RC Table::make_record_for_update(
   // 由make_record修改而来，修改对应字段的record位置即可
   // 检查字段是否存在 类型是否正确 但是stmt好像也检查了一遍 等下对比一下
 
-  int attr_num =
-      table_meta_.field_num() - table_meta_.sys_field_num() - table_meta_.extra_filed_num();  // 该表的字段数量
+  int attr_num = table_meta_.field_num() - table_meta_.sys_field_num() - table_meta_.extra_filed_num();  // 该表的字段数量
   const int normal_field_start_index = table_meta_.sys_field_num();
   
   for (int j = 0; j < value_num; j++) {
     // 测试不同字段是否存在于表中
-    int          count = 0;
+    int count = 0;
     Value &value = values[j];
-    for (int i = 0; i < attr_num; i++) {
-      int              idx   = i + normal_field_start_index;
-      const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
+    //如果是无效的数据直接返回失败即可
+    if(value.attr_type() == UPDATE_FAIL){
+      LOG_ERROR("update sub query table invalid");
+      return RC::INVALID_ARGUMENT;
+    }
 
+    for (int i = 0; i < attr_num; i++) {
+      int idx = i + normal_field_start_index;
+      const FieldMeta *field = table_meta_.field(i + normal_field_start_index);
       // 先找到对应的字段 检查属性
       if (0 == strcmp(field->name(), values_name[j].c_str())) {
         if (field->type() != value.attr_type()) {
@@ -412,12 +416,12 @@ RC Table::make_record_for_update(
   // 感觉很浪费欸 进行了两次循环
 
   // 复制所有字段的值
-  int              record_size = table_meta_.record_size();
-  char            *record_data = (char *)malloc(record_size);
+  int record_size = table_meta_.record_size();
+  char *record_data = (char *)malloc(record_size);
 
   const FieldMeta *null_field  = table_meta_.null_bitmap_field();
-  memcpy(record_data + null_field->offset(),record_in+ null_field->offset(),null_field->len());
-  common::Bitmap   bitmap(record_data + null_field->offset(), null_field->len());//你这个bitmap根本就是随便找的
+  memcpy(record_data + null_field->offset(), record_in + null_field->offset(), null_field->len());
+  common::Bitmap bitmap(record_data + null_field->offset(), null_field->len());//你这个bitmap根本就是随便找的
   //拿的不是record的bitmap
 
   for (int i = 0; i < attr_num; i++) {
@@ -427,16 +431,16 @@ RC Table::make_record_for_update(
     // 新增的for循环
     for (int j = 0; j < value_num; j++) {
       if (0 == strcmp(field->name(), values_name[j].c_str())) {
-        size_t       copy_len = field->len();
-        const Value &value    = values[j];
+        size_t copy_len = field->len();
+        const Value &value = values[j];
 
         if (AttrType::NULLS == value.attr_type()) {  // 检查是否为空值
           if (!field->nullable()) {
             LOG_ERROR("Invalid value type. Cannot be null. table name =%s, field name=%s, type=%d, but given=%d",
-          table_meta_.name(),
-          field->name(),
-          field->type(),
-          value.attr_type());
+              table_meta_.name(),
+              field->name(),
+              field->type(),
+              value.attr_type());
             return RC::SCHEMA_FIELD_TYPE_MISMATCH;
           }
           bitmap.set_bit(idx);  // 这里已经改变了bitmap

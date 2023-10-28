@@ -140,9 +140,9 @@ RC CliCommunicator::read_event(SessionEvent *&event)
   return RC::SUCCESS;
 }
 
-RC CliCommunicator::write_result(SessionEvent *event, bool &need_disconnect)
+RC CliCommunicator::write_result(SessionEvent *event, bool &need_disconnect, RC sql_rc)
 {
-  RC rc = PlainCommunicator::write_result(event, need_disconnect);
+  RC rc = PlainCommunicator::write_result(event, need_disconnect, sql_rc);
   need_disconnect = false;
   return rc;
 }

@@ -156,9 +156,19 @@ RC PlainCommunicator::write_debug(SessionEvent *request, bool &need_disconnect)
   return RC::SUCCESS;
 }
 
-RC PlainCommunicator::write_result(SessionEvent *event, bool &need_disconnect)
+RC PlainCommunicator::write_result(SessionEvent *event, bool &need_disconnect, RC sql_rc)
 {
-  RC rc = write_result_internal(event, need_disconnect);
+  RC rc = RC::SUCCESS;
+  if(sql_rc != RC::SUCCESS){
+    SqlResult *sql_result = event->sql_result();
+    writer_->clean();
+    sql_result->close();
+    sql_result->set_return_code(sql_rc);
+    rc = write_state(event, need_disconnect);
+  }
+  else{
+    rc = write_result_internal(event, need_disconnect);
+  }
   if (!need_disconnect) {
     (void)write_debug(event, need_disconnect);
   }

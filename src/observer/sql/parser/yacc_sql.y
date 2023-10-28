@@ -58,6 +58,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         NULLABLE
         IN
         IS
+        OR
         CREATE
         DROP
         TABLE
@@ -597,17 +598,28 @@ update_stmt:      /*  update 语句的语法解析树*/
     {
       $$ = new ParsedSqlNode(SCF_UPDATE);
       $$->update.relation_name = $2;
-      //std::vector<SetVariableSqlNode> *u_list;
+
       std::vector<SetVariableSqlNode> u_list;
       if($5!=nullptr){
           u_list.swap(*$5);
           delete $5;
       }
       u_list.push_back(*$4);
-      for(int i = u_list.size();i>0;i--)
+      for(int i = u_list.size(); i > 0 ;i--)
       {
         $$->update.attribute_name.push_back(u_list[i-1].name);
-        $$->update.value.push_back(u_list[i-1].value);
+        if(u_list[i-1].type == 0){
+          value_list temp;
+          temp.type = 0;
+          temp.value = u_list[i-1].value;
+          $$->update.values.push_back(temp);
+        }
+        else{
+          value_list temp;
+          temp.type = 1;
+          temp.sub_query = u_list[i-1].query;
+          $$->update.values.push_back(temp);
+        }
       }
       //delete u_list;
      
@@ -638,8 +650,16 @@ update_option:
     	$$ = new SetVariableSqlNode();
       $$->value = *$3;
       $$->name = $1;
+      $$->type = 0;
       free($1);
       free($3);
+		}
+    | ID EQ sub_select_stmt {
+    	$$ = new SetVariableSqlNode();
+      $$->query = $3;
+      $$->name = $1;
+      $$->type = 1;
+      free($1);
 		}
     ;
 
@@ -976,6 +996,13 @@ condition_list:
     }
     | condition AND condition_list {
       $$ = $3;
+      $1->conjunction = 0;
+      $$->emplace_back(*$1);
+      delete $1;
+    }
+    | condition OR condition_list {
+      $$ = $3;
+      $1->conjunction = 1;
       $$->emplace_back(*$1);
       delete $1;
     }

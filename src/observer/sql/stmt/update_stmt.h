@@ -19,12 +19,20 @@ See the Mulan PSL v2 for more details. */
 #include "common/rc.h"
 #include "sql/stmt/stmt.h"
 #include "sql/stmt/filter_stmt.h"
+#include "sql/stmt/select_stmt.h"
 #include "storage/db/db.h"
 #include "storage/table/table.h"
 
 
 class Table;
 class FilterStmt;
+class SelectStmt;
+
+typedef struct update_list{
+  int type;
+  Value value;
+  SelectStmt* sub_query;
+};
 
 /**
  * @brief 更新语句
@@ -34,7 +42,7 @@ class UpdateStmt : public Stmt
 {
 public:
   UpdateStmt() = default;
-  UpdateStmt(Table *table, std::vector<Value> &values, int value_amount, FilterStmt *filter_stmt,std::vector<std::string> &value_name_);
+  UpdateStmt(Table *table, std::vector<update_list> &values, int value_amount, FilterStmt *filter_stmt,std::vector<std::string> &value_name_);
 
 public:
   static RC create(Db *db, UpdateSqlNode &update_sql, Stmt *&stmt);
@@ -45,9 +53,9 @@ public:
   {
     return table_;
   }
-  std::vector<Value> &values() 
+  std::vector<update_list> valueList() const
   {
-    return values_;
+    return update_list_;
   }
   int value_amount() const
   {
@@ -65,14 +73,11 @@ public:
   { 
     return value_name_; 
   }
-  
-
-
 
 private:
   Table *table_ = nullptr;
   //Value *values_ = nullptr;
-  std::vector<Value> values_;
+  std::vector<update_list> update_list_;
   std::vector<std::string> value_name_; 
   int value_amount_ = 0;
   FilterStmt *filter_stmt_ = nullptr;

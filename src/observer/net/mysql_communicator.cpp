@@ -607,7 +607,7 @@ RC MysqlCommunicator::handle_version_comment(bool &need_disconnect)
     return rc;
   }
 
-  rc = write_result(&session_event, need_disconnect);
+  rc = write_result(&session_event, need_disconnect, RC::SUCCESS);
   return rc;
 }
 
@@ -734,7 +734,7 @@ RC MysqlCommunicator::write_state(SessionEvent *event, bool &need_disconnect)
   return rc;
 }
 
-RC MysqlCommunicator::write_result(SessionEvent *event, bool &need_disconnect)
+RC MysqlCommunicator::write_result(SessionEvent *event, bool &need_disconnect, RC sql_rc)
 {
   RC rc = RC::SUCCESS;
 
