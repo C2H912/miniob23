@@ -365,7 +365,7 @@ int Value::compare(const Value &other) const
     int ret1 = -1;
     float ret2 = -1.0;
     string2number(this_data, ret1, ret2);
-    float other_ret = *(int*)other.num_value_.int_value_;
+    float other_ret = other.num_value_.int_value_;
     return common::compare_float((void *)&ret2, (void *)&other_ret);
   } else if (this->attr_type_ == FLOATS && other.attr_type_ == CHARS) {  //.
     const char *this_data = other.ret_str().c_str();
@@ -378,7 +378,7 @@ int Value::compare(const Value &other) const
     int ret1 = -1;
     float ret2 = -1.0;
     string2number(this_data, ret1, ret2);
-    float other_ret = *(int*)this->num_value_.int_value_;
+    float other_ret = this->num_value_.int_value_;
     return common::compare_float((void *)&other_ret, (void *)&ret2);
   }
   LOG_WARN("not supported");
