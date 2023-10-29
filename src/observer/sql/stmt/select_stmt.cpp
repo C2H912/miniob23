@@ -194,10 +194,15 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
       }
 
       } else {
-        auto iter = table_map.find(table_name);
+        auto iter = table_map.find(table_name);//在map中 即在表中找
         if (iter == table_map.end()) {
-          LOG_WARN("no such table in from list: %s", table_name);
-          return RC::SCHEMA_FIELD_MISSING;
+          iter = alias_map.find(table_name);//在alias map中找
+          if(iter == alias_map.end())
+          {
+            LOG_WARN("no such table in from list: %s", table_name);
+            return RC::SCHEMA_FIELD_MISSING;
+          }
+        
         }
 
         Table *table = iter->second;
