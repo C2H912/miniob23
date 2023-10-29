@@ -983,6 +983,49 @@ rel_attr:
       free($3);
       free($5);
     }
+     | ID ID { //不加AS也可以
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $1;
+      $$->aggr_func = UNKNOWN;
+      $$->alias = $2;
+      free($2);
+      free($1);
+    }
+    | ID DOT ID ID {
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $1;
+      $$->attribute_name = $3;
+      $$->aggr_func = UNKNOWN;
+      $$->alias = $4;
+      free($1);
+      free($3);
+      free($4);
+    }
+    | aggr_func LBRACE '*' RBRACE ID {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = "*";
+      $$->aggr_func = $1;
+      $$->alias = $5;
+      free($5);
+    }
+    | aggr_func LBRACE ID RBRACE ID{
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $3;
+      $$->aggr_func = $1;
+       $$->alias = $5;
+       free($5);
+      free($3);
+    }
+    | aggr_func LBRACE ID DOT ID RBRACE ID{
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $3;
+      $$->attribute_name = $5;
+      $$->aggr_func = $1;
+      $$->alias = $7;
+      free($7);
+      free($3);
+      free($5);
+    }
     ;
 
 attr_list:

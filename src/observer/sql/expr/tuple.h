@@ -59,6 +59,10 @@ public:
   {
     append_cell(TupleCellSpec(table, Field, nullptr));
   }
+  void append_cell(const char *table, const char *Field,const char* alias)
+  {
+    append_cell(TupleCellSpec(table, Field, alias));
+  }
   void append_cell(std::string s, AggrOp aggr)
   {
     append_cell(TupleCellSpec(s, aggr));

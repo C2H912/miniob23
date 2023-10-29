@@ -67,6 +67,10 @@ public:
   {
     return aggr_specs_;
   }
+  const std::vector<std::pair<bool,std::string>> &aggr_alias() const
+  {
+    return aggr_alias_;
+  }
   FilterStmt *filter_stmt() const
   {
     return filter_stmt_;
@@ -80,6 +84,8 @@ public:
   {
     return order_by_stmt_;
   }
+
+
 
 private:
   std::vector<Field> query_fields_;
