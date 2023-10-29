@@ -679,7 +679,7 @@ select_stmt:        /*  select 语句的语法解析树*/
         $$->selection.relations.swap(*$5);
         delete $5;
       }
-      $$->selection.relations.push_back($4);
+      $$->selection.relations.push_back(*$4);
       std::reverse($$->selection.relations.begin(), $$->selection.relations.end());
       if ($6 != nullptr) {
         $$->selection.joinTables.swap(*$6);
@@ -703,7 +703,7 @@ rel://这个是返回表名结构体的语法
   ID ID 
   {
     $$ = new RelName();
-    $$->relation_name = $1;
+    $$->relation = $1;
     $$->alias = $2;
     free($1);
     free($2);
@@ -711,13 +711,13 @@ rel://这个是返回表名结构体的语法
   | ID
   {
     $$ = new RelName();
-    $$->relation_name = $1;
+    $$->relation = $1;
     free($1);
   }
   | ID AS ID 
   {
     $$ = new RelName();
-    $$->relation_name = $1;
+    $$->relation = $1;
     $$->alias = $3;
     free($1);
     free($3);
@@ -816,7 +816,7 @@ sub_select_stmt:        /*  select 语句的语法解析树*/
         $$->relations.swap(*$6);
         delete $6;
       }
-      $$->relations.push_back($5);
+      $$->relations.push_back(*$5);
       std::reverse($$->relations.begin(), $$->relations.end());
 
       if ($7 != nullptr) {

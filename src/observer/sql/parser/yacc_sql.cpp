@@ -2425,7 +2425,7 @@ yyreduce:
         (yyval.sql_node)->selection.relations.swap(*(yyvsp[-3].relation_list));
         delete (yyvsp[-3].relation_list);
       }
-      (yyval.sql_node)->selection.relations.push_back((yyvsp[-4].rel_name));
+      (yyval.sql_node)->selection.relations.push_back(*(yyvsp[-4].rel_name));
       std::reverse((yyval.sql_node)->selection.relations.begin(), (yyval.sql_node)->selection.relations.end());
       if ((yyvsp[-2].join_lists) != nullptr) {
         (yyval.sql_node)->selection.joinTables.swap(*(yyvsp[-2].join_lists));
@@ -2450,7 +2450,7 @@ yyreduce:
 #line 704 "yacc_sql.y"
   {
     (yyval.rel_name) = new RelName();
-    (yyval.rel_name)->relation_name = (yyvsp[-1].string);
+    (yyval.rel_name)->relation = (yyvsp[-1].string);
     (yyval.rel_name)->alias = (yyvsp[0].string);
     free((yyvsp[-1].string));
     free((yyvsp[0].string));
@@ -2462,7 +2462,7 @@ yyreduce:
 #line 712 "yacc_sql.y"
   {
     (yyval.rel_name) = new RelName();
-    (yyval.rel_name)->relation_name = (yyvsp[0].string);
+    (yyval.rel_name)->relation = (yyvsp[0].string);
     free((yyvsp[0].string));
   }
 #line 2469 "yacc_sql.cpp"
@@ -2472,7 +2472,7 @@ yyreduce:
 #line 718 "yacc_sql.y"
   {
     (yyval.rel_name) = new RelName();
-    (yyval.rel_name)->relation_name = (yyvsp[-2].string);
+    (yyval.rel_name)->relation = (yyvsp[-2].string);
     (yyval.rel_name)->alias = (yyvsp[0].string);
     free((yyvsp[-2].string));
     free((yyvsp[0].string));
@@ -2601,7 +2601,7 @@ yyreduce:
         (yyval.sub_sql_node)->relations.swap(*(yyvsp[-2].relation_list));
         delete (yyvsp[-2].relation_list);
       }
-      (yyval.sub_sql_node)->relations.push_back((yyvsp[-3].rel_name));
+      (yyval.sub_sql_node)->relations.push_back(*(yyvsp[-3].rel_name));
       std::reverse((yyval.sub_sql_node)->relations.begin(), (yyval.sub_sql_node)->relations.end());
 
       if ((yyvsp[-1].condition_list) != nullptr) {
