@@ -64,6 +64,9 @@ TupleCellSpec::TupleCellSpec(std::string s, AggrOp aggr)
   alias_ = all_alias;
 }
 
+
+
+
 // TupleCellSpec::TupleCellSpec(std::string s, AggrOp aggr)
 // {
 //   std::string aggr_name;

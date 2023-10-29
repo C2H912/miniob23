@@ -209,21 +209,29 @@ RC PhysicalPlanGenerator::create_plan(ProjectLogicalOperator &project_oper, uniq
   ProjectPhysicalOperator *project_operator = new ProjectPhysicalOperator;
   const vector<Field> &project_fields = project_oper.fields();
   const vector<AggrOp> &project_aggr = project_oper.aggr_fields();
+  std::vector<std::pair<bool,std::string>> aggr_alias = project_oper.aggr_alias();
 #if 0
   const vector<string> &project_aggr_spec = project_oper.aggr_specs();
   if(project_aggr[0] != UNKNOWN){
     for(int i = 0; i < (int)project_aggr.size(); i++){
+      if(aggr_alias[i].first==true)//使用别名
+      {
+      project_operator->add_projection(aggr_alias[i].second.c_str());
+      }
+      else{
       project_operator->add_projection(project_aggr_spec[i], project_aggr[i]);
+      }
+     
     }
   }
   else{
     for (const Field &field : project_fields) {
-      project_operator->add_projection(field.table(), field.meta());
+      project_operator->add_projection(field.table(), field.meta(),field.alias());
     }
   }
 #endif
   for (const Field &field : project_fields) {
-    project_operator->add_projection(field.table(), field.meta());
+    project_operator->add_projection(field.table(), field.meta(),field.alias());
   }
   if (child_phy_oper) {
     project_operator->add_child(std::move(child_phy_oper));

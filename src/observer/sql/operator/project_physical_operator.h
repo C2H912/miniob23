@@ -36,6 +36,10 @@ public:
 
   void add_projection(std::string s, AggrOp aggr);
 
+  void add_projection(const Table *table, const FieldMeta *field_meta,const char* alias);//重载 使用别名
+
+  void add_projection(const char* alias);
+
   PhysicalOperatorType type() const override
   {
     return PhysicalOperatorType::PROJECT;

@@ -149,6 +149,7 @@ NULLABLE                                RETURN_TOKEN(NULLABLE);
 NULL                                    RETURN_TOKEN(NULL_T);
 ORDER                                   RETURN_TOKEN(ORDER);
 BY                                      RETURN_TOKEN(BY);
+AS                                      RETURN_TOKEN(AS);
 ASC                                     RETURN_TOKEN(ASC);
 {ID}                                    yylval->string=strdup(yytext); RETURN_TOKEN(ID);
 "("                                     RETURN_TOKEN(LBRACE);

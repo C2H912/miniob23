@@ -119,7 +119,13 @@ public:
   static RC create(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
       const ConditionSqlNode *conditions, int condition_num, FilterStmt *&stmt);
 
+  static RC create(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,std::unordered_map<std::string, Table *> *alias_tables,
+      const ConditionSqlNode *conditions, int condition_num, FilterStmt *&stmt);
+
   static RC create_filter_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
+      const ConditionSqlNode &condition, FilterUnit *&filter_unit);
+
+  static RC create_filter_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,std::unordered_map<std::string, Table *> *alias_tables,
       const ConditionSqlNode &condition, FilterUnit *&filter_unit);
 
 private:
@@ -127,4 +133,7 @@ private:
 };
 
 RC get_table_and_field(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
+    const RelAttrSqlNode &attr, Table *&table, const FieldMeta *&field);
+
+RC get_table_and_field(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,std::unordered_map<std::string, Table *> *alias_tables,
     const RelAttrSqlNode &attr, Table *&table, const FieldMeta *&field);

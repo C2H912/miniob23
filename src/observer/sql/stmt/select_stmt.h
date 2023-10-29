@@ -16,6 +16,7 @@ See the Mulan PSL v2 for more details. */
 
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 #include "common/rc.h"
 #include "sql/stmt/stmt.h"
@@ -85,6 +86,7 @@ private:
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> aggr_specs_;
   std::vector<Table *> tables_;
+  std::vector<std::pair<bool,std::string>> aggr_alias_;
   int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
   OrderByStmt *order_by_stmt_ = nullptr;

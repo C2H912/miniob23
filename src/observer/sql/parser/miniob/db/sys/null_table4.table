@@ -4,8 +4,8 @@
 		{
 			"id" : 0,
 			"len" : 4,
-			"name" : "a",
-			"nullable" : true,
+			"name" : "id",
+			"nullable" : false,
 			"offset" : 0,
 			"type" : "dates",
 			"visible" : true
@@ -13,23 +13,32 @@
 		{
 			"id" : 1,
 			"len" : 4,
-			"name" : "b",
+			"name" : "num",
 			"nullable" : true,
 			"offset" : 4,
-			"type" : "nulls",
+			"type" : "dates",
 			"visible" : true
 		},
 		{
 			"id" : 2,
+			"len" : 10,
+			"name" : "name",
+			"nullable" : true,
+			"offset" : 8,
+			"type" : "ints",
+			"visible" : true
+		},
+		{
+			"id" : 3,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 8,
+			"offset" : 18,
 			"type" : "ints",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
-	"table_id" : 3,
-	"table_name" : "oo"
+	"table_id" : 2,
+	"table_name" : "null_table4"
 }

@@ -66,6 +66,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
         INDEX
         CALC
         SELECT
+        AS
         DESC
         ASC
         ORDER
@@ -141,7 +142,8 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   std::vector<ValueRecord> *        record_list;
   std::vector<ConditionSqlNode> *   condition_list;
   std::vector<RelAttrSqlNode> *     rel_attr_list;
-  std::vector<std::string> *        relation_list;
+  std::vector<RelName> *            relation_list;
+  RelName *                         rel_name;
   std::vector<std::string> *        index_attr_list;
   std::vector<OrderBySqlNode> *     order_by;
   OrderBySqlNode *                  order_by_node;
@@ -176,6 +178,7 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
 %type <join_lists>          join_list
 %type <rel_attr_list>       select_attr
 %type <relation_list>       rel_list
+%type <rel_name>            rel
 %type <index_attr_list>     id_list
 %type <string>              id
 %type <order_by>            order_by_list
@@ -665,7 +668,7 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT select_attr FROM ID rel_list join_list where opt_order_by
+    SELECT select_attr FROM rel rel_list join_list where opt_order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
       if ($2 != nullptr) {
@@ -695,6 +698,31 @@ select_stmt:        /*  select 语句的语法解析树*/
       free($4);
     }
     ;
+
+rel://这个是返回表名结构体的语法
+  ID ID 
+  {
+    $$ = new RelName();
+    $$->relation_name = $1;
+    $$->alias = $2;
+    free($1);
+    free($2);
+  }
+  | ID
+  {
+    $$ = new RelName();
+    $$->relation_name = $1;
+    free($1);
+  }
+  | ID AS ID 
+  {
+    $$ = new RelName();
+    $$->relation_name = $1;
+    $$->alias = $3;
+    free($1);
+    free($3);
+  }
+  ;
 
 opt_order_by:
     {
@@ -777,7 +805,7 @@ order_by_unit:
 
 
 sub_select_stmt:        /*  select 语句的语法解析树*/
-    LBRACE SELECT select_attr FROM ID rel_list where RBRACE
+    LBRACE SELECT select_attr FROM rel rel_list where RBRACE
     {
       $$ = new SelectSqlNode;
       if ($3 != nullptr) {
@@ -910,6 +938,49 @@ rel_attr:
       $$->aggr_func = $1;
       free($3);
       free($5);
+    }//这后面是带别名的
+     | ID AS ID {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $1;
+      $$->aggr_func = UNKNOWN;
+      $$->alias = $3;
+      free($3);
+      free($1);
+    }
+    | ID DOT ID AS ID {
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $1;
+      $$->attribute_name = $3;
+      $$->aggr_func = UNKNOWN;
+      $$->alias = $5;
+      free($1);
+      free($3);
+      free($5);
+    }
+    | aggr_func LBRACE '*' RBRACE AS ID {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = "*";
+      $$->aggr_func = $1;
+      $$->alias = $6;
+      free($6);
+    }
+    | aggr_func LBRACE ID RBRACE AS ID{
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $3;
+      $$->aggr_func = $1;
+       $$->alias = $6;
+       free($6);
+      free($3);
+    }
+    | aggr_func LBRACE ID DOT ID RBRACE AS ID{
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $3;
+      $$->attribute_name = $5;
+      $$->aggr_func = $1;
+      $$->alias = $8;
+      free($8);
+      free($3);
+      free($5);
     }
     ;
 
@@ -935,14 +1006,14 @@ rel_list:
     {
       $$ = nullptr;
     }
-    | COMMA ID rel_list {
+    | COMMA rel rel_list {
       if ($3 != nullptr) {
         $$ = $3;
       } else {
-        $$ = new std::vector<std::string>;
+        $$ = new std::vector<RelName>;
       }
 
-      $$->push_back($2);
+      $$->push_back(*$2);//本来是字符串char* 所以这里要加*
       free($2);
     }
     ;
@@ -951,14 +1022,14 @@ join_list:
     {
       $$ = nullptr;
     }
-    | INNER JOIN ID on join_list{
+    | INNER JOIN rel on join_list{
       if ($5 != nullptr) {
         $$ = $5;
       } else {
         $$ = new std::vector<InnerJoinSqlNode>;
       }
       InnerJoinSqlNode current;
-      current.join_relations = $3;
+      current.join_relations = *$3;
       current.join_conditions.swap(*$4);
       $$->push_back(current);
 

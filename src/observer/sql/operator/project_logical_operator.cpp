@@ -18,3 +18,10 @@ ProjectLogicalOperator::ProjectLogicalOperator(const std::vector<Field> &fields,
             const std::vector<AggrOp> &aggr_fields, const std::vector<std::string> &aggr_specs) 
 : fields_(fields), aggr_fields_(aggr_fields), aggr_specs_(aggr_specs)
 {}
+
+ProjectLogicalOperator::ProjectLogicalOperator(const std::vector<Field> &fields, 
+            const std::vector<AggrOp> &aggr_fields, const std::vector<std::string> &aggr_specs,const std::vector<std::pair<bool,std::string>> &aggr_alias) 
+: fields_(fields), aggr_fields_(aggr_fields), aggr_specs_(aggr_specs),aggr_alias_(aggr_alias)
+{}
+
+
