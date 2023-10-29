@@ -202,19 +202,19 @@ public:
     if(table_->table_meta().field(index)->nullable()==true&&bitmap_.get_bit(index))
     {
       //当该值为NULL时
-    cell.set_type(AttrType::NULLS);
-    //cell.set_data(this->record_->data() + null_field->offset(), field_meta->len());
-    //cell.set_data(this->record_->data() + null_field->offset(), field_meta->len());
-    //cell.set_data(this->record_->data() + field_meta->offset(), field_meta->len());
-    return RC::SUCCESS;
+      cell.set_type(AttrType::NULLS);
+      //cell.set_data(this->record_->data() + null_field->offset(), field_meta->len());
+      //cell.set_data(this->record_->data() + null_field->offset(), field_meta->len());
+      //cell.set_data(this->record_->data() + field_meta->offset(), field_meta->len());
+      return RC::SUCCESS;
     }
     else{
-    FieldExpr *field_expr = speces_[index];
-    const FieldMeta *field_meta = field_expr->field().meta();
-    //TODONULL 在这里加一个判断 如果这个record的null_field指示这个字段为NULL，则返回NOT_FOUND
-    cell.set_type(field_meta->type());
-    cell.set_data(this->record_->data() + field_meta->offset(), field_meta->len());
-    return RC::SUCCESS;
+      FieldExpr *field_expr = speces_[index];
+      const FieldMeta *field_meta = field_expr->field().meta();
+      //TODONULL 在这里加一个判断 如果这个record的null_field指示这个字段为NULL，则返回NOT_FOUND
+      cell.set_type(field_meta->type());
+      cell.set_data(this->record_->data() + field_meta->offset(), field_meta->len());
+      return RC::SUCCESS;
     }
    
   }
@@ -326,8 +326,7 @@ public:
     switch(tuple->type())
     {
       case 0:{
-        RowTuple *tuple = new RowTuple();
-        
+        RowTuple *tuple = new RowTuple();    
       }
     }
   }
@@ -375,18 +374,16 @@ class ExpressionTuple : public Tuple
 public:
   ExpressionTuple(std::vector<std::unique_ptr<Expression>> &expressions)
     : expressions_(expressions)
-  {
-  }
+  {}
   
-  virtual ~ExpressionTuple()
-  {
-  }
+  virtual ~ExpressionTuple(){}
   
-   Tuple* getTuple()
+  Tuple* getTuple()
   {
       return nullptr;
   }
-  std::vector<TupleCellSpec *> &getspeces_(){
+  std::vector<TupleCellSpec *> &getspeces_()
+  {
     std::vector<TupleCellSpec *> aa;
     return aa;
   }
@@ -406,7 +403,6 @@ public:
     if (index < 0 || index >= static_cast<int>(expressions_.size())) {
       return RC::INTERNAL;
     }
-
     const Expression *expr = expressions_[index].get();
     return expr->try_get_value(cell);
   }

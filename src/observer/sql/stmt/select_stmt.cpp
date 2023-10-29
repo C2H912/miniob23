@@ -331,8 +331,8 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   select_stmt->aggr_specs_.swap(aggr_specs);
   select_stmt->aggr_alias_.swap(aggr_alias);
   select_stmt->filter_stmt_ = filter_stmt;
-  select_stmt->order_by_stmt_ = orderby_stmt;
   select_stmt->conjunction_flag_ = conjunction_flag;
+  select_stmt->order_by_stmt_ = orderby_stmt;
   stmt = select_stmt;
   return RC::SUCCESS;
 }
