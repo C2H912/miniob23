@@ -94,12 +94,6 @@ RC ExecuteStage::handle_request_with_physical_operator(SQLStageEvent *sql_event)
             else {
                schema.append_cell(field.field_name());
             }
-
-       
-
-
-
-          
         }
       }
     } break;

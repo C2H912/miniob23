@@ -60,7 +60,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   //位于from里的所有表  //需要修改 这里才是定义表 确定了 只有join和from后面可以定义别名
   for (size_t i = 0; i < select_sql.relations.size(); i++) {
     const char *table_name = select_sql.relations[i].relation.c_str();
-    const char *alias_name = select_sql.relations[i].alias.c_str();
+   std::string alias_name = select_sql.relations[i].alias;
     if (nullptr == table_name) {
       LOG_WARN("invalid argument. relation name is null. index=%d", i);
       return RC::INVALID_ARGUMENT;
@@ -74,7 +74,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
-    if(!select_sql.relations[i].alias.empty()&&alias_name!=nullptr)
+    if(!select_sql.relations[i].alias.empty())
     {
        std::pair<std::unordered_map<std::string, Table *>::iterator, bool> ret = alias_map.insert(std::pair<std::string, Table *>(alias_name, table));
       if(!ret.second)
@@ -87,7 +87,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   for(int i = 0; i < (int)select_sql.joinTables.size(); i++){
     InnerJoinSqlNode temp_node = select_sql.joinTables[i];
     const char *table_name = temp_node.join_relations.relation.c_str();
-    const char *alias_name = temp_node.join_relations.alias.c_str();
+    std::string alias_name = temp_node.join_relations.alias;
     if (nullptr == table_name) {
       LOG_WARN("invalid argument. relation name is null. index=%d", i);
       return RC::INVALID_ARGUMENT;
@@ -101,7 +101,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
-    if(!temp_node.join_relations.alias.empty()&&alias_name!=nullptr)
+    if(!temp_node.join_relations.alias.empty())
     {
       //往别名表里面插入数据 同时判断是否重复
       std::pair<std::unordered_map<std::string, Table *>::iterator, bool> ret = alias_map.insert(std::pair<std::string, Table *>(alias_name, table));
@@ -158,7 +158,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         }
       }
       aggr_specs.push_back("*");
-      if(relation_attr.alias.c_str()!=nullptr)//标识该聚合字段是否有别名o
+      if(!relation_attr.alias.empty()&&relation_attr.alias.c_str()!=nullptr)//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
@@ -169,7 +169,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     } else if (!common::is_blank(relation_attr.relation_name.c_str())) {
       const char *table_name = relation_attr.relation_name.c_str();
       const char *field_name = relation_attr.attribute_name.c_str();
-      const char *alias_name = relation_attr.alias.c_str();
+      std::string alias_name = relation_attr.alias;
 
       if (0 == strcmp(table_name, "*")) {
         if (0 != strcmp(field_name, "*")) {
@@ -185,7 +185,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
           }
         }
         aggr_specs.push_back("*");
-        if(relation_attr.alias.c_str()!=nullptr)//标识该聚合字段是否有别名o
+        if(!relation_attr.alias.empty())//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
@@ -214,7 +214,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
             wildcard_fields(table, query_fields);
           }
           aggr_specs.push_back("*");
-          if(relation_attr.alias.c_str()!=nullptr)//标识该聚合字段是否有别名o
+          if(!relation_attr.alias.empty())//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
@@ -230,7 +230,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
           query_fields.push_back(Field(table, field_meta,alias_name));
           aggr_specs.push_back(relation_attr.attribute_name);
-          if(relation_attr.alias.c_str()!=nullptr)//标识该聚合字段是否有别名o
+          if(!relation_attr.alias.empty()&&relation_attr.alias.c_str()!=nullptr)//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
@@ -247,7 +247,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
       }
 
       Table *table = tables[0];//只会有一个表？
-       const char *alias_name = relation_attr.alias.c_str();
+       std::string alias_name = relation_attr.alias;
       const FieldMeta *field_meta = table->table_meta().field(relation_attr.attribute_name.c_str());
       if (nullptr == field_meta) {
         LOG_WARN("no such field. field=%s.%s.%s", db->name(), table->name(), relation_attr.attribute_name.c_str());

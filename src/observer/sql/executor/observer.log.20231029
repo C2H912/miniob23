@@ -211,3 +211,117 @@ Finish dump configuration
 [2023-10-29 17:41:46.616056 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:164] >> use table scan
 [2023-10-29 17:41:46.616824 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:242] >> create a project physical operator
 [2023-10-29 17:41:48.665100 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-29 17:50:48.102103 pid:12092 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=5): [A
+
+[2023-10-29 17:50:48.103053 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:176] >> Unknown character []
+[2023-10-29 17:50:48.103806 pid:12092 tid:7fffe3203640 ctx:5555558552e0 TRACE: handle_sql@session_stage.cpp:137] >> failed to do parse. rc=INVALID_ARGUMENT
+[2023-10-29 17:50:48.104520 pid:12092 tid:7fffe3203640 ctx:5555558552e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-29 17:51:00.082178 pid:12092 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=99): CREATE TABLE null_table(id int not null, num int null, price float not null, birthday date null);
+
+[2023-10-29 17:51:00.083113 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:105] >> CREATE
+[2023-10-29 17:51:00.083844 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:107] >> TABLE
+[2023-10-29 17:51:00.084474 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:51:00.085279 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:155] >> LBRACE
+[2023-10-29 17:51:00.085962 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:51:00.086691 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:138] >> INT_T
+[2023-10-29 17:51:00.087282 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:121] >> NOT
+[2023-10-29 17:51:00.087872 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:149] >> NULL_T
+[2023-10-29 17:51:00.088748 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:158] >> COMMA
+[2023-10-29 17:51:00.089431 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:51:00.090112 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:138] >> INT_T
+[2023-10-29 17:51:00.090836 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:149] >> NULL_T
+[2023-10-29 17:51:00.091424 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:158] >> COMMA
+[2023-10-29 17:51:00.091997 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:51:00.092537 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:143] >> FLOAT_T
+[2023-10-29 17:51:00.093114 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:121] >> NOT
+[2023-10-29 17:51:00.093665 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:149] >> NULL_T
+[2023-10-29 17:51:00.094228 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:158] >> COMMA
+[2023-10-29 17:51:00.094751 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:51:00.095321 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:142] >> DATE_T
+[2023-10-29 17:51:00.095868 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:149] >> NULL_T
+[2023-10-29 17:51:00.096425 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:156] >> RBRACE
+[2023-10-29 17:51:00.097012 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:98] >> SEMICOLON
+[2023-10-29 17:51:00.097590 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: sql_debug@sql_debug.cpp:61] >> sql debug info: [create table statement: table name null_table]
+[2023-10-29 17:51:00.098180 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: create@table.cpp:104] >> Begin to create table miniob/db/sys:null_table
+[2023-10-29 17:51:00.104014 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: init@field_meta.cpp:62] >> Init a field with name=id
+[2023-10-29 17:51:00.104682 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: init@field_meta.cpp:62] >> Init a field with name=num
+[2023-10-29 17:51:00.105242 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: init@field_meta.cpp:62] >> Init a field with name=price
+[2023-10-29 17:51:00.105771 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: init@field_meta.cpp:62] >> Init a field with name=birthday
+[2023-10-29 17:51:00.106317 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-10-29 17:51:00.106931 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: init@table_meta.cpp:107] >> Sussessfully initialized table meta. table id=2, name=null_table
+[2023-10-29 17:51:00.123823 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: create_file@disk_buffer_pool.cpp:677] >> Successfully create miniob/db/sys/null_table.data.
+[2023-10-29 17:51:00.184314 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/null_table.data.
+[2023-10-29 17:51:00.185672 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a910d8, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=5555558552e0, lbt=0x555555710417 0x5555555c7c5d 0x5555555aaf6f 0x5555555b2bf0 0x5555555ac008 0x5555555b5f78 0x5555555ed469 0x5555555e773c 0x5555555cc96e 0x555555614b19 0x55555561264e 0x5555555838d3 0x5555555828b6 0x555555581476 0x555555580fbd 0x55555573099c 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-10-29 17:51:00.187929 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/null_table.data. file_desc=13, hdr_frame=0x7ffff6a910d8, file header=pageCount:1, allocatedCount:1
+[2023-10-29 17:51:00.189309 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=13, bp=0x7fffd8002640, lbt=0x555555710417 0x5555555b66f2 0x5555555ed469 0x5555555e773c 0x5555555cc96e 0x555555614b19 0x55555561264e 0x5555555838d3 0x5555555828b6 0x555555581476 0x555555580fbd 0x55555573099c 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-10-29 17:51:00.190747 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-10-29 17:51:00.192282 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-10-29 17:51:00.193590 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: create@table.cpp:160] >> Successfully create table miniob/db/sys:null_table
+[2023-10-29 17:51:00.194478 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: create_table@db.cpp:127] >> Create table success. table name=null_table, table_id:2
+[2023-10-29 17:51:00.195302 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-29 17:51:06.197345 pid:12092 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=34): SELECT count(*) FROM null_table;
+
+[2023-10-29 17:51:06.198272 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:116] >> SELECT
+[2023-10-29 17:51:06.199040 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:128] >> COUNT
+[2023-10-29 17:51:06.199721 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:155] >> LBRACE
+[2023-10-29 17:51:06.200402 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:156] >> RBRACE
+[2023-10-29 17:51:06.201341 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:118] >> FROM
+[2023-10-29 17:51:06.202145 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:51:06.202941 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:98] >> SEMICOLON
+[2023-10-29 17:51:06.203689 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 INFO: create@select_stmt.cpp:270] >> got 1 tables in from stmt and 1 fields in query stmt
+[2023-10-29 17:51:06.204521 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:164] >> use table scan
+[2023-10-29 17:51:06.205321 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:270] >> create a aggre physical operator
+[2023-10-29 17:51:06.205961 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:242] >> create a project physical operator
+[2023-10-29 17:51:08.221825 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-29 17:51:20.133817 pid:12092 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=33): SELECT count(*) FROM null_table
+
+[2023-10-29 17:51:20.134712 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:116] >> SELECT
+[2023-10-29 17:51:20.135389 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:128] >> COUNT
+[2023-10-29 17:51:20.136063 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:155] >> LBRACE
+[2023-10-29 17:51:20.136713 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:156] >> RBRACE
+[2023-10-29 17:51:20.137358 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:118] >> FROM
+[2023-10-29 17:51:20.138228 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:51:20.139071 pid:12092 tid:7fffe3203640 ctx:5555558552e0 INFO: create@select_stmt.cpp:270] >> got 1 tables in from stmt and 1 fields in query stmt
+[2023-10-29 17:51:20.139915 pid:12092 tid:7fffe3203640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:164] >> use table scan
+[2023-10-29 17:51:20.140604 pid:12092 tid:7fffe3203640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:270] >> create a aggre physical operator
+[2023-10-29 17:51:20.141289 pid:12092 tid:7fffe3203640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:242] >> create a project physical operator
+[2023-10-29 17:52:17.341256 pid:12092 tid:7fffe3203640 ctx:5555558552e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-29 17:52:17.341447 pid:12092 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=33): SELECT count(*) FROM null_table
+
+[2023-10-29 17:52:17.342853 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:116] >> SELECT
+[2023-10-29 17:52:17.343558 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:128] >> COUNT
+[2023-10-29 17:52:17.344187 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:155] >> LBRACE
+[2023-10-29 17:52:17.345164 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:156] >> RBRACE
+[2023-10-29 17:52:17.345861 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:118] >> FROM
+[2023-10-29 17:52:17.346513 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:52:17.347162 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: create@select_stmt.cpp:270] >> got 1 tables in from stmt and 1 fields in query stmt
+[2023-10-29 17:52:17.347765 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:164] >> use table scan
+[2023-10-29 17:52:17.348404 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:270] >> create a aggre physical operator
+[2023-10-29 17:52:17.349045 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:242] >> create a project physical operator
+[2023-10-29 17:52:19.501130 pid:12092 tid:7fffe2a02640 ctx:5555558552e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-29 17:52:23.397169 pid:12092 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=33): SELECT count(*) FROM null_table
+
+[2023-10-29 17:52:23.398236 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:116] >> SELECT
+[2023-10-29 17:52:23.399043 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:128] >> COUNT
+[2023-10-29 17:52:23.399900 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:155] >> LBRACE
+[2023-10-29 17:52:23.400881 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:156] >> RBRACE
+[2023-10-29 17:52:23.401856 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:118] >> FROM
+[2023-10-29 17:52:23.402714 pid:12092 tid:7fffe3203640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:52:23.403677 pid:12092 tid:7fffe3203640 ctx:5555558552e0 INFO: create@select_stmt.cpp:270] >> got 1 tables in from stmt and 1 fields in query stmt
+[2023-10-29 17:52:23.404514 pid:12092 tid:7fffe3203640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:164] >> use table scan
+[2023-10-29 17:52:23.405134 pid:12092 tid:7fffe3203640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:270] >> create a aggre physical operator
+[2023-10-29 17:52:23.405807 pid:12092 tid:7fffe3203640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:242] >> create a project physical operator
+[2023-10-29 17:52:37.373171 pid:12092 tid:7fffe3203640 ctx:5555558552e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-10-29 17:52:41.070476 pid:12092 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=33): SELECT count(*) FROM null_table
+
+[2023-10-29 17:52:41.071454 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:116] >> SELECT
+[2023-10-29 17:52:41.072071 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:128] >> COUNT
+[2023-10-29 17:52:41.072746 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:155] >> LBRACE
+[2023-10-29 17:52:41.073486 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:156] >> RBRACE
+[2023-10-29 17:52:41.074335 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:118] >> FROM
+[2023-10-29 17:52:41.075148 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 DEBUG: yylex@lex_sql.l:154] >> ID
+[2023-10-29 17:52:41.076012 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 INFO: create@select_stmt.cpp:270] >> got 1 tables in from stmt and 1 fields in query stmt
+[2023-10-29 17:52:41.076864 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:164] >> use table scan
+[2023-10-29 17:52:41.077588 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:270] >> create a aggre physical operator
+[2023-10-29 17:52:41.078483 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 TRACE: create_plan@physical_plan_generator.cpp:242] >> create a project physical operator
+[2023-10-29 18:01:15.692355 pid:12092 tid:7fffe3a04640 ctx:5555558552e0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
