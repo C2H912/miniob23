@@ -74,7 +74,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
-    if(alias_name!=nullptr)
+    if(!select_sql.relations[i].alias.empty()&&alias_name!=nullptr)
     {
        std::pair<std::unordered_map<std::string, Table *>::iterator, bool> ret = alias_map.insert(std::pair<std::string, Table *>(alias_name, table));
       if(!ret.second)
@@ -101,7 +101,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
-    if(alias_name!=nullptr)
+    if(!temp_node.join_relations.alias.empty()&&alias_name!=nullptr)
     {
       //往别名表里面插入数据 同时判断是否重复
       std::pair<std::unordered_map<std::string, Table *>::iterator, bool> ret = alias_map.insert(std::pair<std::string, Table *>(alias_name, table));
