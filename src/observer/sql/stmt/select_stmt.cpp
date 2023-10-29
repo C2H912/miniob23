@@ -256,7 +256,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
       query_fields.push_back(Field(table, field_meta,alias_name));
       aggr_specs.push_back(relation_attr.attribute_name);
-      if(relation_attr.alias.c_str()!=nullptr)//标识该聚合字段是否有别名o
+      if(!relation_attr.alias.empty())//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
