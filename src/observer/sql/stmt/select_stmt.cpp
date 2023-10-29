@@ -297,6 +297,9 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   for(std::pair<std::string, Table *> it : parents){
     all_parents.insert(it);
   }
+   for(std::pair<std::string, Table *> it : alias_map){
+    all_parents.insert(it);
+  }
   RC rc = FilterStmt::create(db,
       default_table,
       &all_parents,
