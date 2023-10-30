@@ -18,25 +18,29 @@ See the Mulan PSL v2 for more details. */
 
 using namespace std;
 
-RC FieldExpr::get_value(const Tuple &tuple, Value &value) const
+RC FieldExpr::get_value(Tuple &tuple, Value &value)
 {
   return tuple.find_cell(TupleCellSpec(table_name(), field_name()), value, 0);
 }
+RC FieldExpr::get_expr_value(Tuple &tuple, Value &value)
+{
+  return tuple.find_cell(TupleCellSpec(str_table_name().c_str(), str_attribute_name().c_str()), value, 0);
+}
 
-RC ValueExpr::get_value(const Tuple &tuple, Value &value) const
+RC ValueExpr::get_value(Tuple &tuple, Value &value)
 {
   value = value_;//用户输入的NULL的AttrType就为NULL，所以这里就不需要了
   return RC::SUCCESS;
 }
 
 //注意这里只提供一个get_value()的接口实现了纯虚函数的多态，实际上这个函数应该永远也不被调用！
-RC ValueListExpr::get_value(const Tuple &tuple, Value &value) const
+RC ValueListExpr::get_value(Tuple &tuple, Value &value)
 {
   return RC::SUCCESS;
 }
 
 //注意这里只提供一个get_value()的接口实现了纯虚函数的多态，实际上这个函数应该永远也不被调用！
-RC SubQueryExpr::get_value(const Tuple &tuple, Value &value) const
+RC SubQueryExpr::get_value(Tuple &tuple, Value &value)
 {
   return RC::SUCCESS;
 }
@@ -86,7 +90,7 @@ RC CastExpr::cast(const Value &value, Value &cast_value) const
   return rc;
 }
 
-RC CastExpr::get_value(const Tuple &tuple, Value &cell) const
+RC CastExpr::get_value(Tuple &tuple, Value &cell)
 {
   RC rc = child_->get_value(tuple, cell);
   if (rc != RC::SUCCESS) {
@@ -211,14 +215,14 @@ RC ComparisonExpr::try_get_value(Value &cell) const //尝试直接获取表达�
   return RC::INVALID_ARGUMENT;
 }
 
-RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
+RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
 {
   // ------------ IN、EXISTS、IS_NULL ------------
   //1. IN
   if(comp_ == IN_QUERY || comp_ == NOT_IN_QUERY){
     //读取左值
     Value left_value;
-    RC rc = left_->get_value(tuple, left_value);
+    RC rc = left_->get_expr_value(tuple, left_value);
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
       return rc;
@@ -287,7 +291,7 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
   if(comp_ == IS_NULL || comp_ == IS_NOT_NULL){
     Value left_v;
     Value right_v;
-    RC rc = left_->get_value(tuple, left_v);
+    RC rc = left_->get_expr_value(tuple, left_v);
     if(left_v.attr_type() == NULLS && comp_ == IS_NULL){
       value.set_boolean(true);
       return RC::SUCCESS;
@@ -311,15 +315,7 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
   Value right_value;
   RC rc = RC::SUCCESS;
 
-  int left_type = left_->expr_type();
-  if(left_type == 1 || left_type == 0){
-    rc = left_->get_value(tuple, left_value);
-    if (rc != RC::SUCCESS) {
-      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
-      return rc;
-    }
-  }
-  else{
+  if(left_->type() == ExprType::QUERY){
     std::vector<std::vector<Value>> left_sub_table = left_->sub_table();
     if((int)left_sub_table.size() == 0){
       value.set_boolean(false);
@@ -331,16 +327,16 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
     }
     left_value = left_sub_table[0][0];
   }
-
-  int right_type = right_->expr_type();
-  if(right_type == 1 || right_type == 0){
-    rc = right_->get_value(tuple, right_value);
+  else{
+    rc = left_->get_expr_value(tuple, left_value);
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
       return rc;
     }
   }
-  else{
+
+  int right_type = right_->expr_type();
+  if(right_->type() == ExprType::QUERY){
     std::vector<std::vector<Value>> right_sub_table = right_->sub_table();
     if((int)right_sub_table.size() == 0){
       value.set_boolean(false);
@@ -351,6 +347,13 @@ RC ComparisonExpr::get_value(const Tuple &tuple, Value &value) const
       return RC::INVALID_ARGUMENT;
     }
     right_value = right_sub_table[0][0];
+  }
+  else{
+    rc = right_->get_expr_value(tuple, right_value);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      return rc;
+    }
   }
 
   bool bool_value = false;
@@ -366,7 +369,7 @@ ConjunctionExpr::ConjunctionExpr(Type type, vector<unique_ptr<Expression>> &chil
     : conjunction_type_(type), children_(std::move(children))
 {}
 
-RC ConjunctionExpr::get_value(const Tuple &tuple, Value &value) const
+RC ConjunctionExpr::get_value(Tuple &tuple, Value &value)
 {
   RC rc = RC::SUCCESS;
   if (children_.empty()) {
@@ -482,7 +485,7 @@ RC ArithmeticExpr::calc_value(const Value &left_value, const Value &right_value,
   return rc;
 }
 
-RC ArithmeticExpr::get_value(const Tuple &tuple, Value &value) const
+RC ArithmeticExpr::get_value(Tuple &tuple, Value &value)
 {
   RC rc = RC::SUCCESS;
 
@@ -580,14 +583,14 @@ RC ALUExpr::calc_value(const Value &left_value, const Value &right_value, Value 
       if (target_type == AttrType::INTS) {
         if (right_value.get_int() == 0) {
           // NOTE: 设置为整数最大值是不正确的。通常的做法是设置为NULL，但是当前的miniob没有NULL概念，所以这里设置为整数最大值。
-          value.set_int(numeric_limits<int>::max());
+          value.set_null_value();
         } else {
           value.set_int(left_value.get_int() / right_value.get_int());
         }
       } else {
         if (right_value.get_float() > -EPSILON && right_value.get_float() < EPSILON) {
           // NOTE: 设置为浮点数最大值是不正确的。通常的做法是设置为NULL，但是当前的miniob没有NULL概念，所以这里设置为浮点数最大值。
-          value.set_float(numeric_limits<float>::max());
+          value.set_null_value();
         } else {
           value.set_float(left_value.get_float() / right_value.get_float());
         }
@@ -610,7 +613,7 @@ RC ALUExpr::calc_value(const Value &left_value, const Value &right_value, Value 
   return rc;
 }
 
-RC ALUExpr::get_value(const Tuple &tuple, Value &value) const
+RC ALUExpr::get_value(Tuple &tuple, Value &value)
 {
   RC rc = RC::SUCCESS;
 
@@ -654,41 +657,21 @@ RC ALUExpr::try_get_value(Value &value) const
   return calc_value(left_value, right_value, value);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-AggreExpr::AggreExpr(AggrOp type, Expression *child)
-    : aggre_type_(type), child_(child)
-{}
-
-RC AggreExpr::get_value(const Tuple &tuple, Value &value) const
-{
-  RC rc = RC::SUCCESS;
-
-  Value left_value;
-  rc = child_->get_value(tuple, left_value);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
-    return rc;
-  }
-
-  return calc_value(left_value, right_value, value);
-}
-
-RC AggreExpr::try_get_value(Value &value) const
+RC ALUExpr::get_expr_value(Tuple &tuple, Value &value)
 {
   RC rc = RC::SUCCESS;
 
   Value left_value;
   Value right_value;
 
-  rc = left_->try_get_value(left_value);
+  rc = left_->get_expr_value(tuple, left_value);
   if (rc != RC::SUCCESS) {
     LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
     return rc;
   }
 
   if (right_) {
-    rc = right_->try_get_value(right_value);
+    rc = right_->get_expr_value(tuple, right_value);
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to get value of right expression. rc=%s", strrc(rc));
       return rc;
@@ -696,4 +679,61 @@ RC AggreExpr::try_get_value(Value &value) const
   }
 
   return calc_value(left_value, right_value, value);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+AggreExpr::AggreExpr(AggrOp type, Expression *child)
+    : aggre_type_(type), child_(child)
+{}
+
+RC AggreExpr::get_value(Tuple &tuple, Value &value)
+{
+  RC rc = RC::SUCCESS;
+
+  Value child_value;
+  rc = child_->get_value(tuple, child_value);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+    return rc;
+  }
+
+  return rc;
+}
+
+RC AggreExpr::try_get_value(Value &value) const
+{
+  RC rc = RC::SUCCESS;
+
+  Value child_value;
+  rc = child_->try_get_value(child_value);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+    return rc;
+  }
+
+  return rc;
+}
+
+RC AggreExpr::get_expr_value(Tuple &tuple, Value &value)
+{
+  RC rc = RC::SUCCESS;
+
+#if 0
+  Value child;
+  rc = child_->get_expr_value(tuple, child);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+    return rc;
+  }
+#endif
+
+  rc = tuple.valueList_find_cell(value);
+  set_value_type(value.attr_type());
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+    return rc;
+  }
+
+  return rc;
 }

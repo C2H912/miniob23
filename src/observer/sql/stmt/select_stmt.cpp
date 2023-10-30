@@ -269,27 +269,76 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 }
 #endif
 
-void dfs(Expression* current, std::vector<RelAttrSqlNode>& attr, std::vector<std::string>& relation)
+void dfs(Expression* current, std::vector<RelAttrSqlNode>& attr, std::vector<AggrOp>& aggre, 
+         std::vector<Expression*>& aggr_node, std::string default_table_name)
 {
+  //终止节点
   if(current->type() == ExprType::VALUE){
     return;
   }
   else if(current->type() == ExprType::FIELD){
     FieldExpr* fieldnode = static_cast<FieldExpr*>(current);
     RelAttrSqlNode node;
-    node.aggr_func = fieldnode->aggre_name();
+    if(fieldnode->str_table_name().empty()){
+      node.relation_name = default_table_name;
+      fieldnode->set_table_name(default_table_name);
+    }
+    else{
+      node.relation_name = fieldnode->str_table_name();
+    }
     node.attribute_name = fieldnode->str_attribute_name();
-    node.relation_name = fieldnode->str_table_name();
+    node.aggr_func = fieldnode->aggr_name();
     attr.push_back(node);
-    relation.push_back(fieldnode->str_table_name());
     return;
   }
-  ArithmeticExpr* arithnode = static_cast<ArithmeticExpr*>(current);
+  //聚合节点
+  if(current->type() == ExprType::AGGRE){
+    AggreExpr* aggrenode = static_cast<AggreExpr*>(current);
+    if(aggrenode->child() != nullptr){
+      aggre.push_back(aggrenode->aggre_type());
+      aggr_node.push_back(current);
+      dfs(aggrenode->child(), attr, aggre, aggr_node, default_table_name);
+      return;
+    }
+  }
+  //计算节点
+  ALUExpr* arithnode = static_cast<ALUExpr*>(current);
   if(arithnode->left() != nullptr){
-    dfs(arithnode->left(), attr, relation);
+    dfs(arithnode->left(), attr, aggre, aggr_node, default_table_name);
   }
   if(arithnode->right() != nullptr){
-    dfs(arithnode->right(), attr, relation);
+    dfs(arithnode->right(), attr, aggre, aggr_node, default_table_name);
+  }
+}
+
+//计算节点时必须根据field拿到这个属性的Attrtype，所以要遍历一遍赋值上field
+void dfs_for_field(Expression* current, int &index, std::vector<Field> &fields)
+{
+  //终止节点
+  if(current->type() == ExprType::VALUE){
+    return;
+  }
+  else if(current->type() == ExprType::FIELD){
+    FieldExpr* fieldnode = static_cast<FieldExpr*>(current);
+    fieldnode->set_field(fields[index]);
+    index++;
+    return;
+  }
+  //聚合节点
+  if(current->type() == ExprType::AGGRE){
+    AggreExpr* aggrenode = static_cast<AggreExpr*>(current);
+    if(aggrenode->child() != nullptr){
+      dfs_for_field(aggrenode->child(), index, fields);
+      return;
+    }
+  }
+  //计算节点
+  ALUExpr* arithnode = static_cast<ALUExpr*>(current);
+  if(arithnode->left() != nullptr){
+    dfs_for_field(arithnode->left(), index, fields);
+  }
+  if(arithnode->right() != nullptr){
+    dfs_for_field(arithnode->right(), index, fields);
   }
 }
 
@@ -298,12 +347,6 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   if (nullptr == db) {
     LOG_WARN("invalid argument. db is null");
     return RC::INVALID_ARGUMENT;
-  }
-// ---------- 首先通过深度优先搜索把expression树中的内容解析出来 ----------
-  std::vector<RelAttrSqlNode> all_relAttrNodes;
-  std::vector<std::string> all_relations;
-  for(size_t i = 0; i < select_sql.expressions.size(); i++){
-    dfs(select_sql.expressions[i], all_relAttrNodes, all_relations);
   }
 
 // ---------- collect tables in `from` statement ----------
@@ -345,19 +388,52 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
   }
 
+// ---------- 首先通过深度优先搜索把expression树中的内容解析出来,并且为Field节点附上表名 ----------
+  std::vector<RelAttrSqlNode> all_relAttrNodes;
+  std::vector<Expression*> aggr_nodes;
+  std::vector<AggrOp> all_aggres;
+  for(size_t i = 0; i < select_sql.expressions.size(); i++){
+    dfs(select_sql.expressions[i], all_relAttrNodes, all_aggres, aggr_nodes, tables[0]->name());
+  }
+  //特殊情况: 整个表达式只有一个*，即select * from a;
+  bool is_star = false;
+  if(0 == strcmp(all_relAttrNodes[0].attribute_name.c_str(), "*")){
+    is_star = true;
+  }
+  //把expression树里的内容填入到select_sql，这里为了兼容以前写的
+  /* 首先把聚合函数填入到RelAttrSqlNode，这里做出如下三个假设：
+   *    1.聚合不会嵌套，即不会出现min(avg(id))
+   *    2.每个聚合函数下面只有一个属性，即不会出现min(id+col)
+   *    3.不会出现聚合与不聚合同时出现的情况，即不会出现select min(id),id from a;
+   * 所以这里认为，all_relAttrNodes中的节点与all_aggres一一对应，直接把它们关联在一起，这样原本的聚合算子就不用
+   * 改写了，当然如果要改写的话可以使用aggr_nodes，聚合算子的接口已经写好。
+   * 
+   * 目前只支持min(id)+max(col)这种，不支持min(id+1),max(col+id)这种
+   */
+  if((int)all_aggres.size() != 0){
+    if((int)all_aggres.size() != (int)all_relAttrNodes.size()){
+      LOG_WARN("ID, AGGR(ID) is not allowed.");
+      return RC::INVALID_ARGUMENT;
+    }
+  }
+  else{
+    all_aggres.push_back(UNKNOWN);
+  }
+  select_sql.attributes = all_relAttrNodes;
+
 // ---------- collect query fields in `select` statement ----------
   std::vector<Field> query_fields;
   std::vector<AggrOp> aggr_fields;
   std::vector<std::string> aggr_specs;
 
-  const RelAttrSqlNode &relation_attr = select_sql.attributes[static_cast<int>(select_sql.attributes.size()) - 1];
-  AggrOp aggr_flag = relation_attr.aggr_func;   //是否带有聚合
+  //const RelAttrSqlNode &relation_attr = select_sql.attributes[0];
+  //AggrOp aggr_flag = relation_attr.aggr_func;   //是否带有聚合
 
-  for (int i = static_cast<int>(select_sql.attributes.size()) - 1; i >= 0; i--) {
+  for (int i = 0; i < (int)select_sql.attributes.size(); i++) {
     const RelAttrSqlNode &relation_attr = select_sql.attributes[i];
     
   //1. 检查聚合的语法
-
+#if 0
     //要么全部都是聚合或者全部都不是聚合
     if(aggr_flag == UNKNOWN){
       if(relation_attr.aggr_func != UNKNOWN){
@@ -376,7 +452,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         return RC::INVALID_ARGUMENT;
       }
     }
-
+#endif
   //2. 创建stmt
 
     if (common::is_blank(relation_attr.relation_name.c_str()) &&
@@ -496,6 +572,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     return rc;
   }
 
+// ---------- create filter statement in `order by` statement ----------
   OrderByStmt *orderby_stmt = nullptr;
   //DEFER_WHEN_NOT_NULL(orderby_stmt);//在离开作用域时，检查orderby_stmt,如果不为空 delete
   if (0 != select_sql.orderBy.size()) {
@@ -506,16 +583,52 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     }
   }
 
-  // everything alright
+// ---------------- everything alright ------------------
+
   SelectStmt *select_stmt = new SelectStmt();
   // TODO add expression copy
   select_stmt->tables_.swap(tables);
   select_stmt->query_fields_.swap(query_fields);
-  select_stmt->aggr_fields_.swap(aggr_fields);
+  //这里还得进行一次深度优先遍历，用于把query_fields中解析出来的属性对应的类型写入到expr树对应的Field中
+  //否则运算时不知道类型
+  int expr_index = 0;
+  for(size_t i = 0; i < select_sql.expressions.size(); i++){
+    dfs_for_field(select_sql.expressions[i], expr_index, select_stmt->query_fields_);
+  }
+  //
+  select_stmt->aggr_fields_.swap(all_aggres);
   select_stmt->aggr_specs_.swap(aggr_specs);
   select_stmt->filter_stmt_ = filter_stmt;
   select_stmt->conjunction_flag_ = conjunction_flag;
   select_stmt->order_by_stmt_ = orderby_stmt;
+  //放入聚合表达式
+  //for (Expression * const expr : aggr_nodes) {
+  //  select_stmt->aggr_expr_node_.emplace_back(expr);
+  //}
+  //放入表达式
+  //特殊情况，如果一开始expresion是*，那么就要把expression替换为所有列的expression，
+  //count(*)的情况不用担心，因为count(*)跟列没有任何关系，可以直接得到结果
+  if(is_star == true){
+    for(size_t i = 0; i < select_stmt->query_fields_.size(); i++){
+      std::string tablename = select_stmt->query_fields_[i].table_name();
+      std::string fieldname = select_stmt->query_fields_[i].field_name();
+      FieldExpr *expr = new FieldExpr(tablename, fieldname, UNKNOWN);
+      if(select_stmt->tables_.size() > 1){
+        std::string s = tablename + "." + fieldname;
+        expr->set_name(s);
+      }
+      else{
+        expr->set_name(fieldname);
+      }
+      select_stmt->expressions_.emplace_back(expr);
+    }
+  }
+  else{
+    for (Expression * const expr : select_sql.expressions) {
+      select_stmt->expressions_.emplace_back(expr);
+    }
+  }
+
   stmt = select_stmt;
   return RC::SUCCESS;
 }

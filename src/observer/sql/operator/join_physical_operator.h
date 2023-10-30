@@ -38,6 +38,9 @@ public:
   RC close() override;
   Tuple *current_tuple() override;
 
+  RC next2() override { return RC::SUCCESS; }
+  Tuple *current_tuple2() override { return nullptr; }
+
 private:
   RC left_next();   //! 左表遍历下一条数据
   RC right_next();  //! 右表遍历下一条数据，如果上一轮结束了就重新开始新的一轮

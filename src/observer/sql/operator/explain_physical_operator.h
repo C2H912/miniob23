@@ -36,6 +36,9 @@ public:
   RC close() override;
   Tuple *current_tuple() override;
 
+  RC next2() override { return RC::SUCCESS; }
+  Tuple *current_tuple2() override { return nullptr; }
+
 private:
   void to_string(std::ostream &os, PhysicalOperator *oper, int level, bool last_child, std::vector<bool> &ends);
 

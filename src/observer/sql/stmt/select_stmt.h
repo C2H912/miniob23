@@ -80,6 +80,16 @@ public:
     return order_by_stmt_;
   }
 
+  //std::vector<std::unique_ptr<Expression>> &aggr_expressions()
+  //{
+  //  return aggr_expr_node_;
+  //}
+
+  std::vector<std::unique_ptr<Expression>> &expressions()
+  {
+    return expressions_;
+  }
+
 private:
   std::vector<Field> query_fields_;
   std::vector<AggrOp> aggr_fields_;
@@ -88,5 +98,6 @@ private:
   int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
   OrderByStmt *order_by_stmt_ = nullptr;
+  //std::vector<std::unique_ptr<Expression>> aggr_expr_node_;
   std::vector<std::unique_ptr<Expression>> expressions_;
 };

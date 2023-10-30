@@ -23,14 +23,15 @@ See the Mulan PSL v2 for more details. */
 class ProjectPhysicalOperator : public PhysicalOperator
 {
 public:
-  ProjectPhysicalOperator()
+  ProjectPhysicalOperator(std::vector<std::unique_ptr<Expression>> &&expressions)
+    : expressions_(std::move(expressions)), expr_tuple_(expressions_)
   {}
 
   virtual ~ProjectPhysicalOperator() = default;
 
   void add_expressions(std::vector<std::unique_ptr<Expression>> &&expressions)
   {
-    
+    expressions_.swap(expressions);
   }
   void add_projection(const Table *table, const FieldMeta *field);
 
@@ -51,7 +52,18 @@ public:
   }
 
   Tuple *current_tuple() override;
+  
+  RC next2() override;
+  Tuple *current_tuple2() override;
+
+  const std::vector<std::unique_ptr<Expression>> &expressions() const
+  {
+    return expressions_;
+  }
 
 private:
   ProjectTuple tuple_;
+  std::vector<std::unique_ptr<Expression>> expressions_;
+  ExpressionTuple expr_tuple_;
+  ValueListTuple result_;
 };

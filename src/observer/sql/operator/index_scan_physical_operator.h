@@ -46,6 +46,9 @@ public:
 
   void set_predicates(std::vector<std::unique_ptr<Expression>> &&exprs);
 
+  RC next2() override { return RC::SUCCESS; }
+  Tuple *current_tuple2() override { return nullptr; }
+
 private:
   // 与TableScanPhysicalOperator代码相同，可以优化
   RC filter(RowTuple &tuple, bool &result);

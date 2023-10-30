@@ -50,8 +50,8 @@ RC FilterStmt::create(Db *db, Table *default_table, std::unordered_map<std::stri
   return rc;
 }
 
-RC get_table_and_field(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
-    const RelAttrSqlNode &attr, Table *&table, const FieldMeta *&field)
+RC filter_get_table_and_field(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
+    const RelAttrSqlNode &attr, Table *&table, const FieldMeta *&field, Field &output_field)
 {
   if (common::is_blank(attr.relation_name.c_str())) {
     table = default_table;
@@ -75,7 +75,55 @@ RC get_table_and_field(Db *db, Table *default_table, std::unordered_map<std::str
     return RC::SCHEMA_FIELD_NOT_EXIST;
   }
 
+  output_field.set_field(field);
+  output_field.set_table(table);
+
   return RC::SUCCESS;
+}
+
+RC filter_dfs(Expression* current, Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables)
+{
+  //终止节点
+  if(current->type() == ExprType::VALUE){
+    return RC::SUCCESS;
+  }
+  else if(current->type() == ExprType::FIELD){
+    FieldExpr* fieldnode = static_cast<FieldExpr*>(current);
+    RelAttrSqlNode node;
+    if(fieldnode->str_table_name().empty()){
+      node.relation_name = default_table->name();
+      fieldnode->set_table_name(default_table->name());
+    }
+    else{
+      node.relation_name = fieldnode->str_table_name();
+    }
+    node.attribute_name = fieldnode->str_attribute_name();
+    Table *table = nullptr;
+    const FieldMeta *field = nullptr;
+    Field temp;
+    RC rc = filter_get_table_and_field(db, default_table, tables, node, table, field, temp);
+    if(rc != RC::SUCCESS){
+      return rc;
+    }
+    fieldnode->set_field(temp);
+    return RC::SUCCESS;
+  }
+  //计算节点
+  ALUExpr* arithnode = static_cast<ALUExpr*>(current);
+  if(arithnode->left() != nullptr){
+    RC rc = filter_dfs(arithnode->left(), db, default_table, tables);
+    if(rc != RC::SUCCESS){
+      return rc;
+    }
+    return RC::SUCCESS;
+  }
+  if(arithnode->right() != nullptr){
+    RC rc = filter_dfs(arithnode->right(), db, default_table, tables);
+    if(rc != RC::SUCCESS){
+      return rc;
+    }
+    return RC::SUCCESS;
+  }
 }
 
 RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
@@ -91,27 +139,18 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
 
   filter_unit = new FilterUnit;
   
-  if (condition.left_is_attr == 1) {
-    Table *table = nullptr;
-    const FieldMeta *field = nullptr;
-    rc = get_table_and_field(db, default_table, tables, condition.left_attr, table, field);
+  //expression
+  if (condition.left_is_attr == 0) {
+    rc = filter_dfs(condition.left_expr, db, default_table, tables);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr");
       return rc;
     }
     FilterObj filter_obj;
-    filter_obj.init_attr(Field(table, field));
+    filter_obj.init_expr(condition.left_expr);
     filter_unit->set_left(filter_obj);
-  } else if (condition.left_is_attr == 0) {
-    if(condition.left_value.attr_type() == UNDEFINED){
-      LOG_WARN("attr_type invalid");
-      return RC::INVALID_ARGUMENT;
-    }
-    FilterObj filter_obj;
-    filter_obj.init_value(condition.left_value);
-    filter_unit->set_left(filter_obj);
-  }
-  else if (condition.left_is_attr == -1){
+  //sub_query
+  } else if (condition.left_is_attr == 1) {
     //递归地调用create生成子查询
     Stmt *sub_stmt;
     SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
@@ -128,28 +167,19 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     //exists的左边,无
   }
 
-  if (condition.right_is_attr == 1) {
-    Table *table = nullptr;
-    const FieldMeta *field = nullptr;
-    rc = get_table_and_field(db, default_table, tables, condition.right_attr, table, field);
+  //expression
+  if (condition.right_is_attr == 0) {
+    rc = filter_dfs(condition.right_expr, db, default_table, tables);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr");
       return rc;
     }
     FilterObj filter_obj;
-    filter_obj.init_attr(Field(table, field));
+    filter_obj.init_expr(condition.right_expr);
     filter_unit->set_right(filter_obj);
   } 
-  else if (condition.right_is_attr == 0) {
-    if(condition.right_value.attr_type() == UNDEFINED){
-      LOG_WARN("attr_type invalid");
-      return RC::INVALID_ARGUMENT;
-    }
-    FilterObj filter_obj;
-    filter_obj.init_value(condition.right_value);
-    filter_unit->set_right(filter_obj);
-  }
-  else if (condition.right_is_attr == -1) {
+  //sub_query
+  else if (condition.right_is_attr == 1) {
     //递归地调用create生成子查询
     Stmt *sub_stmt;
     SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
@@ -162,7 +192,8 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     filter_obj.init_stmt(static_cast<SelectStmt*>(sub_stmt));
     filter_unit->set_right(filter_obj);
   }
-  else if (condition.right_is_attr == 3) {
+  //valueList
+  else if (condition.right_is_attr == 2) {
     FilterObj filter_obj;
     filter_obj.init_value_list(condition.right_list);
     filter_unit->set_right(filter_obj);

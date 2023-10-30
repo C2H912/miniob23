@@ -45,6 +45,9 @@ public:
     return nullptr;
   }
 
+  RC next2() override { return RC::SUCCESS; }
+  Tuple *current_tuple2() override { return nullptr; }
+
 private:
   Table *table_ = nullptr;
   Trx *trx_ = nullptr;

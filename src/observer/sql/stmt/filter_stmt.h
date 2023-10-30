@@ -28,32 +28,25 @@ class FieldMeta;
 struct FilterObj 
 {
   int type;
-  Field field;
-  Value value;
+  Expression *expr;
   SelectStmt *stmt;
   std::vector<Value> value_list;
 
-  void init_attr(const Field &field)
-  {
-    type = 1;
-    this->field = field;
-  }
-
-  void init_value(const Value &value)
+  void init_expr(Expression *expr)
   {
     type = 0;
-    this->value = value;
+    this->expr = expr;
   }
 
   void init_stmt(SelectStmt *stmt)
   {
-    type = -1;
+    type = 1;
     this->stmt = stmt;
   }
 
   void init_value_list(std::vector<Value> list)
   {
-    type = 3;
+    type = 2;
     this->value_list = list;
   }
 };

@@ -30,7 +30,7 @@ class ProjectLogicalOperator : public LogicalOperator
 {
 public:
   ProjectLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-              const std::vector<std::string> &aggr_specs);
+              const std::vector<std::string> &aggr_specs, std::vector<std::unique_ptr<Expression>> &&expressions);
   virtual ~ProjectLogicalOperator() = default;
 
   LogicalOperatorType type() const override

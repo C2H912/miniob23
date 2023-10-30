@@ -85,6 +85,7 @@ RC LogicalPlanGenerator::create_sub_query(SelectStmt *stmt, unique_ptr<LogicalOp
 {
   RC rc = RC::SUCCESS;
 
+#if 0
   //复杂子查询
   std::vector<FilterUnit*> all_filters = stmt->filter_stmt()->filter_units();
   for(size_t i = 0; i < all_filters.size(); i++){
@@ -105,7 +106,7 @@ RC LogicalPlanGenerator::create_sub_query(SelectStmt *stmt, unique_ptr<LogicalOp
       }
     }
   }
-
+#endif
   rc = create_plan(stmt, logical_operator);
 
   return rc;
@@ -126,6 +127,7 @@ RC LogicalPlanGenerator::create_plan(
   const std::vector<Field> &all_fields = select_stmt->query_fields();
   const std::vector<AggrOp> &aggr_fields = select_stmt->aggr_fields();//解析后的字段
   const std::vector<string> &aggr_specs = select_stmt->aggr_specs();//用户输入
+
   for (Table *table : tables) {
     std::vector<Field> fields;
     for (const Field &field : all_fields) {
@@ -157,7 +159,8 @@ RC LogicalPlanGenerator::create_plan(
     aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs));
   }
 
-  unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs));
+  unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs, std::move(select_stmt->expressions())));
+
   unique_ptr<LogicalOperator> order_oper;
   if(select_stmt->order_by_stmt()!=nullptr)
   {
@@ -180,7 +183,7 @@ RC LogicalPlanGenerator::create_plan(
     }
     project_oper->add_child(std::move(aggr_oper));
     if(order_oper){
-    order_oper->add_child(std::move(project_oper));
+      order_oper->add_child(std::move(project_oper));
     }
   }
   else{
@@ -190,14 +193,14 @@ RC LogicalPlanGenerator::create_plan(
       }
       project_oper->add_child(std::move(predicate_oper));
       if(order_oper){
-      order_oper->add_child(std::move(project_oper));
-    }
+        order_oper->add_child(std::move(project_oper));
+      }
     } else {
       if (table_oper) {
         project_oper->add_child(std::move(table_oper));
         if(order_oper){
-        order_oper->add_child(std::move(project_oper));
-    }
+          order_oper->add_child(std::move(project_oper));
+        }
       }
     }
   }
@@ -228,7 +231,7 @@ RC LogicalPlanGenerator::create_plan(
     //递归地生成子查询的火山
     unique_ptr<PhysicalOperator> left_volcano;
     unique_ptr<PhysicalOperator> right_volcano;
-    if(filter_obj_left.type == -1){
+    if(filter_obj_left.type == 1){
       OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
       RC rc = caller.create_sub_request(filter_obj_left.stmt, left_volcano);
       if(rc != RC::SUCCESS){
@@ -237,7 +240,7 @@ RC LogicalPlanGenerator::create_plan(
       }
 
     }
-    if(filter_obj_right.type == -1){
+    if(filter_obj_right.type == 1){
       OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
       RC rc = caller.create_sub_request(filter_obj_right.stmt, right_volcano);
       if(rc != RC::SUCCESS){
@@ -306,23 +309,19 @@ RC LogicalPlanGenerator::create_plan(
       }
     }
 
-    unique_ptr<Expression> left(filter_obj_left.type == 1
-                                         ? static_cast<Expression *>(new FieldExpr(filter_obj_left.field)) :
-                                (filter_obj_left.type == 0
-                                         ? static_cast<Expression *>(new ValueExpr(filter_obj_left.value)) :
-                                (filter_obj_left.type == -1
-                                         ? static_cast<Expression *>(new SubQueryExpr(left_table)) :
-                                           static_cast<Expression *>(new FieldExpr()))));
+    unique_ptr<Expression> left(filter_obj_left.type == 0
+                                         ? std::move(filter_obj_left.expr) :
+                                (filter_obj_left.type == 1
+                                         ? static_cast<Expression *>(new SubQueryExpr(left_table)) 
+                                         : static_cast<Expression *>(new FieldExpr())));
 
-    unique_ptr<Expression> right(filter_obj_right.type == 1
-                                          ? static_cast<Expression *>(new FieldExpr(filter_obj_right.field)) :
-                                (filter_obj_right.type == 0
-                                         ? static_cast<Expression *>(new ValueExpr(filter_obj_right.value)) :
-                                (filter_obj_right.type == -1
+    unique_ptr<Expression> right(filter_obj_right.type == 0
+                                          ? std::move(filter_obj_right.expr) :
+                                (filter_obj_right.type == 1
                                          ? static_cast<Expression *>(new SubQueryExpr(right_table)) :
-                                (filter_obj_right.type == 3
-                                         ? static_cast<Expression *>(new ValueListExpr(filter_obj_right.value_list)) :
-                                           static_cast<Expression *>(new FieldExpr())))));
+                                (filter_obj_right.type == 2
+                                         ? static_cast<Expression *>(new ValueListExpr(filter_obj_right.value_list)) 
+                                         : static_cast<Expression *>(new FieldExpr()))));
 
     ComparisonExpr *cmp_expr = new ComparisonExpr(filter_unit->comp(), std::move(left), std::move(right));
     cmp_exprs.emplace_back(cmp_expr);

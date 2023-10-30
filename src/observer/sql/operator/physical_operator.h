@@ -72,9 +72,11 @@ public:
 
   virtual RC open(Trx *trx) = 0;
   virtual RC next() = 0;
+  virtual RC next2() = 0;
   virtual RC close() = 0;
 
   virtual Tuple *current_tuple() = 0;
+  virtual Tuple *current_tuple2() = 0;
 
   void add_child(std::unique_ptr<PhysicalOperator> oper)
   {

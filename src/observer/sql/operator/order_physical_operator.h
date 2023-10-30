@@ -28,6 +28,8 @@ public:
   Tuple *current_tuple() override;
 
   void print_info();
+  RC next2() override { return RC::SUCCESS; }
+  Tuple *current_tuple2() override { return nullptr; }
 
 private:
   RC fetch_and_OrderPhysical_table();

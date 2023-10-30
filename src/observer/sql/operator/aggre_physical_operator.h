@@ -28,7 +28,7 @@ class AggrePhysicalOperator : public PhysicalOperator
 {
 public:
   AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-      const std::vector<std::string> &spec);
+    const std::vector<std::string> &spec);
 
   virtual ~AggrePhysicalOperator() = default;
 
@@ -47,6 +47,9 @@ public:
   Value do_float(std::vector<std::vector<Value>>& all_tuple, int index);
   Value do_char(std::vector<std::vector<Value>>& all_tuple, int index);
   Value do_date(std::vector<std::vector<Value>>& all_tuple, int index);
+
+  RC next2() override { return RC::SUCCESS; }
+  Tuple *current_tuple2() override { return nullptr; }
 
 private:
   std::vector<Field> fields_;

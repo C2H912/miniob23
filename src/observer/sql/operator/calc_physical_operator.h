@@ -77,6 +77,9 @@ public:
     return expressions_;
   }
 
+  RC next2() override { return RC::SUCCESS; }
+  Tuple *current_tuple2() override { return nullptr; }
+
 private:
   std::vector<std::unique_ptr<Expression>> expressions_;
   ExpressionTuple tuple_;

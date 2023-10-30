@@ -30,10 +30,10 @@ RC OrderPhysicalOperator::fetch_and_OrderPhysical_table()
   std::vector<Value> pair_cell;
 
   auto &units = orderby_stmt_->orderby_units();
-  while (RC::SUCCESS == (rc = children_[0]->next())) {
+  while (RC::SUCCESS == (rc = children_[0]->next2())) {
    if(flag)
    {
-    std::vector<TupleCellSpec*> tmp = children_[0]->current_tuple()->getspeces_();//储存表头
+    std::vector<TupleCellSpec*> tmp = children_[0]->current_tuple2()->getspeces_();//储存表头
     for(TupleCellSpec* tcs:tmp){
     TupleCellSpec* temp = new TupleCellSpec(tcs->table_name(),tcs->field_name(),tcs->alias());
     speces_.push_back(temp);
@@ -45,7 +45,7 @@ RC OrderPhysicalOperator::fetch_and_OrderPhysical_table()
     for (const OrderByUnit *unit : units) { //把排序字段拿出来
       Expression *expr = unit->expr();//这个是FieldExpr
       Value cell;
-      expr->get_value(*children_[0]->current_tuple(), cell);//获取到对应字段数据
+      expr->get_value(*children_[0]->current_tuple2(), cell);//获取到对应字段数据
       pair_cell.emplace_back(cell);//这里面是某一个tuple在不同orderby条件下的集合 比如三个字段的话 就有三个
     }
     // 2 cons pair
@@ -54,9 +54,9 @@ RC OrderPhysicalOperator::fetch_and_OrderPhysical_table()
 
     //拷贝一份下层传上来的tuple
     //有tuple和
-    //std::vector<TupleCellSpec*> spec = children_[0]->current_tuple()->getspeces_();
+    //std::vector<TupleCellSpec*> spec = children_[0]->current_tuple2()->getspeces_();
     
-    Tuple* tuple =  children_[0]->current_tuple();
+    Tuple* tuple =  children_[0]->current_tuple2();
     int cell_num = tuple->cell_num();
     std::vector<Value> st_;
     for (int i = 0; i < cell_num; i++) {

@@ -65,7 +65,7 @@ RC DefaultConditionFilter::init(Table &table, const ConditionSqlNode &condition)
 
   AttrType type_left = UNDEFINED;
   AttrType type_right = UNDEFINED;
-
+#if 0
   if (1 == condition.left_is_attr) {
     left.is_attr = true;
     const FieldMeta *field_left = table_meta.field(condition.left_attr.attribute_name.c_str());
@@ -117,6 +117,8 @@ RC DefaultConditionFilter::init(Table &table, const ConditionSqlNode &condition)
   }
 
   return init(left, right, type_left, condition.comp);
+#endif  
+  return RC::SUCCESS;
 }
 
 bool DefaultConditionFilter::filter(const Record &rec) const

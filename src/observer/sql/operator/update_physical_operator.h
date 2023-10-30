@@ -42,6 +42,9 @@ public:
 
   Tuple *current_tuple() override { return nullptr; }
 
+  RC next2() override { return RC::SUCCESS; }
+  Tuple *current_tuple2() override { return nullptr; }
+
 private:
   Table *table_ = nullptr;
   std::vector<Value> values_;

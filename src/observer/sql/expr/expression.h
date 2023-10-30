@@ -69,13 +69,17 @@ public:
   /**
    * @brief 根据具体的tuple，来计算当前表达式的值。tuple有可能是一个具体某个表的行数据
    */
-  virtual RC get_value(const Tuple &tuple, Value &value) const = 0;
+  virtual RC get_value(Tuple &tuple, Value &value) = 0;
 
   /**
    * @brief 在没有实际运行的情况下，也就是无法获取tuple的情况下，尝试获取表达式的值
    * @details 有些表达式的值是固定的，比如ValueExpr，这种情况下可以直接获取值
    */
   virtual RC try_get_value(Value &value) const
+  {
+    return RC::UNIMPLENMENT;
+  }
+  virtual RC get_expr_value(Tuple &tuple, Value &value)
   {
     return RC::UNIMPLENMENT;
   }
@@ -120,6 +124,9 @@ class FieldExpr : public Expression
 {
 public:
   FieldExpr() = default;
+  FieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func) 
+      : table_name_(table_name), attribute_name_(attribute_name), aggr_func_(aggr_func)
+  {}
   FieldExpr(const Table *table, const FieldMeta *field) : field_(table, field)
   {}
   FieldExpr(const Field &field) : field_(field)
@@ -138,24 +145,34 @@ public:
 
   const char *field_name() const { return field_.field_name(); }
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
+  RC try_get_value(Value &value) const override { return RC::SUCCESS; }
+  RC get_expr_value(Tuple &tuple, Value &value) override;
+
+  const std::string str_table_name() const { return table_name_; }
+  const std::string str_attribute_name() const { return attribute_name_; }
+  AggrOp aggr_name() { return aggr_func_; }
+  void set_table_name(std::string s){
+    table_name_ = s;
+  }
+  void set_field(Field &field){
+    field_ = field;
+  }
 
   //这个函数永远不应该被调用
   std::vector<std::vector<Value>> sub_table() const override {
-    Value ret(10000);
-    std::vector<Value> ret1;
-    ret1.push_back(ret);
-    std::vector<std::vector<Value>> ret2;
-    ret2.push_back(ret1);
-    return ret2;
+    std::vector<std::vector<Value>> ret;
+    return ret;
   }
-
   int expr_type() const override {
     return 1;
   }
 
 private:
   Field field_;
+  std::string table_name_;
+  std::string attribute_name_;
+  AggrOp aggr_func_;
 };
 
 /**
@@ -171,8 +188,9 @@ public:
 
   virtual ~ValueExpr() = default;
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
   RC try_get_value(Value &value) const override { value = value_; return RC::SUCCESS; }
+  RC get_expr_value(Tuple &tuple, Value &value) override { value = value_; return RC::SUCCESS; }
 
   ExprType type() const override { return ExprType::VALUE; }
 
@@ -184,14 +202,9 @@ public:
 
   //这个函数永远不应该被调用
   std::vector<std::vector<Value>> sub_table() const override {
-    Value ret(10000);
-    std::vector<Value> ret1;
-    ret1.push_back(ret);
-    std::vector<std::vector<Value>> ret2;
-    ret2.push_back(ret1);
-    return ret2;
+    std::vector<std::vector<Value>> ret;
+    return ret;
   }
-
   int expr_type() const override {
     return 0;
   }
@@ -210,7 +223,7 @@ public:
   ValueListExpr(const std::vector<Value> &value_list);
   virtual ~ValueListExpr();
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
 
   RC try_get_value(Value &value) const override { return RC::SUCCESS; }
 
@@ -249,7 +262,7 @@ public:
   SubQueryExpr(std::vector<std::vector<Value>> &sub_table);
   virtual ~SubQueryExpr();
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
 
   ExprType type() const override { return ExprType::QUERY; }
 
@@ -286,7 +299,7 @@ public:
   {
     return ExprType::CAST;
   }
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
 
   RC try_get_value(Value &value) const override;
 
@@ -296,12 +309,8 @@ public:
 
   //这个函数永远不应该被调用
   std::vector<std::vector<Value>> sub_table() const override {
-    Value ret(10000);
-    std::vector<Value> ret1;
-    ret1.push_back(ret);
-    std::vector<std::vector<Value>> ret2;
-    ret2.push_back(ret1);
-    return ret2;
+    std::vector<std::vector<Value>> ret;
+    return ret;
   }
 
   int expr_type() const override {
@@ -328,18 +337,14 @@ public:
 
   ExprType type() const override { return ExprType::COMPARISON; }
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
 
   AttrType value_type() const override { return BOOLEANS; }
 
   //这个函数永远不应该被调用
   std::vector<std::vector<Value>> sub_table() const override {
-    Value ret(10000);
-    std::vector<Value> ret1;
-    ret1.push_back(ret);
-    std::vector<std::vector<Value>> ret2;
-    ret2.push_back(ret1);
-    return ret2;
+    std::vector<std::vector<Value>> ret;
+    return ret;
   }
 
   CompOp comp() const { return comp_; }
@@ -391,16 +396,12 @@ public:
 
   AttrType value_type() const override { return BOOLEANS; }
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
 
   //这个函数永远不应该被调用
   std::vector<std::vector<Value>> sub_table() const override {
-    Value ret(10000);
-    std::vector<Value> ret1;
-    ret1.push_back(ret);
-    std::vector<std::vector<Value>> ret2;
-    ret2.push_back(ret1);
-    return ret2;
+    std::vector<std::vector<Value>> ret;
+    return ret;
   }
 
   Type conjunction_type() const { return conjunction_type_; }
@@ -440,17 +441,13 @@ public:
 
   AttrType value_type() const override;
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
   RC try_get_value(Value &value) const override;
 
   //这个函数永远不应该被调用
   std::vector<std::vector<Value>> sub_table() const override {
-    Value ret(10000);
-    std::vector<Value> ret1;
-    ret1.push_back(ret);
-    std::vector<std::vector<Value>> ret2;
-    ret2.push_back(ret1);
-    return ret2;
+    std::vector<std::vector<Value>> ret;
+    return ret;
   }
 
   int expr_type() const override {
@@ -494,8 +491,9 @@ public:
 
   AttrType value_type() const override;
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
   RC try_get_value(Value &value) const override;
+  RC get_expr_value(Tuple &tuple, Value &value) override;
 
   //这个函数永远不应该被调用
   std::vector<std::vector<Value>> sub_table() const override {
@@ -533,17 +531,18 @@ public:
 
   ExprType type() const override { return ExprType::AGGRE; }
 
-  AttrType value_type() const override { return AttrType::UNDEFINED; }
+  AttrType value_type() const override { return attr_type_; }
+  void set_value_type(AttrType type) { attr_type_ = type; }
 
-  RC get_value(const Tuple &tuple, Value &value) const override;
+  RC get_value(Tuple &tuple, Value &value) override;
   RC try_get_value(Value &value) const override;
+  RC get_expr_value(Tuple &tuple, Value &value) override;
 
   //这个函数永远不应该被调用
   std::vector<std::vector<Value>> sub_table() const override {
     std::vector<std::vector<Value>> ret;
     return ret;
   }
-
   int expr_type() const override {
     return 9;
   }
@@ -556,5 +555,7 @@ private:
   
 private:
   AggrOp aggre_type_;
+  AttrType attr_type_;
   Expression* child_;
+  bool first_entry = true;
 };

@@ -33,12 +33,58 @@ RC ProjectPhysicalOperator::open(Trx *trx)
   return RC::SUCCESS;
 }
 
-RC ProjectPhysicalOperator::next()
+#if 1
+RC ProjectPhysicalOperator::next2()
 {
   if (children_.empty()) {
     return RC::RECORD_EOF;
   }
   return children_[0]->next();
+}
+
+Tuple *ProjectPhysicalOperator::current_tuple2()
+{
+  tuple_.set_tuple(children_[0]->current_tuple());
+  return &tuple_;
+}
+
+#endif
+
+RC ProjectPhysicalOperator::next()
+{
+  if (children_.empty()) {
+    return RC::RECORD_EOF;
+  }
+
+  RC rc = RC::SUCCESS;
+  PhysicalOperator *oper = children_.front().get();
+  rc = oper->next();
+  if(rc == RC::RECORD_EOF){
+    return rc;
+  }
+  else if(rc != RC::SUCCESS){
+    return rc;
+  }
+
+  Tuple *tuple = oper->current_tuple();
+  if (nullptr == tuple) {
+    rc = RC::INTERNAL;
+    LOG_WARN("failed to get tuple from operator");
+  }
+
+  std::vector<Value> temp_result;
+  int cell_num = expr_tuple_.cell_num();
+  for (int i = 0; i < cell_num; i++) {
+    Value value;
+    rc = expr_tuple_.get_expr_value(*tuple, value, i);
+    if (OB_FAIL(rc)) {
+      return rc;
+    }
+    temp_result.push_back(value);
+  }
+  result_.set_cells(temp_result);
+   
+  return rc;
 }
 
 RC ProjectPhysicalOperator::close()
@@ -48,10 +94,10 @@ RC ProjectPhysicalOperator::close()
   }
   return RC::SUCCESS;
 }
+
 Tuple *ProjectPhysicalOperator::current_tuple()
 {
-  tuple_.set_tuple(children_[0]->current_tuple());
-  return &tuple_;
+  return static_cast<Tuple*>(&result_);
 }
 
 void ProjectPhysicalOperator::add_projection(const Table *table, const FieldMeta *field_meta)

@@ -206,7 +206,7 @@ RC PhysicalPlanGenerator::create_plan(ProjectLogicalOperator &project_oper, uniq
     }
   }
 
-  ProjectPhysicalOperator *project_operator = new ProjectPhysicalOperator;
+  ProjectPhysicalOperator *project_operator = new ProjectPhysicalOperator(std::move(project_oper.expressions()));
   const vector<Field> &project_fields = project_oper.fields();
   const vector<AggrOp> &project_aggr = project_oper.aggr_fields();
 #if 0
@@ -251,7 +251,8 @@ RC PhysicalPlanGenerator::create_plan(AggreLogicalOperator &aggr_oper, unique_pt
     }
   }
 
-  AggrePhysicalOperator *aggre_operator = new AggrePhysicalOperator(aggr_oper.fields(), aggr_oper.aggr_fields(), aggr_oper.spec());
+  AggrePhysicalOperator *aggre_operator = new AggrePhysicalOperator(aggr_oper.fields(), aggr_oper.aggr_fields(), 
+      aggr_oper.spec());
 
   if (child_phy_oper) {
     aggre_operator->add_child(std::move(child_phy_oper));

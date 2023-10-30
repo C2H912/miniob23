@@ -117,6 +117,7 @@ public:
    * @param[out] cell 返回的cell
    */
   virtual RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const = 0;
+  virtual RC valueList_find_cell(Value &cell) = 0;
 
   virtual std::string to_string() const
   {
@@ -237,7 +238,7 @@ public:
     return RC::NOTFOUND;
   }
  
-  
+  virtual RC valueList_find_cell(Value &cell) { return RC::SUCCESS; }
 
 #if 0
   RC cell_spec_at(int index, const TupleCellSpec *&spec) const override
@@ -354,6 +355,7 @@ public:
     return tuple_->find_cell(spec, cell, index);
   }
 
+  virtual RC valueList_find_cell(Value &cell) { return RC::SUCCESS; }
 #if 0
   RC cell_spec_at(int index, const TupleCellSpec *&spec) const override
   {
@@ -417,6 +419,16 @@ public:
     return RC::NOTFOUND;
   }
 
+  RC get_expr_value(Tuple &tuple, Value &value, int index)
+  {
+    if (index < 0 || index >= static_cast<int>(expressions_.size())) {
+      return RC::INTERNAL;
+    }
+    Expression *expr = expressions_[index].get();
+    return expr->get_expr_value(tuple, value);
+  }
+
+  virtual RC valueList_find_cell(Value &cell) { return RC::SUCCESS; }
 
 private:
   const std::vector<std::unique_ptr<Expression>> &expressions_;
@@ -478,9 +490,23 @@ public:
     return RC::SUCCESS;
   }
 
+  virtual RC valueList_find_cell(Value &cell) override
+  {
+    if(index_ < 0 || index_ >= cell_num()) {
+      return RC::NOTFOUND;
+    }
+    cell = cells_[index_];
+    index_++;
+    if(index_ == cell_num()){
+      index_ = 0;
+    }
+    return RC::SUCCESS;
+  }
+
 private:
   std::vector<Value> cells_;
   std::vector<Field> spec_;
+  int index_ = 0;
 };
 
 /**
@@ -545,6 +571,8 @@ public:
 
     return right_->find_cell(spec, value, index);
   }
+
+  virtual RC valueList_find_cell(Value &cell) { return RC::SUCCESS; }
 
 private:
   Tuple *left_ = nullptr;
