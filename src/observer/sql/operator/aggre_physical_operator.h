@@ -55,6 +55,6 @@ private:
   std::vector<Field> fields_;
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> spec_;
-  ValueListTuple tuple_;
+  AggreListTuple tuple_;
   bool enter_flag_ = false;
 };

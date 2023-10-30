@@ -107,7 +107,7 @@ public:
    */
   virtual RC cell_at(int index, Value &cell) const = 0;
 
-  virtual Tuple* getTuple()  = 0;
+  virtual Tuple* getTuple() = 0;
   virtual std::vector<TupleCellSpec *> &getspeces_() = 0;
 
   /**
@@ -117,7 +117,6 @@ public:
    * @param[out] cell 返回的cell
    */
   virtual RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const = 0;
-  virtual RC valueList_find_cell(Value &cell) = 0;
 
   virtual std::string to_string() const
   {
@@ -237,8 +236,7 @@ public:
     }
     return RC::NOTFOUND;
   }
- 
-  virtual RC valueList_find_cell(Value &cell) { return RC::SUCCESS; }
+
 
 #if 0
   RC cell_spec_at(int index, const TupleCellSpec *&spec) const override
@@ -355,7 +353,6 @@ public:
     return tuple_->find_cell(spec, cell, index);
   }
 
-  virtual RC valueList_find_cell(Value &cell) { return RC::SUCCESS; }
 #if 0
   RC cell_spec_at(int index, const TupleCellSpec *&spec) const override
   {
@@ -428,8 +425,6 @@ public:
     return expr->get_expr_value(tuple, value);
   }
 
-  virtual RC valueList_find_cell(Value &cell) { return RC::SUCCESS; }
-
 private:
   const std::vector<std::unique_ptr<Expression>> &expressions_;
 };
@@ -487,19 +482,6 @@ public:
   {
     //return RC::INTERNAL;
     cell_at(index, cell);
-    return RC::SUCCESS;
-  }
-
-  virtual RC valueList_find_cell(Value &cell) override
-  {
-    if(index_ < 0 || index_ >= cell_num()) {
-      return RC::NOTFOUND;
-    }
-    cell = cells_[index_];
-    index_++;
-    if(index_ == cell_num()){
-      index_ = 0;
-    }
     return RC::SUCCESS;
   }
 
@@ -572,8 +554,6 @@ public:
     return right_->find_cell(spec, value, index);
   }
 
-  virtual RC valueList_find_cell(Value &cell) { return RC::SUCCESS; }
-
 private:
   Tuple *left_ = nullptr;
   Tuple *right_ = nullptr;
@@ -581,3 +561,77 @@ private:
 
 //typedef std::vector<ProjectTuple*> CompoundTuple;
 
+/**
+ * @brief 一些常量值组成的Tuple
+ * @ingroup Tuple
+ */
+class AggreListTuple : public Tuple 
+{
+public:
+  AggreListTuple() = default;
+  virtual ~AggreListTuple() = default;
+
+  void set_cells(const std::vector<Value> &cells)
+  {
+    cells_ = cells;
+  }
+  void set_specs(const std::vector<std::string> &specs)
+  {
+    spec_ = specs;
+  }
+  void set_aggre(const std::vector<AggrOp> &aggr)
+  {
+    aggr_ = aggr;
+  }
+
+  //not used
+  Tuple* getTuple()
+  {
+    return nullptr;
+  }
+  std::vector<TupleCellSpec *> &getspeces_(){
+    std::vector<TupleCellSpec *> aa;
+    return aa;
+  }
+
+  virtual int cell_num() const override
+  {
+    return static_cast<int>(cells_.size());
+  }
+
+  int type() const
+  {
+    return 5;
+  }
+
+  virtual RC cell_at(int index, Value &cell) const override
+  {
+    if (index < 0 || index >= cell_num()) {
+      return RC::NOTFOUND;
+    }
+    cell = cells_[index];
+    return RC::SUCCESS;
+  }
+
+  virtual RC find_cell(const TupleCellSpec &spec, Value &cell, int index) const override
+  {
+    const char *s = spec.alias();
+    AggrOp op = spec.aggr_name();
+
+    for (size_t i = 0; i < spec_.size(); ++i) {
+      const char *aggr_s = spec_[i].c_str();
+      AggrOp aggr_op = aggr_[i];
+      if (0 == strcmp(s, aggr_s)) {
+        if(op == aggr_op){
+          return cell_at(i, cell);
+        }
+      }
+    }
+    return RC::NOTFOUND;
+  }
+
+private:
+  std::vector<Value> cells_;
+  std::vector<std::string> spec_;
+  std::vector<AggrOp> aggr_;
+};

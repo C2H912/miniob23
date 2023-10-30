@@ -81,12 +81,7 @@ RC AggrePhysicalOperator::next()
 RC AggrePhysicalOperator::do_aggre_func(std::vector<std::vector<Value>>& all_tuple)
 {
   std::vector<Value> ret_tuple;
-  std::vector<Field> ret_specs;
   for(int i = 0; i < (int)fields_.size(); i++){
-    Field ret_field;
-    ret_field.set_table(fields_[i].table());
-    ret_field.set_field(fields_[i].meta());
-    ret_specs.push_back(ret_field);
     if(aggr_fields_[i] == COUNTF){
       if(spec_[i] == "*"){
         Value ret;
@@ -133,7 +128,8 @@ RC AggrePhysicalOperator::do_aggre_func(std::vector<std::vector<Value>>& all_tup
     }
   }
   tuple_.set_cells(ret_tuple);
-  tuple_.set_specs(ret_specs);
+  tuple_.set_specs(spec_);
+  tuple_.set_aggre(aggr_fields_);
   return RC::SUCCESS;
 }
 

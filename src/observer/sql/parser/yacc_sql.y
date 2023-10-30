@@ -52,6 +52,7 @@ ALUExpr *create_alu_expression(ALUExpr::Type2 type,
   return expr;
 }
 
+/*
 AggreExpr *create_aggr_expression(AggrOp type,
                                       Expression *child,
                                       const char *sql_string,
@@ -61,6 +62,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
   expr->set_name(token_name(sql_string, llocp));
   return expr;
 }
+*/
 
 %}
 
@@ -909,16 +911,13 @@ myexpression:
     | myexpression '/' myexpression {
       $$ = create_alu_expression(ALUExpr::Type2::DIV, $1, $3, sql_string, &@$);
     }
-    | aggr_func LBRACE myexpression RBRACE {
-      $$ = create_aggr_expression($1, $3, sql_string, &@$);
-    }
     | LBRACE myexpression RBRACE {
       $$ = $2;
       $$->set_name(token_name(sql_string, &@$));
     }
-    | '-' myexpression %prec UMINUS {
-      $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
-    }
+    //| '-' myexpression %prec UMINUS {
+    //  $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
+    //}
     | value {
       $$ = new ValueExpr(*$1);
       $$->set_name(token_name(sql_string, &@$));
@@ -956,6 +955,22 @@ cal_attr:
       @$ = @1;
       free($1);
       free($3);
+    }
+    | aggr_func LBRACE ID RBRACE{
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $3;
+      $$->aggr_func = $1;
+      @$ = @1;
+      free($3);
+    }
+    | aggr_func LBRACE ID DOT ID RBRACE{
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $3;
+      $$->attribute_name = $5;
+      $$->aggr_func = $1;
+      @$ = @1;
+      free($3);
+      free($5);
     }
     ;
 

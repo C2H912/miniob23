@@ -24,7 +24,10 @@ RC FieldExpr::get_value(Tuple &tuple, Value &value)
 }
 RC FieldExpr::get_expr_value(Tuple &tuple, Value &value)
 {
-  return tuple.find_cell(TupleCellSpec(str_table_name().c_str(), str_attribute_name().c_str()), value, 0);
+  if(tuple.type() == 5){      //聚合
+    return tuple.find_cell(TupleCellSpec(str_attribute_name().c_str(), aggr_name(), 0), value, 0);
+  }
+  return tuple.find_cell(TupleCellSpec(table_name(), field_name()), value, 0);
 }
 
 RC ValueExpr::get_value(Tuple &tuple, Value &value)
@@ -679,61 +682,4 @@ RC ALUExpr::get_expr_value(Tuple &tuple, Value &value)
   }
 
   return calc_value(left_value, right_value, value);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-AggreExpr::AggreExpr(AggrOp type, Expression *child)
-    : aggre_type_(type), child_(child)
-{}
-
-RC AggreExpr::get_value(Tuple &tuple, Value &value)
-{
-  RC rc = RC::SUCCESS;
-
-  Value child_value;
-  rc = child_->get_value(tuple, child_value);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
-    return rc;
-  }
-
-  return rc;
-}
-
-RC AggreExpr::try_get_value(Value &value) const
-{
-  RC rc = RC::SUCCESS;
-
-  Value child_value;
-  rc = child_->try_get_value(child_value);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
-    return rc;
-  }
-
-  return rc;
-}
-
-RC AggreExpr::get_expr_value(Tuple &tuple, Value &value)
-{
-  RC rc = RC::SUCCESS;
-
-#if 0
-  Value child;
-  rc = child_->get_expr_value(tuple, child);
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
-    return rc;
-  }
-#endif
-
-  rc = tuple.valueList_find_cell(value);
-  set_value_type(value.attr_type());
-  if (rc != RC::SUCCESS) {
-    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
-    return rc;
-  }
-
-  return rc;
 }
