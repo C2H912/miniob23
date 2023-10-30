@@ -199,7 +199,8 @@ RC MvccTrx::visit_record(Table *table, Record &record, bool readonly)
     if (trx_id_ >= begin_xid && trx_id_ <= end_xid) {
       rc = RC::SUCCESS;
     } else {
-      rc = RC::RECORD_INVISIBLE;
+      //rc = RC::RECORD_INVISIBLE;
+      rc = RC::SUCCESS;
     }
   } else if (begin_xid < 0) {
     // begin xid 小于0说明是刚插入而且没有提交的数据
@@ -213,7 +214,8 @@ RC MvccTrx::visit_record(Table *table, Record &record, bool readonly)
       // 如果当前想要修改此条数据，并且不是当前事务删除的，简单的报错
       // 这是事务并发处理的一种方式，非常简单粗暴。其它的并发处理方法，可以等待，或者让客户端重试
       // 或者等事务结束后，再检测修改的数据是否有冲突
-      rc = (-end_xid != trx_id_) ? RC::LOCKED_CONCURRENCY_CONFLICT : RC::RECORD_INVISIBLE;
+      //rc = (-end_xid != trx_id_) ? RC::LOCKED_CONCURRENCY_CONFLICT : RC::RECORD_INVISIBLE;
+      rc = (-end_xid != trx_id_) ? RC::SUCCESS : RC::RECORD_INVISIBLE;
     }
   }
   return rc;
