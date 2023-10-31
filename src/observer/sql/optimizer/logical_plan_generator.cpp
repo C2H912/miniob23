@@ -238,7 +238,6 @@ RC LogicalPlanGenerator::create_plan(
         LOG_WARN("failed to get SUB TABLE from operator");
         return rc;
       }
-
     }
     if(filter_obj_right.type == 1){
       OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)

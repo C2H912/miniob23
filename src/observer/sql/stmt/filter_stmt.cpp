@@ -85,6 +85,10 @@ RC filter_dfs(Expression* current, Db *db, Table *default_table, std::unordered_
 {
   //终止节点
   if(current->type() == ExprType::VALUE){
+    if(current->value_type() == UNDEFINED){
+      LOG_WARN("attr_type invalid");
+      return RC::INVALID_ARGUMENT;
+    }
     return RC::SUCCESS;
   }
   else if(current->type() == ExprType::FIELD){
@@ -143,7 +147,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   if (condition.left_is_attr == 0) {
     rc = filter_dfs(condition.left_expr, db, default_table, tables);
     if (rc != RC::SUCCESS) {
-      LOG_WARN("cannot find attr");
+      LOG_WARN("cannot find attr or invalid value");
       return rc;
     }
     FilterObj filter_obj;
@@ -163,8 +167,11 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     filter_obj.init_stmt(static_cast<SelectStmt*>(sub_stmt));
     filter_unit->set_left(filter_obj);
   }
+  //exists的左边,无
   else{
-    //exists的左边,无
+    FilterObj filter_obj;
+    filter_obj.set_nothing_here();
+    filter_unit->set_left(filter_obj);
   }
 
   //expression
@@ -198,8 +205,11 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
     filter_obj.init_value_list(condition.right_list);
     filter_unit->set_right(filter_obj);
   }
+  //is null的右边
   else {
-    //无
+    FilterObj filter_obj;
+    filter_obj.set_nothing_here();
+    filter_unit->set_right(filter_obj);
   }
 
   filter_unit->set_comp(comp);

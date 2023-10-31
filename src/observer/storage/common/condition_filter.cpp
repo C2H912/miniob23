@@ -65,6 +65,8 @@ RC DefaultConditionFilter::init(Table &table, const ConditionSqlNode &condition)
 
   AttrType type_left = UNDEFINED;
   AttrType type_right = UNDEFINED;
+
+  printf("hello");
 #if 0
   if (1 == condition.left_is_attr) {
     left.is_attr = true;

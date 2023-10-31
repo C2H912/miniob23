@@ -49,6 +49,11 @@ struct FilterObj
     type = 2;
     this->value_list = list;
   }
+
+  void set_nothing_here()
+  {
+    type = -1;
+  }
 };
 
 class FilterUnit 

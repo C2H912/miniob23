@@ -210,6 +210,8 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <expression_list>     expression_list
 %type <expression>          myexpression
 %type <expression_list>     myexpression_list
+%type <expression>          sub_myexpression
+%type <expression>          base_myexpression
 %type <sql_node>            calc_stmt
 %type <sql_node>            select_stmt
 %type <sub_sql_node>        sub_select_stmt
@@ -237,8 +239,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
 
 %left '+' '-'
 %left '*' '/'
-%left UMINUS
-//%nonassoc UMINUS
+%nonassoc UMINUS
 %%
 
 commands: command_wrapper opt_semicolon  //commands or sqls. parser starts here.
@@ -900,23 +901,33 @@ myexpression_list:
     }
     ;
 myexpression:
-    myexpression '+' myexpression {
+    sub_myexpression{
+
+    }
+    | myexpression '+' sub_myexpression {
       $$ = create_alu_expression(ALUExpr::Type2::ADD, $1, $3, sql_string, &@$);
     }
-    | myexpression '-' myexpression {
+    | myexpression '-' sub_myexpression {
       $$ = create_alu_expression(ALUExpr::Type2::SUB, $1, $3, sql_string, &@$);
     }
-    | myexpression '*' myexpression {
+    ;
+sub_myexpression:
+    base_myexpression{
+
+    }
+    | sub_myexpression '*' base_myexpression {
       $$ = create_alu_expression(ALUExpr::Type2::MUL, $1, $3, sql_string, &@$);
     }
-    | myexpression '/' myexpression {
+    | sub_myexpression '/' base_myexpression {
       $$ = create_alu_expression(ALUExpr::Type2::DIV, $1, $3, sql_string, &@$);
     }
-    | LBRACE myexpression RBRACE {
+    //| '-' myexpression %prec UMINUS {
+base_myexpression:
+    LBRACE myexpression RBRACE {
       $$ = $2;
       $$->set_name(token_name(sql_string, &@$));
     }
-    | '-' myexpression %prec UMINUS {
+    | '-' base_myexpression {
       $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
     }
     | value {
@@ -1113,6 +1124,15 @@ condition:
       }
       $$->right_list.emplace_back(*$4);
       std::reverse($$->right_list.begin(), $$->right_list.end());
+      $$->comp = $2;
+    }
+    | myexpression logical_comp_op sub_select_stmt
+    {
+      $$ = new ConditionSqlNode;
+      $$->left_is_attr = 0;
+      $$->left_expr = $1;
+      $$->right_is_attr = 1;
+      $$->right_sql = $3;
       $$->comp = $2;
     }
     //exists
