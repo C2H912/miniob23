@@ -67,29 +67,31 @@ RC ExecuteStage::handle_request_with_physical_operator(SQLStageEvent *sql_event)
   TupleSchema schema;
   switch (stmt->type()) {
     case StmtType::SELECT: {
-      ProjectPhysicalOperator *project_operator = static_cast<ProjectPhysicalOperator *>(physical_operator.get());
-      for (const unique_ptr<Expression> & expr : project_operator->expressions()) {
-        schema.append_cell(expr->name().c_str());
-      }
-#if 0
       SelectStmt *select_stmt = static_cast<SelectStmt *>(stmt);
-      bool with_table_name = select_stmt->tables().size() > 1;
-      if(select_stmt->aggr_fields()[0] != UNKNOWN){
-        for(int i = 0; i < (int)select_stmt->aggr_fields().size(); i++){
-          AggrOp temp_aggr = select_stmt->aggr_fields()[i];
-          schema.append_cell(select_stmt->aggr_specs()[i], temp_aggr);
+      if(select_stmt->expr_flag() == true){
+        ProjectPhysicalOperator *project_operator = static_cast<ProjectPhysicalOperator *>(physical_operator.get());
+        for (const unique_ptr<Expression> & expr : project_operator->expressions()) {
+          schema.append_cell(expr->name().c_str());
         }
       }
       else{
-        for (const Field &field : select_stmt->query_fields()) {
-          if (with_table_name) {
-            schema.append_cell(field.table_name(), field.field_name());
-          } else {
-            schema.append_cell(field.field_name());
+        bool with_table_name = select_stmt->tables().size() > 1;
+        if(select_stmt->aggr_fields()[0] != UNKNOWN){
+          for(int i = 0; i < (int)select_stmt->aggr_fields().size(); i++){
+            AggrOp temp_aggr = select_stmt->aggr_fields()[i];
+            schema.append_cell(select_stmt->aggr_specs()[i], temp_aggr);
+          }
+        }
+        else{
+          for (const Field &field : select_stmt->query_fields()) {
+            if (with_table_name) {
+              schema.append_cell(field.table_name(), field.field_name());
+            } else {
+              schema.append_cell(field.field_name());
+            }
           }
         }
       }
-#endif
     } break;
 
     case StmtType::CALC: {

@@ -323,6 +323,15 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     LOG_WARN("invalid argument. db is null");
     return RC::INVALID_ARGUMENT;
   }
+  
+  //处理表头
+  bool is_expr = false;
+  for(size_t i = 0; i < select_sql.expressions.size(); i++){
+    if(select_sql.expressions[i]->type() == ExprType::ALU){
+      is_expr = true;
+      break;
+    }
+  }
 
 // ---------- collect tables in `from` statement ----------
   std::vector<Table *> tables;
@@ -384,14 +393,14 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   std::vector<AggrOp> aggr_fields;
   std::vector<std::string> aggr_specs;
 
-  //const RelAttrSqlNode &relation_attr = select_sql.attributes[0];
-  //AggrOp aggr_flag = relation_attr.aggr_func;   //是否带有聚合
+  const RelAttrSqlNode &relation_attr = select_sql.attributes[0];
+  AggrOp aggr_flag = relation_attr.aggr_func;   //是否带有聚合
 
   for (int i = 0; i < (int)select_sql.attributes.size(); i++) {
     const RelAttrSqlNode &relation_attr = select_sql.attributes[i];
     
   //1. 检查聚合的语法
-#if 0
+
     //要么全部都是聚合或者全部都不是聚合
     if(aggr_flag == UNKNOWN){
       if(relation_attr.aggr_func != UNKNOWN){
@@ -410,7 +419,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         return RC::INVALID_ARGUMENT;
       }
     }
-#endif
+
   //2. 创建stmt
 
     if (common::is_blank(relation_attr.relation_name.c_str()) &&
@@ -557,15 +566,17 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   //放入表达式
   //这里还得进行一次深度优先遍历，用于把query_fields中解析出来的属性对应的类型写入到expr树对应的Field中
   //否则运算时不知道类型
+  select_stmt->is_expr_ = is_expr;
   int expr_index = 0;
   for(size_t i = 0; i < select_sql.expressions.size(); i++){
     dfs_for_field(select_sql.expressions[i], expr_index, select_stmt->query_fields_);
   }
-  if(is_star == true && select_stmt->aggr_fields_.empty()){
+  if(is_star == true && select_stmt->aggr_fields_[0] == UNKNOWN){
     for(size_t i = 0; i < select_stmt->query_fields_.size(); i++){
       std::string tablename = select_stmt->query_fields_[i].table_name();
       std::string fieldname = select_stmt->query_fields_[i].field_name();
       FieldExpr *expr = new FieldExpr(tablename, fieldname, UNKNOWN);
+      expr->set_field(select_stmt->query_fields_[i]);
       if(select_stmt->tables_.size() > 1){
         std::string s = tablename + "." + fieldname;
         expr->set_name(s);

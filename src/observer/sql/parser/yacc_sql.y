@@ -915,9 +915,9 @@ myexpression:
       $$ = $2;
       $$->set_name(token_name(sql_string, &@$));
     }
-    //| '-' myexpression %prec UMINUS {
-    //  $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
-    //}
+    | '-' myexpression %prec UMINUS {
+      $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
+    }
     | value {
       $$ = new ValueExpr(*$1);
       $$->set_name(token_name(sql_string, &@$));

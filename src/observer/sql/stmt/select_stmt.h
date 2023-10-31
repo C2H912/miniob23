@@ -90,6 +90,11 @@ public:
     return expressions_;
   }
 
+  bool expr_flag()
+  {
+    return is_expr_;
+  }
+
 private:
   std::vector<Field> query_fields_;
   std::vector<AggrOp> aggr_fields_;
@@ -98,5 +103,6 @@ private:
   int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
   OrderByStmt *order_by_stmt_ = nullptr;
+  bool is_expr_ = false;
   std::vector<std::unique_ptr<Expression>> expressions_;
 };
