@@ -237,7 +237,8 @@ AggreExpr *create_aggr_expression(AggrOp type,
 
 %left '+' '-'
 %left '*' '/'
-%nonassoc UMINUS
+%left UMINUS
+//%nonassoc UMINUS
 %%
 
 commands: command_wrapper opt_semicolon  //commands or sqls. parser starts here.
@@ -955,6 +956,12 @@ cal_attr:
       @$ = @1;
       free($1);
       free($3);
+    }
+    | aggr_func LBRACE '*' RBRACE{
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = "*";
+      $$->aggr_func = $1;
+      @$ = @1;
     }
     | aggr_func LBRACE ID RBRACE{
       $$ = new RelAttrSqlNode;
