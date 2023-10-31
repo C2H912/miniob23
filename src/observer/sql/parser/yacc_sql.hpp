@@ -123,7 +123,7 @@ extern int yydebug;
     ID = 324,                      /* ID  */
     SSS = 325,                     /* SSS  */
     DATESSS = 326,                 /* DATESSS  */
-    UMINUS = 327                   /* UMINUS  */
+    UNARY_MINUS = 327              /* UNARY_MINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

@@ -208,10 +208,10 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <attr_name_value>     update_option
 %type <expression>          expression
 %type <expression_list>     expression_list
-%type <expression>          myexpression
-%type <expression_list>     myexpression_list
-%type <expression>          sub_myexpression
-%type <expression>          base_myexpression
+%type <expression>          add_expr
+%type <expression_list>     add_expr_list
+%type <expression>          mul_expr
+%type <expression>          base_expr
 %type <sql_node>            calc_stmt
 %type <sql_node>            select_stmt
 %type <sub_sql_node>        sub_select_stmt
@@ -239,7 +239,8 @@ AggreExpr *create_aggr_expression(AggrOp type,
 
 %left '+' '-'
 %left '*' '/'
-%nonassoc UMINUS
+%left UNARY_MINUS
+%left "=" "<=" "<>" "!=" "<" ">=" ">"   
 %%
 
 commands: command_wrapper opt_semicolon  //commands or sqls. parser starts here.
@@ -691,7 +692,7 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT myexpression_list FROM ID rel_list join_list where opt_order_by
+    SELECT add_expr_list FROM ID rel_list join_list where opt_order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
 
@@ -809,7 +810,7 @@ order_by_unit:
 
 
 sub_select_stmt:        /*  select 语句的语法解析树*/
-    LBRACE SELECT myexpression_list FROM ID rel_list where RBRACE
+    LBRACE SELECT add_expr_list FROM ID rel_list where RBRACE
     {
       $$ = new SelectSqlNode;
       if ($3 != nullptr) {
@@ -875,7 +876,7 @@ expression:
       $$ = $2;
       $$->set_name(token_name(sql_string, &@$));
     }
-    | '-' expression %prec UMINUS {
+    | '-' expression %prec UNARY_MINUS {
       $$ = create_arithmetic_expression(ArithmeticExpr::Type::NEGATIVE, $2, nullptr, sql_string, &@$);
     }
     | value {
@@ -884,13 +885,13 @@ expression:
       delete $1;
     }
     ;
-myexpression_list:
-    myexpression
+add_expr_list:
+    add_expr
     {
       $$ = new std::vector<Expression*>;
       $$->emplace_back($1);
     }
-    | myexpression COMMA myexpression_list
+    | add_expr COMMA add_expr_list
     {
       if ($3 != nullptr) {
         $$ = $3;
@@ -900,35 +901,35 @@ myexpression_list:
       $$->emplace_back($1);
     }
     ;
-myexpression:
-    sub_myexpression{
+add_expr:
+    mul_expr{
 
     }
-    | myexpression '+' sub_myexpression {
+    | add_expr '+' mul_expr {
       $$ = create_alu_expression(ALUExpr::Type2::ADD, $1, $3, sql_string, &@$);
     }
-    | myexpression '-' sub_myexpression {
+    | add_expr '-' mul_expr {
       $$ = create_alu_expression(ALUExpr::Type2::SUB, $1, $3, sql_string, &@$);
     }
     ;
-sub_myexpression:
-    base_myexpression{
+mul_expr:
+    base_expr{
 
     }
-    | sub_myexpression '*' base_myexpression {
+    | mul_expr '*' base_expr {
       $$ = create_alu_expression(ALUExpr::Type2::MUL, $1, $3, sql_string, &@$);
     }
-    | sub_myexpression '/' base_myexpression {
+    | mul_expr '/' base_expr {
       $$ = create_alu_expression(ALUExpr::Type2::DIV, $1, $3, sql_string, &@$);
     }
-    //| '-' myexpression %prec UMINUS {
-base_myexpression:
-    LBRACE myexpression RBRACE {
+    | '-' base_expr {
+      $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
+    }
+    ;
+base_expr:
+    LBRACE add_expr RBRACE {
       $$ = $2;
       $$->set_name(token_name(sql_string, &@$));
-    }
-    | '-' base_myexpression {
-      $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
     }
     | value {
       $$ = new ValueExpr(*$1);
@@ -1077,7 +1078,7 @@ condition_list:
     }
     ;
 condition:
-    myexpression cal_comp_op myexpression
+    add_expr cal_comp_op add_expr
     {
       $$ = new ConditionSqlNode;
       $$->left_is_attr = 0;
@@ -1095,7 +1096,7 @@ condition:
       $$->right_sql = $3;
       $$->comp = $2;
     }
-    | myexpression cal_comp_op sub_select_stmt
+    | add_expr cal_comp_op sub_select_stmt
     {
       $$ = new ConditionSqlNode;
       $$->left_is_attr = 0;
@@ -1104,7 +1105,7 @@ condition:
       $$->right_sql = $3;
       $$->comp = $2;
     }
-    | sub_select_stmt cal_comp_op myexpression
+    | sub_select_stmt cal_comp_op add_expr
     {
       $$ = new ConditionSqlNode;
       $$->left_is_attr = 1;
@@ -1113,7 +1114,7 @@ condition:
       $$->right_expr = $3;
       $$->comp = $2;
     }
-    | myexpression logical_comp_op LBRACE value value_list RBRACE
+    | add_expr logical_comp_op LBRACE value value_list RBRACE
     {
       $$ = new ConditionSqlNode;
       $$->left_is_attr = 0;
@@ -1126,7 +1127,7 @@ condition:
       std::reverse($$->right_list.begin(), $$->right_list.end());
       $$->comp = $2;
     }
-    | myexpression logical_comp_op sub_select_stmt
+    | add_expr logical_comp_op sub_select_stmt
     {
       $$ = new ConditionSqlNode;
       $$->left_is_attr = 0;
@@ -1145,7 +1146,7 @@ condition:
       $$->comp = $1;
     }
     //is null
-    | myexpression cal_comp_op
+    | add_expr cal_comp_op
     {
       $$ = new ConditionSqlNode;
       $$->left_is_attr = 0;
