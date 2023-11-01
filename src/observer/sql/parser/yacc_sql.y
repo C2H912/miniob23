@@ -186,6 +186,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <number>              type
 %type <condition>           condition
 %type <value>               value
+%type <value>               value2
 %type <record>              record
 %type <number>              number
 %type <comp>                cal_comp_op
@@ -587,8 +588,16 @@ value:
       $$ = new Value((int)$1);
       @$ = @1;
     }
-    |FLOAT {
+    | NEGATIVE_NUM NUMBER {
+      $$ = new Value((int)$2);
+      @$ = @1;
+    }
+    | FLOAT {
       $$ = new Value((float)$1);
+      @$ = @1;
+    }
+    |NEGATIVE_NUM FLOAT {
+      $$ = new Value((float)$2);
       @$ = @1;
     }
     | NULL_T{ //要放到SSS的前面
@@ -881,7 +890,7 @@ expression:
     | NEGATIVE_NUM expression %prec UNARY_MINUS {
       $$ = create_arithmetic_expression(ArithmeticExpr::Type::NEGATIVE, $2, nullptr, sql_string, &@$);
     }
-    | value {
+    | value2 {
       $$ = new ValueExpr(*$1);
       $$->set_name(token_name(sql_string, &@$));
       delete $1;
@@ -925,7 +934,6 @@ mul_expr:
       $$ = create_alu_expression(ALUExpr::Type2::DIV, $1, $3, sql_string, &@$);
     }
     | NEGATIVE_NUM base_expr {
-      printf("NEGATIVE_NUM\n");
       $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
     }
     ;
@@ -934,7 +942,7 @@ base_expr:
       $$ = $2;
       $$->set_name(token_name(sql_string, &@$));
     }
-    | value {
+    | value2 {
       $$ = new ValueExpr(*$1);
       $$->set_name(token_name(sql_string, &@$));
       delete $1;
@@ -947,6 +955,32 @@ base_expr:
       $$->set_name(token_name(sql_string, &@$));
       delete $1;
     }
+    ;
+value2:
+    NUMBER {
+      $$ = new Value((int)$1);
+      @$ = @1;
+    }
+    | FLOAT {
+      $$ = new Value((float)$1);
+      @$ = @1;
+    }
+    | NULL_T{ //要放到SSS的前面
+      //char *tmp = common::substr($1,1,strlen($1)-2);
+      $$ = new Value(0);
+      $$->set_null_value();
+      //free(tmp);
+    }
+    |SSS {
+      char *tmp = common::substr($1,1,strlen($1)-2);
+      $$ = new Value(tmp);
+      free(tmp);
+    }
+    |DATESSS {
+			char *tmp = common::substr($1,1,strlen($1)-2);
+      $$ = new Value(1, tmp);
+      free(tmp);
+		} 
     ;
 cal_attr:
     '*' {

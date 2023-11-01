@@ -119,15 +119,14 @@ RC filter_dfs(Expression* current, Db *db, Table *default_table, std::unordered_
     if(rc != RC::SUCCESS){
       return rc;
     }
-    return RC::SUCCESS;
   }
   if(arithnode->right() != nullptr){
     RC rc = filter_dfs(arithnode->right(), db, default_table, tables);
     if(rc != RC::SUCCESS){
       return rc;
     }
-    return RC::SUCCESS;
   }
+  return RC::SUCCESS;
 }
 
 RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables,
