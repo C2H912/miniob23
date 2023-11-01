@@ -81,6 +81,8 @@ AggreExpr *create_aggr_expression(AggrOp type,
         NULLABLE
         IN
         IS
+        SUB_NUM
+        NEGATIVE_NUM
         OR
         CREATE
         DROP
@@ -237,10 +239,10 @@ AggreExpr *create_aggr_expression(AggrOp type,
 // commands should be a list but I use a single command instead
 %type <sql_node>            commands
 
-%left '+' '-'
+%left '+' SUB_NUM
 %left '*' '/'
 %left UNARY_MINUS
-%left "=" "<=" "<>" "!=" "<" ">=" ">"   
+%left EQ LT GT LE GE NE 
 %%
 
 commands: command_wrapper opt_semicolon  //commands or sqls. parser starts here.
@@ -863,7 +865,7 @@ expression:
     expression '+' expression {
       $$ = create_arithmetic_expression(ArithmeticExpr::Type::ADD, $1, $3, sql_string, &@$);
     }
-    | expression '-' expression {
+    | expression SUB_NUM expression {
       $$ = create_arithmetic_expression(ArithmeticExpr::Type::SUB, $1, $3, sql_string, &@$);
     }
     | expression '*' expression {
@@ -876,7 +878,7 @@ expression:
       $$ = $2;
       $$->set_name(token_name(sql_string, &@$));
     }
-    | '-' expression %prec UNARY_MINUS {
+    | NEGATIVE_NUM expression %prec UNARY_MINUS {
       $$ = create_arithmetic_expression(ArithmeticExpr::Type::NEGATIVE, $2, nullptr, sql_string, &@$);
     }
     | value {
@@ -908,7 +910,8 @@ add_expr:
     | add_expr '+' mul_expr {
       $$ = create_alu_expression(ALUExpr::Type2::ADD, $1, $3, sql_string, &@$);
     }
-    | add_expr '-' mul_expr {
+    | add_expr SUB_NUM mul_expr {
+      printf("SUB_NUM\n");
       $$ = create_alu_expression(ALUExpr::Type2::SUB, $1, $3, sql_string, &@$);
     }
     ;
@@ -922,7 +925,8 @@ mul_expr:
     | mul_expr '/' base_expr {
       $$ = create_alu_expression(ALUExpr::Type2::DIV, $1, $3, sql_string, &@$);
     }
-    | '-' base_expr {
+    | NEGATIVE_NUM base_expr {
+      printf("NEGATIVE_NUM\n");
       $$ = create_alu_expression(ALUExpr::Type2::NEGATIVE, $2, nullptr, sql_string, &@$);
     }
     ;
