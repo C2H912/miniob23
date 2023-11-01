@@ -81,7 +81,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
         NULLABLE
         IN
         IS
-        SUB_NUM
+        MINUS
         NEGATIVE_NUM
         OR
         CREATE
@@ -239,7 +239,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
 // commands should be a list but I use a single command instead
 %type <sql_node>            commands
 
-%left '+' SUB_NUM
+%left '+' MINUS
 %left '*' '/'
 %left UNARY_MINUS
 %left EQ LT GT LE GE NE 
@@ -865,7 +865,7 @@ expression:
     expression '+' expression {
       $$ = create_arithmetic_expression(ArithmeticExpr::Type::ADD, $1, $3, sql_string, &@$);
     }
-    | expression SUB_NUM expression {
+    | expression MINUS expression {
       $$ = create_arithmetic_expression(ArithmeticExpr::Type::SUB, $1, $3, sql_string, &@$);
     }
     | expression '*' expression {
@@ -910,8 +910,7 @@ add_expr:
     | add_expr '+' mul_expr {
       $$ = create_alu_expression(ALUExpr::Type2::ADD, $1, $3, sql_string, &@$);
     }
-    | add_expr SUB_NUM mul_expr {
-      printf("SUB_NUM\n");
+    | add_expr MINUS mul_expr {
       $$ = create_alu_expression(ALUExpr::Type2::SUB, $1, $3, sql_string, &@$);
     }
     ;

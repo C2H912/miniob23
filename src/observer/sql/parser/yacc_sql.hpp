@@ -58,7 +58,7 @@ extern int yydebug;
     NULLABLE = 259,                /* NULLABLE  */
     IN = 260,                      /* IN  */
     IS = 261,                      /* IS  */
-    SUB_NUM = 262,                 /* SUB_NUM  */
+    MINUS = 262,                   /* MINUS  */
     NEGATIVE_NUM = 263,            /* NEGATIVE_NUM  */
     OR = 264,                      /* OR  */
     CREATE = 265,                  /* CREATE  */

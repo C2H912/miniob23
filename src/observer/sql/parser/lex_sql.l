@@ -63,7 +63,8 @@ extern double atof();
 
 #define RETURN_TOKEN(token) LOG_DEBUG("%s", #token);return token
 
-int is_nagetive = 0;
+int is_minus = 1;
+int can_be_minus = 0;
 
 %}
 
@@ -95,9 +96,6 @@ QUOTE            [\'\"]
 {WHITE_SAPCE}                                        // ignore whitespace
 \n                                                   ;
 
-{DIGIT}+                           is_nagetive = 0; yylval->number=atoi(yytext); RETURN_TOKEN(NUMBER);
-{DIGIT}+{DOT}{DIGIT}+              is_nagetive = 0; yylval->floats=(float)(atof(yytext)); RETURN_TOKEN(FLOAT);
-
 ";"                                     RETURN_TOKEN(SEMICOLON);
 {DOT}                                   RETURN_TOKEN(DOT);
 EXIT                                    RETURN_TOKEN(EXIT);
@@ -112,7 +110,7 @@ TABLES                                  RETURN_TOKEN(TABLES);
 INDEX                                   RETURN_TOKEN(INDEX);
 ON                                      RETURN_TOKEN(ON);
 OR {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(OR);
 }                                        
 INNER                                   RETURN_TOKEN(INNER);
@@ -120,17 +118,17 @@ JOIN                                    RETURN_TOKEN(JOIN);
 SHOW                                    RETURN_TOKEN(SHOW);
 SYNC                                    RETURN_TOKEN(SYNC);
 SELECT {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(SELECT);
 }
 CALC                                    RETURN_TOKEN(CALC);
 FROM                                    RETURN_TOKEN(FROM);
 WHERE {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(WHERE);
 }
 AND  {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(AND);
 }                                   
 NOT                                     RETURN_TOKEN(NOT);
@@ -165,45 +163,45 @@ NULL                                    RETURN_TOKEN(NULL_T);
 ORDER                                   RETURN_TOKEN(ORDER);
 BY                                      RETURN_TOKEN(BY);
 ASC                                     RETURN_TOKEN(ASC);
-{ID}                                    is_nagetive = 0; yylval->string=strdup(yytext); RETURN_TOKEN(ID);
+{ID}                                    can_be_minus = 1; yylval->string=strdup(yytext); RETURN_TOKEN(ID);
 "(" {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(LBRACE);
 }
 ")" {
-  is_nagetive = 0;
+  can_be_minus = 1;
   RETURN_TOKEN(RBRACE);
 }
 "," {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(COMMA);
 }
 "=" {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(EQ);
 }
 "<=" {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(LE);
 }
 "<>" {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(NE);
 }
 "!=" {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(NE);
 }
 "<"  {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(LT);
 }
 ">=" {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(GE);
 }
 ">"  {
-  is_nagetive = 1;
+  can_be_minus = 0;
   RETURN_TOKEN(GT);
 }
 
@@ -212,16 +210,40 @@ ASC                                     RETURN_TOKEN(ASC);
 "/"                                     { return yytext[0]; }
 
 "-"  {
-  if(is_nagetive == 0){
-    printf("SUN_NUM");
-    RETURN_TOKEN(SUB_NUM);
-  }
-  else{
-    printf("NEGATIVE_NUM");
+  //不能是减号,必须是负号
+  if(can_be_minus == 0){
+    is_minus = 0;
     RETURN_TOKEN(NEGATIVE_NUM);
   }
+  else{
+    is_minus = 1;
+    RETURN_TOKEN(MINUS);
+  }
 }
-{QUOTE}[0-9][0-9][0-9][0-9][-][0-9]*[-][0-9]*{QUOTE}               yylval->string=strdup(yytext); RETURN_TOKEN(DATESSS);
+{DIGIT}+ {
+  if(is_minus == 1){
+    can_be_minus = 1;
+    yylval->number=atoi(yytext); RETURN_TOKEN(NUMBER);
+  }
+  else{
+    can_be_minus = 1;
+    is_minus = 1;
+    yylval->number=atoi(yytext); yylval->number *= -1; RETURN_TOKEN(NUMBER);
+  }
+}  
+{DIGIT}+{DOT}{DIGIT}+  {
+  if(is_minus == 1){
+    can_be_minus = 1;
+    yylval->floats=(float)(atof(yytext)); RETURN_TOKEN(FLOAT);
+  }
+  else{
+    can_be_minus = 1;
+    is_minus = 1;
+    yylval->floats=(float)(atof(yytext)); yylval->floats *= -1; RETURN_TOKEN(FLOAT);
+  }
+}   
+
+{QUOTE}[0-9][0-9][0-9][0-9][-][0-9]*[-][0-9]*{QUOTE}        yylval->string=strdup(yytext); RETURN_TOKEN(DATESSS);
 {QUOTE}(\\\47|[\40\42A-Za-z0-9_/\.\-\%])*{QUOTE}            yylval->string=strdup(yytext); RETURN_TOKEN(SSS);
 \"[^"]*\"                               yylval->string = strdup(yytext); RETURN_TOKEN(SSS);
 '[^']*\'                                yylval->string = strdup(yytext); RETURN_TOKEN(SSS);
