@@ -40,6 +40,7 @@ class OptimizeStage
 public:
   RC handle_request(SQLStageEvent *event);
   RC create_sub_request(SelectStmt *stmt, std::unique_ptr<PhysicalOperator> &subExpr);
+  RC create_complex_sub_request(std::vector<Tuple*> &paretnts, SelectStmt *stmt, std::unique_ptr<PhysicalOperator> &subExpr);
 
 private:
   /**

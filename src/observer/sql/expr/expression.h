@@ -23,6 +23,8 @@ See the Mulan PSL v2 for more details. */
 #include "common/log/log.h"
 
 class Tuple;
+class PhysicalOperator;
+class SelectStmt;
 
 /**
  * @defgroup Expression
@@ -38,6 +40,7 @@ enum class ExprType
   NONE,
   STAR,         ///< 星号，表示所有字段
   FIELD,        ///< 字段。在实际执行时，根据行数据内容提取对应字段的值
+  COMPLEXFIELD,
   VALUE,        ///< 常量值
   VALUELIST,    ///< 常量列
   QUERY,        ///< 子查询
@@ -82,6 +85,11 @@ public:
   virtual RC get_expr_value(Tuple &tuple, Value &value)
   {
     return RC::UNIMPLENMENT;
+  }
+
+  virtual void clear_table()
+  {
+    return;
   }
 
   /**
@@ -176,6 +184,66 @@ private:
 };
 
 /**
+ * @brief 复杂子查询字段表达式
+ * @ingroup Expression
+ */
+class ComplexFieldExpr : public Expression 
+{
+public:
+  ComplexFieldExpr() = default;
+  ComplexFieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func, Field &field, std::vector<Tuple*> &parents_tuples) 
+      : table_name_(table_name), attribute_name_(attribute_name), aggr_func_(aggr_func), field_(field), parents_tuples_(parents_tuples)
+  {}
+  ComplexFieldExpr(const Table *table, const FieldMeta *field) : field_(table, field)
+  {}
+  ComplexFieldExpr(const Field &field) : field_(field)
+  {}
+
+  virtual ~ComplexFieldExpr() = default;
+
+  ExprType type() const override { return ExprType::COMPLEXFIELD; }
+  AttrType value_type() const override { return field_.attr_type(); }
+
+  Field &field() { return field_; }
+
+  const Field &field() const { return field_; }
+
+  const char *table_name() const { return field_.table_name(); }
+
+  const char *field_name() const { return field_.field_name(); }
+
+  RC get_value(Tuple &tuple, Value &value) override;
+  RC try_get_value(Value &value) const override { return RC::SUCCESS; }
+  RC get_expr_value(Tuple &tuple, Value &value) override;
+
+  const std::string str_table_name() const { return table_name_; }
+  const std::string str_attribute_name() const { return attribute_name_; }
+  AggrOp aggr_name() { return aggr_func_; }
+  void set_table_name(std::string s){
+    table_name_ = s;
+  }
+  void set_field(Field &field){
+    field_ = field;
+  }
+
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    std::vector<std::vector<Value>> ret;
+    return ret;
+  }
+  int expr_type() const override {
+    return -5;
+  }
+
+private:
+  Field field_;
+  std::string table_name_;
+  std::string attribute_name_;
+  std::vector<Tuple*> parents_tuples_;
+  AggrOp aggr_func_;
+};
+
+/**
  * @brief 常量值表达式
  * @ingroup Expression
  */
@@ -260,6 +328,8 @@ public:
   //  : sub_query_(stmt), operator_(std::move(oper))
   //{}
   SubQueryExpr(std::vector<std::vector<Value>> &sub_table);
+  SubQueryExpr(SelectStmt *sub_select_stmt);
+  SubQueryExpr(SelectStmt *sub_select_stmt, std::vector<Tuple*> &parents_tuples);
   virtual ~SubQueryExpr();
 
   RC get_value(Tuple &tuple, Value &value) override;
@@ -267,10 +337,6 @@ public:
   ExprType type() const override { return ExprType::QUERY; }
 
   AttrType value_type() const override { return INTS; }
-
-  //void get_stmt(SelectStmt &stmt) const { stmt = sub_query_; }
-
-  //const SelectStmt &get_stmt() const { return sub_query_; }
 
   RC try_get_value(Value &value) const override { return RC::SUCCESS; }
 
@@ -280,8 +346,13 @@ public:
     return -1;
   }
 
+  RC get_expr_value(Tuple &tuple, Value &value) override;
+  void clear_table() { sub_table_.clear(); }
+
 private:
-  //SelectStmt sub_query_;
+  SelectStmt *sub_select_stmt_;
+  std::unique_ptr<PhysicalOperator> sub_volcano_;
+  std::vector<Tuple*> parents_tuples_;
   std::vector<std::vector<Value>> sub_table_;
 };
 

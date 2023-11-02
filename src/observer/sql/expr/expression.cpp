@@ -14,6 +14,9 @@ See the Mulan PSL v2 for more details. */
 
 #include "sql/expr/expression.h"
 #include "sql/expr/tuple.h"
+#include "sql/stmt/select_stmt.h"
+#include "sql/operator/physical_operator.h"
+#include "sql/optimizer/optimize_stage.h"
 #include <regex>
 
 using namespace std;
@@ -29,6 +32,29 @@ RC FieldExpr::get_expr_value(Tuple &tuple, Value &value)
   }
   return tuple.find_cell(TupleCellSpec(table_name(), field_name()), value, 0);
 }
+
+RC ComplexFieldExpr::get_value(Tuple &tuple, Value &value)
+{
+  return tuple.find_cell(TupleCellSpec(table_name(), field_name()), value, 0);
+}
+RC ComplexFieldExpr::get_expr_value(Tuple &tuple, Value &value)
+{
+  RC rc = tuple.find_cell(TupleCellSpec(table_name(), field_name()), value, 0);
+  if(rc == RC::SUCCESS){
+    return rc;
+  }
+  else{
+    for(size_t i = 0; i < parents_tuples_.size(); i++){
+      Tuple *current = parents_tuples_[i];
+      rc = current->find_cell(TupleCellSpec(table_name(), field_name()), value, 0);
+      if(rc == RC::SUCCESS){
+        return rc;
+      }
+    }
+  }
+  return RC::NOTFOUND;
+}
+
 
 RC ValueExpr::get_value(Tuple &tuple, Value &value)
 {
@@ -60,8 +86,56 @@ SubQueryExpr::SubQueryExpr(std::vector<std::vector<Value>> &sub_table)
   : sub_table_(sub_table)
 {}
 
+SubQueryExpr::SubQueryExpr(SelectStmt *sub_select_stmt)
+  : sub_select_stmt_(sub_select_stmt)
+{}
+
+SubQueryExpr::SubQueryExpr(SelectStmt *sub_select_stmt, std::vector<Tuple*> &parents_tuples)
+  : sub_select_stmt_(sub_select_stmt), parents_tuples_(parents_tuples)
+{}
+
 SubQueryExpr::~SubQueryExpr()
 {}
+
+RC SubQueryExpr::get_expr_value(Tuple &outer_tuple, Value &value)
+{
+  //如果子火山为空先创建子火山
+  if(!sub_volcano_){
+    parents_tuples_.push_back(&outer_tuple);
+    OptimizeStage caller;
+    RC rc = caller.create_complex_sub_request(parents_tuples_, sub_select_stmt_, sub_volcano_);
+    if(rc != RC::SUCCESS){
+      LOG_WARN("failed to get SUB TABLE from operator");
+      return rc;
+    }
+  }
+  //执行子火山把结果写入到sub_table_中
+  RC rc = RC::SUCCESS;
+  sub_volcano_->open(nullptr);
+  while (RC::SUCCESS == (rc = sub_volcano_->next())) {
+    Tuple * tuple = sub_volcano_->current_tuple();
+    std::vector<Value> row;
+    for(int i = 0; i < tuple->cell_num(); i++){
+      Value value;
+      rc = tuple->cell_at(i, value);
+      if (rc != RC::SUCCESS) {
+        sub_volcano_->close();
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
+      row.push_back(value);
+    }
+    sub_table_.push_back(row);
+  }
+  sub_volcano_->close();
+  if (rc == RC::RECORD_EOF) {
+    rc = RC::SUCCESS;
+  }
+  else{
+    LOG_WARN("failed to get SUB TABLE from operator");
+    return rc;
+  }
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -231,7 +305,19 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
       return rc;
     }
     //返回子表
+    if(right_->type() == ExprType::VALUELIST){
+      //
+    }
+    else{
+      Value not_used;
+      rc = right_->get_expr_value(tuple, not_used);
+      if(rc != RC::SUCCESS){
+        LOG_WARN("failed to get SUB TABLE from operator");
+        return rc;
+      }
+    }
     std::vector<std::vector<Value>> sub_table = right_->sub_table();
+    right_->clear_table();    //非常关键，不然越push_back越多
     if ((int)sub_table.size() == 0) {
       if(comp_ == NOT_IN_QUERY){
         value.set_boolean(true);
@@ -279,7 +365,14 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
   //2. EXISTS
   if(comp_ == EXISTS_QUERY || comp_ == NOT_EXISTS_QUERY){
     //返回子表
+    Value not_used;
+    RC rc = right_->get_expr_value(tuple, not_used);
+    if(rc != RC::SUCCESS){
+      LOG_WARN("failed to get SUB TABLE from operator");
+      return rc;
+    }
     std::vector<std::vector<Value>> sub_table = right_->sub_table();
+    right_->clear_table();
     //判断
     if((int)sub_table.size() > 0){
       value.set_boolean(true);
@@ -319,7 +412,14 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
   RC rc = RC::SUCCESS;
 
   if(left_->type() == ExprType::QUERY){
+    Value not_used;
+    rc = left_->get_expr_value(tuple, not_used);
+    if(rc != RC::SUCCESS){
+      LOG_WARN("failed to get SUB TABLE from operator");
+      return rc;
+    }
     std::vector<std::vector<Value>> left_sub_table = left_->sub_table();
+    left_->clear_table();
     if((int)left_sub_table.size() == 0){
       value.set_boolean(false);
       return RC::SUCCESS;
@@ -340,7 +440,14 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
 
   int right_type = right_->expr_type();
   if(right_->type() == ExprType::QUERY){
+    Value not_used;
+    rc = right_->get_expr_value(tuple, not_used);
+    if(rc != RC::SUCCESS){
+      LOG_WARN("failed to get SUB TABLE from operator");
+      return rc;
+    }
     std::vector<std::vector<Value>> right_sub_table = right_->sub_table();
+    right_->clear_table();
     if((int)right_sub_table.size() == 0){
       value.set_boolean(false);
       return RC::SUCCESS;
