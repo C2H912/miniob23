@@ -92,7 +92,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
   }
-
+//别名注意事项 不能重复 
 // ---------- collect query fields in `select` statement ----------
   std::vector<Field> query_fields;
   std::vector<AggrOp> aggr_fields;

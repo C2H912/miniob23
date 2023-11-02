@@ -406,7 +406,7 @@ RC LogicalPlanGenerator::create_plan(UpdateStmt *update_stmt, std::unique_ptr<Lo
       }
       if((int)sub_table.size() == 0){
         Value invalid_value(-1);
-        invalid_value.set_type(UPDATE_FAIL);
+        invalid_value.set_type(NULLS);
         all_values.push_back(invalid_value);
       }
       else if((int)sub_table.size() > 1 || (int)sub_table[0].size() > 1){

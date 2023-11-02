@@ -319,6 +319,18 @@ void string2number(const char * s, int &ret1, float &ret2)
   ret1 = (int)ret2;
 }
 
+int Value::compare_date(const Value &other) const
+{
+        char* tmp = (char *)this->str_value_.c_str();
+        int tempdate = date2int(tmp);
+        void* datetocomp = &tempdate;
+        const char* tmp2 = other.str_value_.c_str();
+        int tempdate2 = date2int(tmp2);
+        void* datetocomp2 = &tempdate2;
+        return common::compare_int(datetocomp, datetocomp2);
+       
+}
+
 int Value::compare(const Value &other) const
 {
   if (this->attr_type_ == other.attr_type_) {
@@ -333,7 +345,8 @@ int Value::compare(const Value &other) const
         char* tmp = (char *)this->str_value_.c_str();
         int tempdate = date2int(tmp);
         void* datetocomp = &tempdate;
-        return common::compare_int(datetocomp, (void *)&other.num_value_.int_value_);
+        return common::compare_int(datetocomp , (void *)&other.num_value_.int_value_);
+        
       } break;
       case CHARS: {
         return common::compare_string((void *)this->str_value_.c_str(),

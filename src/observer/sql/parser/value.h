@@ -106,33 +106,47 @@ public:
     return false;
   }
 
+  int compare_date(const Value &other) const;
+
   bool operator==(const Value &other) const
   {
+    if(other.attr_type()==AttrType::DATES)
+    return 0 == compare_date(other);
     return 0 == compare(other);
   }
 
   bool operator!=(const Value &other) const
   {
+     if(other.attr_type()==AttrType::DATES)
+    return 0 != compare_date(other);
     return 0 != compare(other);
   }
 
   bool operator<(const Value &other) const
   {
+     if(other.attr_type()==AttrType::DATES)
+    return 0  > compare_date(other);
     return 0 > compare(other);
   }
 
   bool operator<=(const Value &other) const
   {
+     if(other.attr_type()==AttrType::DATES)
+    return 0 >= compare_date(other);
     return 0 >= compare(other);
   }
 
   bool operator>(const Value &other) const
   {
+     if(other.attr_type()==AttrType::DATES)
+    return 0 < compare_date(other);
     return 0 < compare(other);
   }
 
   bool operator>=(const Value &other) const
   {
+     if(other.attr_type()==AttrType::DATES)
+    return 0 <= compare_date(other);
     return 0 <= compare(other);
   }
 
