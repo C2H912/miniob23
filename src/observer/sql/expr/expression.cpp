@@ -688,3 +688,52 @@ RC ALUExpr::get_expr_value(Tuple &tuple, Value &value)
 
   return calc_value(left_value, right_value, value);
 }
+
+
+RC FuncExpression::create_expression(const RelAttrSqlNode *expr, Expression *&res_expr)
+{
+  RC rc = RC::SUCCESS;
+  Expression *param_expr1 = nullptr;
+  Expression *param_expr2 = nullptr;
+  FuncExpr func = expr->func;
+  std::pair<Value,Value> value = func.value;
+  //FuncOp *fexp = expr->fun_op;
+  switch (expr->fun_op) {
+    case FUNC_LENGTH: {
+      //生成FieldExpr或者ValueExpr
+      if(func.is_func){ //如果是
+
+      }
+      else{
+        param_expr1 = new ValueExpr(value.first);
+      }
+      break;
+    }
+    case FUNC_ROUND: {
+      if(func.is_func){ //如果是
+
+      }
+      else{
+        param_expr1 = new ValueExpr(value.first);
+        param_expr2 = new ValueExpr(value.second);
+      }
+      break;
+    }
+    case FUNC_DATE_FORMAT: {
+         if(func.is_func){ //如果是
+
+      }
+      else{
+        param_expr1 = new ValueExpr(value.first);
+        param_expr2 = new ValueExpr(value.second);
+      }
+      break;
+    }
+    default:
+      return RC::UNIMPLENMENT;
+      break;
+  }
+
+  //res_expr = new FuncExpression(expr->fexp->type, expr->fexp->param_size, param_expr1, param_expr2, 0);
+  return rc;
+}

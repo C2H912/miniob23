@@ -58,6 +58,10 @@ public:
   {
     return aggr_specs_;
   }
+  const std::vector<std::pair<bool,std::string>> &aggr_alias() const
+  {
+    return aggr_alias_;
+  }
 
 private:
   //! 投影映射的字段名称
@@ -67,4 +71,5 @@ private:
   std::vector<Field> fields_;
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> aggr_specs_;
+  std::vector<std::pair<bool,std::string>> aggr_alias_;
 };

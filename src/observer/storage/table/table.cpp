@@ -380,6 +380,7 @@ RC Table::make_record_for_update(
     // 测试不同字段是否存在于表中
     int count = 0;
     Value &value = values[j];
+
     //如果是无效的数据直接返回失败即可
     if(value.attr_type() == UPDATE_FAIL){
       LOG_ERROR("update sub query table invalid");
