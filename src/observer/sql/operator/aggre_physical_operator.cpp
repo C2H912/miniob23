@@ -36,6 +36,7 @@ RC AggrePhysicalOperator::open(Trx *trx)
 RC AggrePhysicalOperator::next()
 {
   if(enter_flag_ == true){
+    enter_flag_ = false;
     return RC::RECORD_EOF;
   }
 
