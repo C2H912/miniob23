@@ -154,7 +154,7 @@ RC MvccTrx::insert_record(Table *table, Record &record)
   pair<OperationSet::iterator, bool> ret = 
         operations_.insert(Operation(Operation::Type::INSERT, table, record.rid()));
   if (!ret.second) {
-    rc = RC::INTERNAL;
+    // rc = RC::INTERNAL;
     LOG_WARN("failed to insert operation(insertion) into operation set: duplicate");
   }
   return rc;
@@ -176,6 +176,11 @@ RC MvccTrx::delete_record(Table * table, Record &record)
   }
   
   end_field.set_int(record, -trx_id_);
+  RC rc = table->delete_record(record);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to delete record into table. rc=%s", strrc(rc));
+    return rc;
+  }
   RC rc = log_manager_->append_log(CLogType::DELETE, trx_id_, table->table_id(), record.rid(), 0, 0, nullptr);
   ASSERT(rc == RC::SUCCESS, "failed to append delete record log. trx id=%d, table id=%d, rid=%s, record len=%d, rc=%s",
       trx_id_, table->table_id(), record.rid().to_string().c_str(), record.len(), strrc(rc));
@@ -199,8 +204,8 @@ RC MvccTrx::visit_record(Table *table, Record &record, bool readonly)
     if (trx_id_ >= begin_xid && trx_id_ <= end_xid) {
       rc = RC::SUCCESS;
     } else {
-      //rc = RC::RECORD_INVISIBLE;
-      rc = RC::SUCCESS;
+      rc = RC::RECORD_INVISIBLE;
+      //rc = RC::SUCCESS;
     }
   } else if (begin_xid < 0) {
     // begin xid 小于0说明是刚插入而且没有提交的数据
@@ -214,8 +219,8 @@ RC MvccTrx::visit_record(Table *table, Record &record, bool readonly)
       // 如果当前想要修改此条数据，并且不是当前事务删除的，简单的报错
       // 这是事务并发处理的一种方式，非常简单粗暴。其它的并发处理方法，可以等待，或者让客户端重试
       // 或者等事务结束后，再检测修改的数据是否有冲突
-      //rc = (-end_xid != trx_id_) ? RC::LOCKED_CONCURRENCY_CONFLICT : RC::RECORD_INVISIBLE;
-      rc = (-end_xid != trx_id_) ? RC::SUCCESS : RC::RECORD_INVISIBLE;
+      rc = (-end_xid != trx_id_) ? RC::LOCKED_CONCURRENCY_CONFLICT : RC::RECORD_INVISIBLE;
+      //rc = (-end_xid != trx_id_) ? RC::SUCCESS : RC::RECORD_INVISIBLE;
     }
   }
   return rc;
