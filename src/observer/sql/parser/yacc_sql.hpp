@@ -121,11 +121,13 @@ extern int yydebug;
     NE = 322,                      /* NE  */
     EXISTS = 323,                  /* EXISTS  */
     NUMBER = 324,                  /* NUMBER  */
-    FLOAT = 325,                   /* FLOAT  */
-    ID = 326,                      /* ID  */
-    SSS = 327,                     /* SSS  */
-    DATESSS = 328,                 /* DATESSS  */
-    UNARY_MINUS = 329              /* UNARY_MINUS  */
+    NUMBER_NEGA = 325,             /* NUMBER_NEGA  */
+    FLOAT = 326,                   /* FLOAT  */
+    FLOAT_NEGA = 327,              /* FLOAT_NEGA  */
+    ID = 328,                      /* ID  */
+    SSS = 329,                     /* SSS  */
+    DATESSS = 330,                 /* DATESSS  */
+    UNARY_MINUS = 331              /* UNARY_MINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -163,7 +165,7 @@ union YYSTYPE
   int                               number;
   float                             floats;
 
-#line 167 "yacc_sql.hpp"
+#line 169 "yacc_sql.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

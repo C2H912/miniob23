@@ -176,7 +176,9 @@ AggreExpr *create_aggr_expression(AggrOp type,
 }
 
 %token <number> NUMBER
+%token <number> NUMBER_NEGA
 %token <floats> FLOAT
+%token <floats> FLOAT_NEGA
 %token <string> ID
 %token <string> SSS
 %token <string> DATESSS
@@ -588,7 +590,7 @@ value:
       $$ = new Value((int)$1);
       @$ = @1;
     }
-    | NEGATIVE_NUM NUMBER {
+    | NEGATIVE_NUM NUMBER_NEGA {
       $$ = new Value((int)$2);
       @$ = @1;
     }
@@ -596,7 +598,7 @@ value:
       $$ = new Value((float)$1);
       @$ = @1;
     }
-    |NEGATIVE_NUM FLOAT {
+    |NEGATIVE_NUM FLOAT_NEGA {
       $$ = new Value((float)$2);
       @$ = @1;
     }
@@ -963,6 +965,18 @@ value2:
     }
     | FLOAT {
       $$ = new Value((float)$1);
+      @$ = @1;
+    }
+    | NUMBER_NEGA {
+      int temp = (int)$1;
+      temp *= (-1);
+      $$ = new Value(temp);
+      @$ = @1;
+    }
+    | FLOAT_NEGA {
+      float temp = (float)$1;
+      temp *= (-1.0);
+      $$ = new Value(temp);
       @$ = @1;
     }
     | NULL_T{ //要放到SSS的前面

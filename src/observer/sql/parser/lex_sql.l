@@ -228,13 +228,13 @@ ASC                                     RETURN_TOKEN(ASC);
   else{
     can_be_minus = 1;
     is_minus = 1;
-    yylval->number=atoi(yytext); yylval->number *= -1; RETURN_TOKEN(NUMBER);
+    yylval->number=atoi(yytext); yylval->number *= -1; RETURN_TOKEN(NUMBER_NEGA);
   }
 }  
 {DIGIT}+{DOT}{DIGIT}+  {
   if(is_minus == 1){
     can_be_minus = 1;
-    yylval->floats=(float)(atof(yytext)); RETURN_TOKEN(FLOAT);
+    yylval->floats=(float)(atof(yytext)); RETURN_TOKEN(FLOAT_NEGA);
   }
   else{
     can_be_minus = 1;

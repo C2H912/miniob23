@@ -474,9 +474,9 @@ RC ArithmeticExpr::calc_value(const Value &left_value, const Value &right_value,
 
     case Type::NEGATIVE: {
       if (target_type == AttrType::INTS) {
-        value.set_int(left_value.get_int());
+        value.set_int(-left_value.get_int());
       } else {
-        value.set_float(left_value.get_float());
+        value.set_float(-left_value.get_float());
       }
     } break;
 
