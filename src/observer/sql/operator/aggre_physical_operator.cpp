@@ -66,6 +66,9 @@ RC AggrePhysicalOperator::next()
 
     all_tuple.push_back(one_tuple);
   }
+  if (rc != RC::RECORD_EOF) {
+    return rc;
+  }
   
   if((int)all_tuple.size() == 0){
     return RC::RECORD_EOF;

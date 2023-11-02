@@ -415,7 +415,7 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
     Value not_used;
     rc = left_->get_expr_value(tuple, not_used);
     if(rc != RC::SUCCESS){
-      LOG_WARN("failed to get SUB TABLE from operator");
+      LOG_WARN("failed to get SUB TABLE from operator\n");
       return rc;
     }
     std::vector<std::vector<Value>> left_sub_table = left_->sub_table();
@@ -423,9 +423,11 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
     if((int)left_sub_table.size() == 0){
       value.set_boolean(false);
       return RC::SUCCESS;
+      //LOG_WARN("EMPTY TABLE\n");
+      //return RC::EMPTY;
     }
     if((int)left_sub_table.size() > 1 || (int)left_sub_table[0].size() > 1){
-      LOG_WARN("table size is incorrect");
+      LOG_WARN("table size is incorrect\n");
       return RC::INVALID_ARGUMENT;
     }
     left_value = left_sub_table[0][0];
@@ -433,7 +435,7 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
   else{
     rc = left_->get_expr_value(tuple, left_value);
     if (rc != RC::SUCCESS) {
-      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      LOG_WARN("failed to get value of left expression. rc=%s\n", strrc(rc));
       return rc;
     }
   }
@@ -443,7 +445,7 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
     Value not_used;
     rc = right_->get_expr_value(tuple, not_used);
     if(rc != RC::SUCCESS){
-      LOG_WARN("failed to get SUB TABLE from operator");
+      LOG_WARN("failed to get SUB TABLE from operator\n");
       return rc;
     }
     std::vector<std::vector<Value>> right_sub_table = right_->sub_table();
@@ -451,9 +453,11 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
     if((int)right_sub_table.size() == 0){
       value.set_boolean(false);
       return RC::SUCCESS;
+      //LOG_WARN("EMPTY TABLE\n");
+      //return RC::EMPTY;
     }
     if((int)right_sub_table.size() > 1 || (int)right_sub_table[0].size() > 1){
-      LOG_WARN("table size is incorrect");
+      LOG_WARN("table size is incorrect\n");
       return RC::INVALID_ARGUMENT;
     }
     right_value = right_sub_table[0][0];
@@ -461,7 +465,7 @@ RC ComparisonExpr::get_value(Tuple &tuple, Value &value)
   else{
     rc = right_->get_expr_value(tuple, right_value);
     if (rc != RC::SUCCESS) {
-      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      LOG_WARN("failed to get value of left expression. rc=%s\n", strrc(rc));
       return rc;
     }
   }
