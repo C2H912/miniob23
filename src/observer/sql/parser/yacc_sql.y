@@ -598,7 +598,7 @@ value:
       $$ = new Value((float)$1);
       @$ = @1;
     }
-    |NEGATIVE_NUM FLOAT_NEGA {
+    | NEGATIVE_NUM FLOAT_NEGA {
       $$ = new Value((float)$2);
       @$ = @1;
     }

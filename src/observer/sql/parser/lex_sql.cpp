@@ -1544,12 +1544,12 @@ YY_RULE_SETUP
 {
   if(is_minus == 1){
     can_be_minus = 1;
-    yylval->floats=(float)(atof(yytext)); RETURN_TOKEN(FLOAT_NEGA);
+    yylval->floats=(float)(atof(yytext)); RETURN_TOKEN(FLOAT);
   }
   else{
     can_be_minus = 1;
     is_minus = 1;
-    yylval->floats=(float)(atof(yytext)); yylval->floats *= -1; RETURN_TOKEN(FLOAT);
+    yylval->floats=(float)(atof(yytext)); yylval->floats *= -1; RETURN_TOKEN(FLOAT_NEGA);
   }
 }   
 	YY_BREAK

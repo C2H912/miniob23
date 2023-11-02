@@ -2346,7 +2346,7 @@ yyreduce:
 
   case 62: /* value: NEGATIVE_NUM FLOAT_NEGA  */
 #line 601 "yacc_sql.y"
-                             {
+                              {
       (yyval.value) = new Value((float)(yyvsp[0].floats));
       (yyloc) = (yylsp[-1]);
     }
