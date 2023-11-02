@@ -50,6 +50,7 @@ enum class ExprType
   ALU,
   AGGRE,
   ARITHMETIC,   ///< 算术运算
+  FUNC,
 };
 
 /**
@@ -135,6 +136,9 @@ public:
   FieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func) 
       : table_name_(table_name), attribute_name_(attribute_name), aggr_func_(aggr_func)
   {}
+   FieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func, std::string alias_name) 
+      : table_name_(table_name), attribute_name_(attribute_name), aggr_func_(aggr_func),alias_name_(alias_name)
+  {}
   FieldExpr(const Table *table, const FieldMeta *field) : field_(table, field)
   {}
   FieldExpr(const Field &field) : field_(field)
@@ -159,6 +163,7 @@ public:
 
   const std::string str_table_name() const { return table_name_; }
   const std::string str_attribute_name() const { return attribute_name_; }
+  const std::string str_alias_name() const { return alias_name_; }
   AggrOp aggr_name() { return aggr_func_; }
   void set_table_name(std::string s){
     table_name_ = s;
@@ -181,6 +186,7 @@ private:
   std::string table_name_;
   std::string attribute_name_;
   AggrOp aggr_func_;
+  std::string alias_name_;
 };
 
 /**
@@ -588,4 +594,78 @@ private:
   Type2 alu_type_;
   Expression* left_;
   Expression* right_;
+};
+
+class FuncExpression : public Expression {
+public:
+  FuncExpression() = default;
+  FuncExpression(FuncOp func_type, int param_size, Expression *param1, Expression *param2, bool with_brace)
+      : func_type_(func_type), param_size_(param_size)
+  {
+    // if (with_brace) {
+    //   set_with_brace();
+    // }
+    if (param1 != NULL) {
+      params_expr_.emplace_back(param1);
+    }
+    if (param2 != NULL) {
+      params_expr_.emplace_back(param2);
+    }
+  }
+  virtual ~FuncExpression() = default;
+
+  RC get_func_length_value(const Tuple &tuple, Value &final_cell) const;
+
+  RC get_func_round_value(const Tuple &tuple, Value &final_cell) const;
+
+  RC get_func_data_format_value(const Tuple &tuple, Value &final_cell) const;
+
+  RC get_value(const Tuple &tuple, Value &final_cell) const 
+  {
+    RC rc = RC::SUCCESS;
+    switch (func_type_) {
+      case FUNC_LENGTH: {
+        rc = get_func_length_value(tuple, final_cell);
+        break;
+      }
+      case FUNC_ROUND: {
+        rc = get_func_round_value(tuple, final_cell);
+        break;
+      }
+      case FUNC_DATE_FORMAT: {
+        rc = get_func_data_format_value(tuple, final_cell);
+        break;
+      }
+      default:
+        break;
+    }
+    return rc;
+  }
+
+  ExprType type() const override
+  {
+    return ExprType::FUNC;
+  }
+
+
+  FuncOp get_func_type()
+  {
+    return func_type_;
+  }
+
+  std::vector<Expression *> get_params()
+  {
+    return params_expr_;
+  }
+
+  int get_param_size()
+  {
+    return param_size_;
+  }
+  static RC create_expression(const RelAttrSqlNode *expr, Expression *&res_expr);
+
+private:
+  FuncOp func_type_;
+  std::vector<Expression *> params_expr_;
+  int param_size_;
 };

@@ -27,6 +27,8 @@ public:
   Field() = default;
   Field(const Table *table, const FieldMeta *field) : table_(table), field_(field)
   {}
+  Field(const Table *table, const FieldMeta *field,std::string alias) : table_(table), field_(field),alias_(alias)
+  {}
   Field(const Field &) = default;
 
   const Table *table() const
@@ -66,8 +68,15 @@ public:
 
   const char *get_data(const Record &record);
 
+  const char * alias() const
+  {
+    if(alias_.empty())
+   return  nullptr;
+   else return alias_.c_str();
+  }
+
 private:
   const Table *table_ = nullptr;
   const FieldMeta *field_ = nullptr;
-  //std::string alias;
+  std::string alias_;
 };

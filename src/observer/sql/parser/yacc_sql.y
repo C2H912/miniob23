@@ -84,6 +84,9 @@ AggreExpr *create_aggr_expression(AggrOp type,
         MINUS
         NEGATIVE_NUM
         OR
+        LENGTH
+        ROUND 
+        DATE_FORMAT
         CREATE
         DROP
         TABLE
@@ -91,6 +94,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
         INDEX
         CALC
         SELECT
+        AS
         DESC
         ASC
         ORDER
@@ -166,7 +170,8 @@ AggreExpr *create_aggr_expression(AggrOp type,
   std::vector<ValueRecord> *        record_list;
   std::vector<ConditionSqlNode> *   condition_list;
   std::vector<RelAttrSqlNode> *     rel_attr_list;
-  std::vector<std::string> *        relation_list;
+  std::vector<RelName> *            relation_list;
+  RelName *                         rel_name;
   std::vector<std::string> *        index_attr_list;
   std::vector<OrderBySqlNode> *     order_by;
   OrderBySqlNode *                  order_by_node;
@@ -204,6 +209,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <condition_list>      on
 %type <join_lists>          join_list
 %type <relation_list>       rel_list
+%type <rel_name>            rel
 %type <index_attr_list>     id_list
 %type <string>              id
 %type <order_by>            order_by_list
@@ -705,7 +711,7 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT add_expr_list FROM ID rel_list join_list where opt_order_by
+    SELECT add_expr_list FROM rel rel_list join_list where opt_order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
 
@@ -719,7 +725,7 @@ select_stmt:        /*  select 语句的语法解析树*/
         $$->selection.relations.swap(*$5);
         delete $5;
       }
-      $$->selection.relations.push_back($4);
+      $$->selection.relations.push_back(*$4);
       std::reverse($$->selection.relations.begin(), $$->selection.relations.end());
 
       if ($6 != nullptr) {
@@ -741,6 +747,31 @@ select_stmt:        /*  select 语句的语法解析树*/
       free($4);
     }
     ;
+
+rel://这个是返回表名结构体的语法
+  ID ID 
+  {
+    $$ = new RelName();
+    $$->relation = $1;
+    $$->alias = $2;
+    free($1);
+    free($2);
+  }
+  | ID
+  {
+    $$ = new RelName();
+    $$->relation = $1;
+    free($1);
+  }
+  | ID AS ID 
+  {
+    $$ = new RelName();
+    $$->relation = $1;
+    $$->alias = $3;
+    free($1);
+    free($3);
+  }
+  ;
 
 opt_order_by:
     {
@@ -823,7 +854,7 @@ order_by_unit:
 
 
 sub_select_stmt:        /*  select 语句的语法解析树*/
-    LBRACE SELECT add_expr_list FROM ID rel_list where RBRACE
+    LBRACE SELECT add_expr_list FROM rel rel_list where RBRACE
     {
       $$ = new SelectSqlNode;
       if ($3 != nullptr) {
@@ -835,7 +866,7 @@ sub_select_stmt:        /*  select 语句的语法解析树*/
         $$->relations.swap(*$6);
         delete $6;
       }
-      $$->relations.push_back($5);
+      $$->relations.push_back(*$5);
       std::reverse($$->relations.begin(), $$->relations.end());
 
       if ($7 != nullptr) {
@@ -952,8 +983,9 @@ base_expr:
     | cal_attr {
       std::string table = $1->relation_name;
       std::string attribute = $1->attribute_name;
+      std::string alias = $1->alias;
       AggrOp aggr = $1->aggr_func;
-      $$ = new FieldExpr(table, attribute, aggr);
+      $$ = new FieldExpr(table, attribute, aggr,alias);
       $$->set_name(token_name(sql_string, &@$));
       delete $1;
     }
@@ -1002,12 +1034,14 @@ cal_attr:
       $$->relation_name  = "";
       $$->attribute_name = "*";
       $$->aggr_func = UNKNOWN;
+      $$->fun_op = UNCHECKED;
       @$ = @1;
     }
     | ID {
       $$ = new RelAttrSqlNode;
       $$->attribute_name = $1;
       $$->aggr_func = UNKNOWN;
+      $$->fun_op = UNCHECKED;
       @$ = @1;
       free($1);
     }
@@ -1016,6 +1050,7 @@ cal_attr:
       $$->relation_name  = $1;
       $$->attribute_name = $3;
       $$->aggr_func = UNKNOWN;
+      $$->fun_op = UNCHECKED;
       @$ = @1;
       free($1);
       free($3);
@@ -1024,12 +1059,14 @@ cal_attr:
       $$ = new RelAttrSqlNode;
       $$->attribute_name = "*";
       $$->aggr_func = $1;
+      $$->fun_op = UNCHECKED;
       @$ = @1;
     }
     | aggr_func LBRACE ID RBRACE{
       $$ = new RelAttrSqlNode;
       $$->attribute_name = $3;
       $$->aggr_func = $1;
+      $$->fun_op = UNCHECKED;
       @$ = @1;
       free($3);
     }
@@ -1038,11 +1075,171 @@ cal_attr:
       $$->relation_name  = $3;
       $$->attribute_name = $5;
       $$->aggr_func = $1;
+      $$->fun_op = UNCHECKED;
       @$ = @1;
       free($3);
       free($5);
+    }//这后面是带别名的
+     | ID AS ID {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $1;
+      $$->aggr_func = UNKNOWN;
+      $$->fun_op = UNCHECKED;
+      $$->alias = $3;
+      free($3);
+      free($1);
+    }
+    | ID DOT ID AS ID {
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $1;
+      $$->attribute_name = $3;
+      $$->aggr_func = UNKNOWN;
+      $$->fun_op = UNCHECKED;
+      $$->alias = $5;
+      free($1);
+      free($3);
+      free($5);
+    }
+    | aggr_func LBRACE '*' RBRACE AS ID {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = "*";
+      $$->aggr_func = $1;
+      $$->fun_op = UNCHECKED;
+      $$->alias = $6;
+      free($6);
+    }
+    | aggr_func LBRACE ID RBRACE AS ID{
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $3;
+      $$->aggr_func = $1;
+       $$->alias = $6;
+       $$->fun_op = UNCHECKED;
+       free($6);
+      free($3);
+    }
+    | aggr_func LBRACE ID DOT ID RBRACE AS ID{
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $3;
+      $$->attribute_name = $5;
+      $$->aggr_func = $1;
+      $$->fun_op = UNCHECKED;
+      $$->alias = $8;
+      free($8);
+      free($3);
+      free($5);
+    }
+     | ID ID { //不加AS也可以
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $1;
+      $$->aggr_func = UNKNOWN;
+      $$->fun_op = UNCHECKED;
+      $$->alias = $2;
+      free($2);
+      free($1);
+    }
+    | ID DOT ID ID {
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $1;
+      $$->attribute_name = $3;
+      $$->aggr_func = UNKNOWN;
+      $$->fun_op = UNCHECKED;
+      $$->alias = $4;
+      free($1);
+      free($3);
+      free($4);
+    }
+    | aggr_func LBRACE '*' RBRACE ID {
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = "*";
+      $$->aggr_func = $1;
+      $$->fun_op = UNCHECKED;
+      $$->alias = $5;
+      free($5);
+    }
+    | aggr_func LBRACE ID RBRACE ID{
+      $$ = new RelAttrSqlNode;
+      $$->attribute_name = $3;
+      $$->aggr_func = $1;
+       $$->alias = $5;
+       $$->fun_op = UNCHECKED;
+       
+       free($5);
+      free($3);
+    }
+    | aggr_func LBRACE ID DOT ID RBRACE ID{
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $3;
+      $$->attribute_name = $5;
+      $$->aggr_func = $1;
+      $$->alias = $7;
+       $$->fun_op = UNCHECKED;
+      free($7);
+      free($3);
+      free($5);
+    }
+    | LENGTH LBRACE value RBRACE ID
+    {
+      $$ = new RelAttrSqlNode;
+      $$->aggr_func = UNKNOWN;
+      $$->alias = $5;
+       $$->fun_op = FUNC_ROUND;
+      FuncExpr funcExpr;
+      //func_expr.funcOp = LENGTH;
+      //funcExpr.value = std::make_pair($3,$3);
+      funcExpr.is_func = false;
+      $$->func = funcExpr;
+      free($3);
+      free($5);
+    }
+    |
+    ROUND LBRACE value RBRACE ID
+    {
+      $$ = new RelAttrSqlNode;
+      $$->aggr_func = UNKNOWN;
+      $$->alias = $5;
+      $$->fun_op = FUNC_ROUND;
+      FuncExpr funcExpr;
+      //funcExpr.value = std::make_pair($3,$3);
+      funcExpr.is_func = false;
+      $$->func = funcExpr;
+      free($3);
+      free($5);
+    }
+    |
+    ROUND LBRACE value COMMA value RBRACE ID
+    {
+      $$ = new RelAttrSqlNode;
+      $$->aggr_func = UNKNOWN;
+      $$->alias = $7;
+      $$->fun_op = FUNC_ROUND;
+      FuncExpr funcExpr;
+      //funcExpr.value = std::make_pair($3,$5);
+      funcExpr.is_func = false;
+      $$->func = funcExpr;
+      free($3);
+      free($5);
+      free($7);
+    }
+    |
+    DATE_FORMAT LBRACE value COMMA value RBRACE ID
+    {
+       $$ = new RelAttrSqlNode;
+      $$->aggr_func = UNKNOWN;
+      $$->alias = $7;
+      $$->fun_op = FUNC_DATE_FORMAT;
+      FuncExpr funcExpr;
+      //funcExpr.value = std::make_pair($3,$5);
+      funcExpr.is_func = false;
+      $$->func = funcExpr;
+      free($3);
+      free($5);
+      free($7);
     }
     ;
+
+
+   
+    
 
 aggr_func:
     MAX { $$=MAXF; }
@@ -1056,14 +1253,14 @@ rel_list:
     {
       $$ = nullptr;
     }
-    | COMMA ID rel_list {
+    | COMMA rel rel_list {
       if ($3 != nullptr) {
         $$ = $3;
       } else {
-        $$ = new std::vector<std::string>;
+        $$ = new std::vector<RelName>;
       }
 
-      $$->push_back($2);
+      $$->push_back(*$2);//本来是字符串char* 所以这里要加*
       free($2);
     }
     ;
@@ -1072,14 +1269,14 @@ join_list:
     {
       $$ = nullptr;
     }
-    | INNER JOIN ID on join_list{
+    | INNER JOIN rel on join_list{
       if ($5 != nullptr) {
         $$ = $5;
       } else {
         $$ = new std::vector<InnerJoinSqlNode>;
       }
       InnerJoinSqlNode current;
-      current.join_relations = $3;
+      current.join_relations = *$3;
       current.join_conditions.swap(*$4);
       $$->push_back(current);
 

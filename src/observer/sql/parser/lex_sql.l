@@ -161,7 +161,11 @@ EXPLAIN                                 RETURN_TOKEN(EXPLAIN);
 NULLABLE                                RETURN_TOKEN(NULLABLE);
 NULL                                    RETURN_TOKEN(NULL_T);
 ORDER                                   RETURN_TOKEN(ORDER);
+ROUND                                   RETURN_TOKEN(ROUND);
+LENGTH                                  RETURN_TOKEN(LENGTH);
+DATE_FORMAT                             RETURN_TOKEN(DATE_FORMAT);
 BY                                      RETURN_TOKEN(BY);
+AS                                      RETURN_TOKEN(AS);
 ASC                                     RETURN_TOKEN(ASC);
 {ID}                                    can_be_minus = 1; yylval->string=strdup(yytext); RETURN_TOKEN(ID);
 "(" {
