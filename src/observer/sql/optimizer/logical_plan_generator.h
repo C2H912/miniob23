@@ -17,6 +17,8 @@ See the Mulan PSL v2 for more details. */
 #include <memory>
 
 #include "common/rc.h"
+#include <vector>
+#include "sql/expr/tuple.h"
 
 class Stmt;
 class CalcStmt;
@@ -36,6 +38,7 @@ public:
 
   RC create(Stmt *stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_sub_query(SelectStmt *stmt, std::unique_ptr<LogicalOperator> &logical_operator);
+  RC create_complex_sub_query(std::vector<Tuple*> &paretnts, SelectStmt *stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   //RC create_plan(
   //  const std::vector<Field> &all_fields, const std::vector<AggrOp> &aggr_fields, 
   //  std::unique_ptr<LogicalOperator> &logical_operator);
@@ -43,7 +46,11 @@ public:
 private:
   RC create_plan(CalcStmt *calc_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(SelectStmt *select_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
+  RC create_complex_sub_plan(std::vector<Tuple*> &paretnts, SelectStmt *select_stmt, 
+      std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(FilterStmt *filter_stmt, std::unique_ptr<LogicalOperator> &logical_operator, int conjunction_flag);
+  RC create_complex_filter_plan(FilterStmt *filter_stmt, std::unique_ptr<LogicalOperator> &logical_operator, 
+      int conjunction_flag, std::vector<Tuple*> &paretnts);
   RC create_plan(InsertStmt *insert_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(DeleteStmt *delete_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(UpdateStmt *update_stmt, std::unique_ptr<LogicalOperator> &logical_operator);

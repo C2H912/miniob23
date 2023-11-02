@@ -101,6 +101,29 @@ RC OptimizeStage::create_sub_request(SelectStmt *stmt, unique_ptr<PhysicalOperat
   return rc;
 }
 
+RC OptimizeStage::create_complex_sub_request(std::vector<Tuple*> &paretnts, SelectStmt *stmt, std::unique_ptr<PhysicalOperator> &subExpr)
+{
+  unique_ptr<LogicalOperator> logical_operator;
+  RC rc = logical_plan_generator_.create_complex_sub_query(paretnts, stmt, logical_operator);
+  if (rc != RC::SUCCESS) {
+    if (rc != RC::UNIMPLENMENT) {
+      LOG_WARN("failed to create sub logical plan. rc=%s", strrc(rc));
+    }
+    return rc;
+  }
+
+  unique_ptr<PhysicalOperator> physical_operator;
+  rc = generate_physical_plan(logical_operator, physical_operator);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to generate sub physical plan. rc=%s", strrc(rc));
+    return rc;
+  }
+
+  subExpr.swap(physical_operator);
+
+  return rc;
+}
+
 RC OptimizeStage::optimize(unique_ptr<LogicalOperator> &oper)
 {
   // do nothing

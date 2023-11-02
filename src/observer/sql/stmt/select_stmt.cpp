@@ -438,7 +438,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   for(int i = 0; i < (int)select_sql.joinTables.size(); i++){
     InnerJoinSqlNode temp_node = select_sql.joinTables[i];
     const char *table_name = temp_node.join_relations.relation.c_str();
-    std::string alias_name = select_sql.relations[i].alias;
+    std::string alias_name = temp_node.join_relations.alias;
     if (nullptr == table_name) {
       LOG_WARN("invalid argument. relation name is null. index=%d", i);
       return RC::INVALID_ARGUMENT;
@@ -559,9 +559,15 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
       }
       } else {
         auto iter = table_map.find(table_name);
-        if (iter == table_map.end()) {
-          LOG_WARN("no such table in from list: %s", table_name);
+        if (iter == table_map.end()) {//在当前表寻找
+           iter = parents.find(table_name);//在父表中找对比
+      if (iter != parents.end()) {
+            LOG_WARN("no such table in from list: %s", table_name);
           return RC::SCHEMA_FIELD_MISSING;
+    }
+
+
+          
         }
 
         Table *table = iter->second;
@@ -656,9 +662,13 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   for(std::pair<std::string, Table *> it : parents){
     all_parents.insert(it);
   }
+  for(std::pair<std::string, Table *> it : alias_map){
+    all_parents.insert(it);
+  }
   RC rc = FilterStmt::create(db,
       default_table,
       &all_parents,
+      &alias_map,
       all_filters.data(),
       static_cast<int>(all_filters.size()),
       filter_stmt);

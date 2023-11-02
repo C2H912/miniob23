@@ -13,7 +13,7 @@
 		{
 			"id" : 1,
 			"len" : 4,
-			"name" : "col2",
+			"name" : "level",
 			"nullable" : true,
 			"offset" : 4,
 			"type" : "dates",
@@ -21,24 +21,15 @@
 		},
 		{
 			"id" : 2,
-			"len" : 4,
-			"name" : "feat2",
-			"nullable" : true,
-			"offset" : 8,
-			"type" : "booleans",
-			"visible" : true
-		},
-		{
-			"id" : 3,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 12,
+			"offset" : 8,
 			"type" : "ints",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
-	"table_id" : 1,
-	"table_name" : "table_alias_2"
+	"table_id" : 3,
+	"table_name" : "join_table_3"
 }

@@ -5,7 +5,7 @@
 			"id" : 0,
 			"len" : 4,
 			"name" : "id",
-			"nullable" : false,
+			"nullable" : true,
 			"offset" : 0,
 			"type" : "dates",
 			"visible" : true
@@ -13,7 +13,7 @@
 		{
 			"id" : 1,
 			"len" : 4,
-			"name" : "num",
+			"name" : "col3",
 			"nullable" : true,
 			"offset" : 4,
 			"type" : "dates",
@@ -22,32 +22,23 @@
 		{
 			"id" : 2,
 			"len" : 4,
-			"name" : "price",
-			"nullable" : false,
+			"name" : "feat3",
+			"nullable" : true,
 			"offset" : 8,
 			"type" : "booleans",
 			"visible" : true
 		},
 		{
 			"id" : 3,
-			"len" : 4,
-			"name" : "birthday",
-			"nullable" : true,
-			"offset" : 12,
-			"type" : "nulls",
-			"visible" : true
-		},
-		{
-			"id" : 4,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 16,
+			"offset" : 12,
 			"type" : "ints",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
-	"table_id" : 2,
-	"table_name" : "null_table"
+	"table_id" : 6,
+	"table_name" : "table_alias_3"
 }

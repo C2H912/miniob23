@@ -36,6 +36,7 @@ RC AggrePhysicalOperator::open(Trx *trx)
 RC AggrePhysicalOperator::next()
 {
   if(enter_flag_ == true){
+    enter_flag_ = false;
     return RC::RECORD_EOF;
   }
 
@@ -64,6 +65,9 @@ RC AggrePhysicalOperator::next()
     }
 
     all_tuple.push_back(one_tuple);
+  }
+  if (rc != RC::RECORD_EOF) {
+    return rc;
   }
   
   if((int)all_tuple.size() == 0){

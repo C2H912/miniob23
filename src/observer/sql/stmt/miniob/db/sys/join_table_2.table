@@ -4,7 +4,7 @@
 		{
 			"id" : 0,
 			"len" : 4,
-			"name" : "a",
+			"name" : "id",
 			"nullable" : true,
 			"offset" : 0,
 			"type" : "dates",
@@ -12,15 +12,24 @@
 		},
 		{
 			"id" : 1,
+			"len" : 4,
+			"name" : "age",
+			"nullable" : true,
+			"offset" : 4,
+			"type" : "dates",
+			"visible" : true
+		},
+		{
+			"id" : 2,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 4,
+			"offset" : 8,
 			"type" : "ints",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
-	"table_id" : 0,
-	"table_name" : "oo"
+	"table_id" : 2,
+	"table_name" : "join_table_2"
 }
