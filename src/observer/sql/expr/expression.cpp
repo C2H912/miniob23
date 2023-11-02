@@ -555,6 +555,11 @@ RC ALUExpr::calc_value(const Value &left_value, const Value &right_value, Value 
 {
   RC rc = RC::SUCCESS;
 
+  if(left_value.attr_type() == NULLS || right_value.attr_type() == NULLS){
+    value.set_null_value();
+    return RC::SUCCESS;
+  }
+
   const AttrType target_type = value_type();
 
   switch (alu_type_) {
