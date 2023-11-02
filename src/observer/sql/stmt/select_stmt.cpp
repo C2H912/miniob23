@@ -561,7 +561,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         auto iter = table_map.find(table_name);
         if (iter == table_map.end()) {//在当前表寻找
            iter = parents.find(table_name);//在父表中找对比
-      if (iter != parents.end()) {
+      if (iter == parents.end()) {
             LOG_WARN("no such table in from list: %s", table_name);
           return RC::SCHEMA_FIELD_MISSING;
     }
