@@ -176,11 +176,13 @@ RC MvccTrx::delete_record(Table * table, Record &record)
   }
   
   end_field.set_int(record, -trx_id_);
+
   RC rc = table->delete_record(record);
   if (rc != RC::SUCCESS) {
     LOG_WARN("failed to delete record into table. rc=%s", strrc(rc));
     return rc;
   }
+
   rc = log_manager_->append_log(CLogType::DELETE, trx_id_, table->table_id(), record.rid(), 0, 0, nullptr);
   ASSERT(rc == RC::SUCCESS, "failed to append delete record log. trx id=%d, table id=%d, rid=%s, record len=%d, rc=%s",
       trx_id_, table->table_id(), record.rid().to_string().c_str(), record.len(), strrc(rc));
@@ -209,7 +211,8 @@ RC MvccTrx::visit_record(Table *table, Record &record, bool readonly)
     }
   } else if (begin_xid < 0) {
     // begin xid 小于0说明是刚插入而且没有提交的数据
-    rc = (-begin_xid == trx_id_) ? RC::SUCCESS : RC::RECORD_INVISIBLE;
+    // rc = (-begin_xid == trx_id_) ? RC::SUCCESS : RC::RECORD_INVISIBLE;
+    rc = (-begin_xid == trx_id_) ? RC::SUCCESS : RC::SUCCESS;
   } else if (end_xid < 0) {
     // end xid 小于0 说明是正在删除但是还没有提交的数据
     if (readonly) {
