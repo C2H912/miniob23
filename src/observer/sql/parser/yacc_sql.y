@@ -98,7 +98,9 @@ AggreExpr *create_aggr_expression(AggrOp type,
         DESC
         ASC
         ORDER
+        GROUP
         BY
+        HAVING
         SHOW
         SYNC
         INSERT
@@ -210,6 +212,9 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <join_lists>          join_list
 %type <relation_list>       rel_list
 %type <rel_name>            rel
+%type <relation_list>       opt_group_by
+%type <rel_name>            group_by
+%type <relation_list>       group_by_list
 %type <index_attr_list>     id_list
 %type <string>              id
 %type <order_by>            order_by_list
@@ -711,7 +716,7 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT add_expr_list FROM rel rel_list join_list where opt_order_by
+    SELECT add_expr_list FROM rel rel_list join_list where opt_group_by opt_order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
 
@@ -740,8 +745,14 @@ select_stmt:        /*  select 语句的语法解析树*/
       }
 
       if ($8 != nullptr) {
-        $$->selection.orderBy.swap(*$8);
+        $$->selection.groupBy.swap(*$8);
         delete $8;
+        std::reverse($$->selection.groupBy.begin(), $$->selection.groupBy.end());
+      }
+
+      if ($9 != nullptr) {
+        $$->selection.orderBy.swap(*$9);
+        delete $9;
       }
 
       free($4);
@@ -770,6 +781,43 @@ rel://这个是返回表名结构体的语法
     $$->alias = $3;
     free($1);
     free($3);
+  }
+  ;
+opt_group_by:
+  /* empty */
+  {
+    $$ = nullptr;
+  }
+  | GROUP BY group_by group_by_list {
+    if ($4 != nullptr) {
+      $$ = $4;
+    } else {
+      $$ = new std::vector<RelAttrSqlNode>;
+    }
+    $$->push_back(*$3);
+    free($3);
+  }
+  ;
+group_by:
+  ID 
+  {
+    $$ = new RelAttrSqlNode;
+    $$->attribute_name = $1;
+    free($1);
+  } 
+group_by_list:
+  /* empty */
+  {
+    $$ = nullptr;
+  }
+  | COMMA group_by group_by_list {
+    if ($3 != nullptr) {
+      $$ = $3;
+    } else {
+      $$ = new std::vector<RelAttrSqlNode>;
+    }
+    $$->push_back(*$2);
+    free($2);
   }
   ;
 
@@ -1236,10 +1284,6 @@ cal_attr:
       free($7);
     }
     ;
-
-
-   
-    
 
 aggr_func:
     MAX { $$=MAXF; }

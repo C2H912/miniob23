@@ -69,11 +69,7 @@ struct RelAttrSqlNode
   std::string alias;//列别名 在输出时打印
   FuncExpr func;
   FuncOp fun_op;
-  
 };
-
-
-
 
 
 /**
@@ -138,14 +134,11 @@ struct RelName
 {
   std::string  relation;
   std::string  alias;//表别名，
-
 };
-
-
 
 struct InnerJoinSqlNode
 {
-  RelName                          join_relations;      ///< 查询的表
+  RelName                         join_relations;      ///< 查询的表
   std::vector<ConditionSqlNode>   join_conditions;     ///< 查询条件，使用AND串联起来多个条件
 };
 
@@ -160,25 +153,14 @@ struct OrderBySqlNode
 struct SelectSqlNode
 {
   std::vector<RelAttrSqlNode>     attributes;     ///< attributes in select clause
-  //std::vector<std::string>        relations;      ///< 查询的表
-  std::vector<Expression*>       expressions;
-  //std::vector<std::string>        rel_alias;      ///< 表别名
-  //std::vector<std::string>        relations;      ///< 查询的表
+  std::vector<Expression*>        expressions;
   std::vector<RelName>            relations;       ///< 使用结构体封装表名和别名
   std::vector<ConditionSqlNode>   conditions;     ///< 查询条件，使用AND串联起来多个条件
   std::vector<InnerJoinSqlNode>   joinTables;     ///< INNER JOIN
+  std::vector<RelAttrSqlNode>     groupBy;
   std::vector<OrderBySqlNode>     orderBy;
 };
 
-
-
-#if 0
-struct SubSqlNode
-{
-  SelectSqlNode           subSqlNode;
-  ConditionSqlNode        sub_conditions;
-};
-#endif
 
 /**
  * @brief 算术表达式计算的语法树

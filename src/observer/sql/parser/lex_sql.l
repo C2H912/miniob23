@@ -161,6 +161,8 @@ EXPLAIN                                 RETURN_TOKEN(EXPLAIN);
 NULLABLE                                RETURN_TOKEN(NULLABLE);
 NULL                                    RETURN_TOKEN(NULL_T);
 ORDER                                   RETURN_TOKEN(ORDER);
+GROUP                                   RETURN_TOKEN(GROUP);
+HAVING                                  RETURN_TOKEN(HAVING);
 ROUND                                   RETURN_TOKEN(ROUND);
 LENGTH                                  RETURN_TOKEN(LENGTH);
 DATE_FORMAT                             RETURN_TOKEN(DATE_FORMAT);

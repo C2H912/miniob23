@@ -108,6 +108,7 @@ private:
   std::vector<std::pair<bool,std::string>> aggr_alias_;
   int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
+  std::vector<Field> group_by_fields_;
   OrderByStmt *order_by_stmt_ = nullptr;
   bool is_expr_ = false;
   std::vector<std::unique_ptr<Expression>> expressions_;
