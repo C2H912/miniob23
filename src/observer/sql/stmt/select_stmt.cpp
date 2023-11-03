@@ -425,7 +425,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
-    if(!select_sql.relations[i].alias.empty())
+    if(!select_sql.relations[i].alias.empty()&&alias_name!="")
     {
        std::pair<std::unordered_map<std::string, Table *>::iterator, bool> ret = alias_map.insert(std::pair<std::string, Table *>(alias_name, table));
       if(!ret.second)
@@ -452,7 +452,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
-    if(!select_sql.relations[i].alias.empty())
+    if(!temp_node.join_relations.alias.empty()&&alias_name!="")
     {
        std::pair<std::unordered_map<std::string, Table *>::iterator, bool> ret = alias_map.insert(std::pair<std::string, Table *>(alias_name, table));
       if(!ret.second)
@@ -550,7 +550,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
           }
         }
         aggr_specs.push_back("*");
-           if(!relation_attr.alias.empty())//标识该聚合字段是否有别名o
+           if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
@@ -586,7 +586,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
             wildcard_fields(table, query_fields);
           }
           aggr_specs.push_back("*");
-             if(!relation_attr.alias.empty())//标识该聚合字段是否有别名o
+             if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
@@ -603,7 +603,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
           query_fields.push_back(Field(table, field_meta,alias_name));
           aggr_specs.push_back(relation_attr.attribute_name);
-             if(!relation_attr.alias.empty())//标识该聚合字段是否有别名o
+             if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
@@ -628,7 +628,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
       query_fields.push_back(Field(table, field_meta,alias_name));
       aggr_specs.push_back(relation_attr.attribute_name);
-         if(!relation_attr.alias.empty())//标识该聚合字段是否有别名o
+         if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }

@@ -13,7 +13,7 @@
 		{
 			"id" : 1,
 			"len" : 4,
-			"name" : "col2",
+			"name" : "col1",
 			"nullable" : true,
 			"offset" : 4,
 			"type" : "dates",
@@ -22,23 +22,41 @@
 		{
 			"id" : 2,
 			"len" : 4,
-			"name" : "feat2",
+			"name" : "col2",
 			"nullable" : true,
 			"offset" : 8,
-			"type" : "booleans",
+			"type" : "dates",
 			"visible" : true
 		},
 		{
 			"id" : 3,
+			"len" : 4,
+			"name" : "col3",
+			"nullable" : true,
+			"offset" : 12,
+			"type" : "booleans",
+			"visible" : true
+		},
+		{
+			"id" : 4,
+			"len" : 4,
+			"name" : "col4",
+			"nullable" : true,
+			"offset" : 16,
+			"type" : "booleans",
+			"visible" : true
+		},
+		{
+			"id" : 5,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 12,
+			"offset" : 20,
 			"type" : "ints",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
-	"table_id" : 7,
-	"table_name" : "table_alias_2"
+	"table_id" : 5,
+	"table_name" : "exp_table"
 }

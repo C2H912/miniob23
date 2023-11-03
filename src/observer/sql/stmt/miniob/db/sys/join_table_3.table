@@ -30,6 +30,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 3,
+	"table_id" : 2,
 	"table_name" : "join_table_3"
 }

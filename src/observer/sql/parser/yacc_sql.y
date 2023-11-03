@@ -1045,6 +1045,16 @@ cal_attr:
       @$ = @1;
       free($1);
     }
+    | ID DOT '*' {
+      $$ = new RelAttrSqlNode;
+      $$->relation_name  = $1;
+      $$->attribute_name = "*";
+      $$->aggr_func = UNKNOWN;
+      $$->fun_op = UNCHECKED;
+      @$ = @1;
+      free($1);
+      
+    }
     | ID DOT ID {
       $$ = new RelAttrSqlNode;
       $$->relation_name  = $1;
