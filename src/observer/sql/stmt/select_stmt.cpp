@@ -476,7 +476,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
   for(int i = 0;i<all_relAttrNodes.size();i++)
   {
-    if(0 == strcmp(all_relAttrNodes[i].attribute_name.c_str(), "*")){ //这里只判断了第一个是不是为*号
+    if(0 == strcmp(all_relAttrNodes[i].attribute_name.c_str(), "*")&&all_relAttrNodes[0].aggr_func==UNKNOWN){ //这里只判断了第一个是不是为*号
     is_star = true;
     star_index = i;
     break;
@@ -748,7 +748,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
       select_stmt->expressions_.emplace_back(expr);
     }
   }
-  else{
+  else {
     // for (Expression * const expr : select_sql.expressions) {
     //   select_stmt->expressions_.emplace_back(expr);
     // }
