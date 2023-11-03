@@ -472,9 +472,19 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     return RC::EMPTY;
   }
   bool is_star = false;
-  if(0 == strcmp(all_relAttrNodes[0].attribute_name.c_str(), "*")){
+  int star_index = 10000;//标识star的位置
+
+  for(int i = 0;i<all_relAttrNodes.size();i++)
+  {
+    if(0 == strcmp(all_relAttrNodes[i].attribute_name.c_str(), "*")){ //这里只判断了第一个是不是为*号
     is_star = true;
+    star_index = i;
+    break;
+
   }
+  }
+
+  
 
   select_sql.attributes = all_relAttrNodes;
 
@@ -717,8 +727,13 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   for(size_t i = 0; i < select_sql.expressions.size(); i++){
     dfs_for_field(select_sql.expressions[i], expr_index, select_stmt->query_fields_);
   }
+
+  for(int i = 0;i<star_index&&i<select_sql.expressions.size();i++){
+    select_stmt->expressions_.emplace_back(select_sql.expressions[i]);
+  }
+
   if(is_star == true && select_stmt->aggr_fields_[0] == UNKNOWN){
-    for(size_t i = 0; i < select_stmt->query_fields_.size(); i++){
+    for(size_t i = star_index; i < select_stmt->query_fields_.size(); i++){
       std::string tablename = select_stmt->query_fields_[i].table_name();
       std::string fieldname = select_stmt->query_fields_[i].field_name();
       FieldExpr *expr = new FieldExpr(tablename, fieldname, UNKNOWN);
@@ -734,9 +749,9 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     }
   }
   else{
-    for (Expression * const expr : select_sql.expressions) {
-      select_stmt->expressions_.emplace_back(expr);
-    }
+    // for (Expression * const expr : select_sql.expressions) {
+    //   select_stmt->expressions_.emplace_back(expr);
+    // }
   }
 
   stmt = select_stmt;
