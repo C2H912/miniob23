@@ -212,9 +212,9 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <join_lists>          join_list
 %type <relation_list>       rel_list
 %type <rel_name>            rel
-%type <relation_list>       opt_group_by
-%type <rel_name>            group_by
-%type <relation_list>       group_by_list
+%type <rel_attr_list>       opt_group_by
+%type <rel_attr>            group_by
+%type <rel_attr_list>       group_by_list
 %type <index_attr_list>     id_list
 %type <string>              id
 %type <order_by>            order_by_list
@@ -805,6 +805,7 @@ group_by:
     $$->attribute_name = $1;
     free($1);
   } 
+  ;
 group_by_list:
   /* empty */
   {

@@ -453,6 +453,16 @@ public:
     spec_ = specs;
   }
 
+  std::vector<Value> get_cells()
+  {
+    return cells_;
+  }
+
+  std::vector<Field> get_specs()
+  {
+    return spec_;
+  }
+
    Tuple* getTuple()
   {
       return nullptr;
@@ -487,6 +497,23 @@ public:
     //return RC::INTERNAL;
     cell_at(index, cell);
     return RC::SUCCESS;
+  }
+
+  int compare_valueList(const ValueListTuple &other) const 
+  {
+    if(this == &other){
+      return 0;
+    }
+    for(size_t i = 0; i < cell_num(); i++){
+      Value this_cell, other_cell;
+      this->cell_at(i, this_cell);
+      other.cell_at(i, other_cell);
+      int cmp_result = this_cell.compare(other_cell);
+      if(cmp_result != 0) {
+        return cmp_result;
+      }
+    }
+    return 0;
   }
 
 private:
@@ -638,4 +665,34 @@ private:
   std::vector<Value> cells_;
   std::vector<std::string> spec_;
   std::vector<AggrOp> aggr_;
+};
+
+class Key
+{
+public:
+  Key() = default;
+  ~Key() = default;
+
+  void set_valueList(const ValueListTuple &cur)
+  {
+    key_ = cur;
+  }
+
+  std::vector<Value> get_value()
+  {
+    return key_.get_cells();
+  }
+
+  std::vector<Field> get_field()
+  {
+    return key_.get_specs();
+  }
+
+  bool operator < (const Key &other) const
+  {
+    return (key_.compare_valueList(other.key_) < 0);
+  }
+
+private:
+  ValueListTuple key_;
 };

@@ -47,6 +47,8 @@ enum class PhysicalOperatorType
   STRING_LIST,
   DELETE,
   UPDATE,
+  AGGRE,
+  GROUP,
   ORDER,
   INSERT,
 };
@@ -77,6 +79,7 @@ public:
 
   virtual Tuple *current_tuple() = 0;
   virtual Tuple *current_tuple2() = 0;
+  virtual std::map<Key, std::vector<ValueListTuple>> current_group() = 0;
 
   void add_child(std::unique_ptr<PhysicalOperator> oper)
   {

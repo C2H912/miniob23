@@ -40,6 +40,11 @@ public:
 
   RC next2() override { return RC::SUCCESS; }
   Tuple *current_tuple2() override { return nullptr; }
+  std::map<Key, std::vector<ValueListTuple>> current_group() override
+  {
+    std::map<Key, std::vector<ValueListTuple>> not_used;
+    return not_used;
+  }
 
 private:
   RC left_next();   //! 左表遍历下一条数据

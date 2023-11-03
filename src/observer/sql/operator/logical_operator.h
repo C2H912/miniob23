@@ -41,6 +41,7 @@ enum class LogicalOperatorType
   INSERT,     ///< 插入
   UPDATE,     ///< 插入
   DELETE,     ///< 删除，删除可能会有子查询
+  GROUP,      ///< 分组
   ORDER,      ///< 排序
   EXPLAIN,    ///< 查看执行计划
 };

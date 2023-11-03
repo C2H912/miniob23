@@ -18,22 +18,21 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/physical_operator.h"
 #include "sql/expr/expression.h"
 
-class FilterStmt;
 
 /**
- * @brief 过滤/谓词物理算子
+ * @brief 分组物理算子
  * @ingroup PhysicalOperator
  */
-class PredicatePhysicalOperator : public PhysicalOperator
+class GroupPhysicalOperator : public PhysicalOperator
 {
 public:
-  PredicatePhysicalOperator(std::unique_ptr<Expression> expr);
+  GroupPhysicalOperator(const std::vector<Field> &fields, const std::vector<Field> &group_fields);
 
-  virtual ~PredicatePhysicalOperator() = default;
+  virtual ~GroupPhysicalOperator() = default;
 
   PhysicalOperatorType type() const override
   {
-    return PhysicalOperatorType::PREDICATE;
+    return PhysicalOperatorType::GROUP;
   }
 
   RC open(Trx *trx) override;
@@ -44,12 +43,10 @@ public:
 
   RC next2() override { return RC::SUCCESS; }
   Tuple *current_tuple2() override { return nullptr; }
-  std::map<Key, std::vector<ValueListTuple>> current_group() override
-  {
-    std::map<Key, std::vector<ValueListTuple>> not_used;
-    return not_used;
-  }
+  std::map<Key, std::vector<ValueListTuple>> current_group() override;
 
 private:
-  std::unique_ptr<Expression> expression_;
+  std::vector<Field> all_fields_;
+  std::vector<Field> group_fields_;
+  std::map<Key, std::vector<ValueListTuple>> groups_;
 };

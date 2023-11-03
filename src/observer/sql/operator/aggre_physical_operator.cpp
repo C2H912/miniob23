@@ -33,53 +33,164 @@ RC AggrePhysicalOperator::open(Trx *trx)
   return children_[0]->open(trx);
 }
 
+
 RC AggrePhysicalOperator::next()
 {
+  //这里控制火山的执行，第一次进入时执行，之后进入只是读取结果而已，直到读取到记录尾下次进入就重新执行
   if(enter_flag_ == true){
-    enter_flag_ = false;
-    return RC::RECORD_EOF;
+    scan_index_++;
+    if(scan_index_ == (int)tuple_.size()){
+      enter_flag_ = false;
+      return RC::RECORD_EOF;
+    }
+    else{
+      return RC::SUCCESS;
+    }
+  }
+  else{
+    scan_index_ = 0;
+    enter_flag_ = true;
   }
 
   RC rc = RC::SUCCESS;
   PhysicalOperator *oper = children_.front().get();
 
-  //先把所有值存起来
-  std::vector<std::vector<Value>> all_tuple;
-  while (RC::SUCCESS == (rc = oper->next())) {
-    Tuple *tuple = oper->current_tuple();
-    if (nullptr == tuple) {
-      rc = RC::INTERNAL;
-      LOG_WARN("failed to get tuple from operator");
-      break;
+/*
+ * 其实像下面这样写不太好，但是兼容的成本低，不用大改
+ */
+// ------------- case 1: 下面是GROUP算子 --------------
+  if(oper->type() == PhysicalOperatorType::GROUP){
+    std::map<Key, std::vector<ValueListTuple>> group_result;
+    rc = oper->next();
+    if(rc != RC::SUCCESS){
+      LOG_WARN("GROUP BY FAILED\n");
+      return rc;
     }
-
-    std::vector<Value> one_tuple;
-    for(int i = 0; i < (int)fields_.size(); i++){
-      Value value;
-      FieldExpr field_exp(fields_[i]);
-      rc = field_exp.get_value(*tuple, value);
-      if (rc != RC::SUCCESS) {
-        return rc;
+    group_result = oper->current_group();
+    rc = do_group_aggre(group_result);
+    if(rc != RC::SUCCESS){
+      LOG_WARN("GROUP BY AGGRE FAILED\n");
+      return rc;
+    }
+  }
+// ---------------- case 2: 一般情况 ------------------
+  else{
+    //先把所有值存起来
+    std::vector<std::vector<Value>> all_tuple;
+    while (RC::SUCCESS == (rc = oper->next())) {
+      Tuple *tuple = oper->current_tuple();
+      if (nullptr == tuple) {
+        rc = RC::INTERNAL;
+        LOG_WARN("failed to get tuple from operator");
+        break;
       }
-      one_tuple.push_back(value);
-    }
 
-    all_tuple.push_back(one_tuple);
+      std::vector<Value> one_tuple;
+      for(int i = 0; i < (int)fields_.size(); i++){
+        Value value;
+        FieldExpr field_exp(fields_[i]);
+        rc = field_exp.get_value(*tuple, value);
+        if (rc != RC::SUCCESS) {
+          return rc;
+        }
+        one_tuple.push_back(value);
+      }
+
+      all_tuple.push_back(one_tuple);
+    }
+    if (rc != RC::RECORD_EOF) {
+      return rc;
+    }
+    
+    if((int)all_tuple.size() == 0){
+      return RC::RECORD_EOF;
+    }
+    rc = do_aggre_func(all_tuple);
+    if (rc != RC::SUCCESS) {
+      return rc;
+    }
   }
-  if (rc != RC::RECORD_EOF) {
-    return rc;
-  }
-  
-  if((int)all_tuple.size() == 0){
-    return RC::RECORD_EOF;
-  }
-  rc = do_aggre_func(all_tuple);
-  if (rc != RC::SUCCESS) {
-    return rc;
-  }
-  enter_flag_ = true;
 
   return rc;
+}
+
+RC AggrePhysicalOperator::do_group_aggre(std::map<Key, std::vector<ValueListTuple>>& groups)
+{
+  RC rc = RC::SUCCESS;
+  
+  //取出每个组
+  for(const auto& group : groups){
+    //当前组的数据, 将每个组的非聚合部分写入结果
+    AggreListTuple current_group;
+    std::vector<Value> group_cells;
+    Key current_key = group.first;
+    group_cells = current_key.get_value();
+    current_group.set_specs(spec_);
+    current_group.set_aggre(aggr_fields_);
+
+    //对剩下的部分进行聚合
+    std::vector<ValueListTuple> group_aggre = group.second;
+    std::vector<std::vector<Value>> aggre_values;
+    for(size_t j = 0; j < group_aggre.size(); j++){
+      aggre_values.push_back(group_aggre[j].get_cells());
+    }
+    std::vector<Value> ret_tuple;
+    for(size_t i = group_cells.size(); i < (int)fields_.size(); i++){
+      if(aggr_fields_[i] == COUNTF){
+        if(spec_[i] == "*"){
+          Value ret;
+          ret.set_int((int)aggre_values.size());
+          ret_tuple.push_back(ret);
+          continue;
+        }
+        else{
+          int count = 0;
+          for(int j = 0; j < (int)aggre_values.size(); j++){
+            if(aggre_values[j][i].attr_type() == NULLS){
+              continue;
+            }
+            else{
+              count++;
+            }
+          }
+          Value ret;
+          ret.set_int(count);
+          ret_tuple.push_back(ret);
+          continue;
+        }
+      }
+      switch(fields_[i].attr_type()){
+      case INTS:{
+        ret_tuple.push_back(do_int(aggre_values, i));
+        break;
+      }
+      case CHARS:{
+        ret_tuple.push_back(do_char(aggre_values, i));
+        break;
+      }
+      case FLOATS:{
+        ret_tuple.push_back(do_float(aggre_values, i));
+        break;
+      }
+      case DATES:{
+        ret_tuple.push_back(do_date(aggre_values, i));
+        break;
+      }
+      default: {
+        LOG_ERROR("Unsupported type\n");
+      }
+      }
+    }
+    for(size_t k = 0; k < ret_tuple.size(); k++){
+      group_cells.push_back(ret_tuple[k]);
+    }
+
+    //写入结果
+    current_group.set_cells(group_cells);
+    tuple_.push_back(current_group);
+  }
+
+  return RC::SUCCESS;
 }
 
 RC AggrePhysicalOperator::do_aggre_func(std::vector<std::vector<Value>>& all_tuple)
@@ -131,9 +242,11 @@ RC AggrePhysicalOperator::do_aggre_func(std::vector<std::vector<Value>>& all_tup
     }
     }
   }
-  tuple_.set_cells(ret_tuple);
-  tuple_.set_specs(spec_);
-  tuple_.set_aggre(aggr_fields_);
+  AggreListTuple result;
+  result.set_cells(ret_tuple);
+  result.set_specs(spec_);
+  result.set_aggre(aggr_fields_);
+  tuple_.push_back(result);
   return RC::SUCCESS;
 }
 
@@ -450,5 +563,5 @@ RC AggrePhysicalOperator::close()
 
 Tuple *AggrePhysicalOperator::current_tuple()
 {
-  return static_cast<Tuple*>(&tuple_);
+  return static_cast<Tuple*>(&tuple_[scan_index_]);
 }

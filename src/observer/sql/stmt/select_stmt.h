@@ -80,15 +80,15 @@ public:
     return conjunction_flag_;
   }
 
+  const std::vector<Field> &group_fields() const
+  {
+    return group_by_fields_;
+  }
+
   OrderByStmt *order_by_stmt()
   {
     return order_by_stmt_;
   }
-
-  //std::vector<std::unique_ptr<Expression>> &aggr_expressions()
-  //{
-  //  return aggr_expr_node_;
-  //}
 
   std::vector<std::unique_ptr<Expression>> &expressions()
   {
@@ -100,6 +100,11 @@ public:
     return is_expr_;
   }
 
+  bool groupby_flag()
+  {
+    return groupby_flag_;
+  }
+
 private:
   std::vector<Field> query_fields_;
   std::vector<AggrOp> aggr_fields_;
@@ -109,6 +114,7 @@ private:
   int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
   std::vector<Field> group_by_fields_;
+  bool groupby_flag_ = false;
   OrderByStmt *order_by_stmt_ = nullptr;
   bool is_expr_ = false;
   std::vector<std::unique_ptr<Expression>> expressions_;

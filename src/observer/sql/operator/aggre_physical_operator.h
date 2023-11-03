@@ -34,7 +34,7 @@ public:
 
   PhysicalOperatorType type() const override
   {
-    return PhysicalOperatorType::PREDICATE;
+    return PhysicalOperatorType::AGGRE;
   }
 
   RC open(Trx *trx) override;
@@ -42,6 +42,8 @@ public:
   RC close() override;
 
   Tuple *current_tuple() override;
+
+  RC do_group_aggre(std::map<Key, std::vector<ValueListTuple>>& groups);
   RC do_aggre_func(std::vector<std::vector<Value>>& all_tuple);
   Value do_int(std::vector<std::vector<Value>>& all_tuple, int index);
   Value do_float(std::vector<std::vector<Value>>& all_tuple, int index);
@@ -50,11 +52,17 @@ public:
 
   RC next2() override { return RC::SUCCESS; }
   Tuple *current_tuple2() override { return nullptr; }
+  std::map<Key, std::vector<ValueListTuple>> current_group() override
+  {
+    std::map<Key, std::vector<ValueListTuple>> not_used;
+    return not_used;
+  }
 
 private:
   std::vector<Field> fields_;
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> spec_;
-  AggreListTuple tuple_;
+  std::vector<AggreListTuple> tuple_;
+  int scan_index_ = 0;
   bool enter_flag_ = false;
 };

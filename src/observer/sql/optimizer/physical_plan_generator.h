@@ -30,6 +30,7 @@ class ExplainLogicalOperator;
 class JoinLogicalOperator;
 class CalcLogicalOperator;
 class AggreLogicalOperator;
+class GroupLogicalOperator;
 class OrderLogicalOperator;
 
 /**
@@ -57,5 +58,6 @@ private:
   RC create_plan(ExplainLogicalOperator &logical_oper, std::unique_ptr<PhysicalOperator> &oper);
   RC create_plan(JoinLogicalOperator &logical_oper, std::unique_ptr<PhysicalOperator> &oper);
   RC create_plan(CalcLogicalOperator &logical_oper, std::unique_ptr<PhysicalOperator> &oper);
+  RC create_plan(GroupLogicalOperator &group_oper, std::unique_ptr<PhysicalOperator> &oper);
   RC create_plan(OrderLogicalOperator &order_oper, std::unique_ptr<PhysicalOperator> &oper);
 };

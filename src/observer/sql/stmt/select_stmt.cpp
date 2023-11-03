@@ -405,22 +405,26 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
  * 在SELECT子句中出现的列必须要么包含在GROUP BY子句中，要么为聚合函数的结果。否则，在执行查询时将会抛出错误。
  */ 
   std::vector<Field> group_by_fields;
-  for(size_t i = 0; i < all_relAttrNodes.size(); i++){
-    if(all_relAttrNodes[i].aggr_func == UNKNOWN){
-      if(i > (int)select_sql.groupBy.size()-1){
-        LOG_WARN("group by mismatch field\n");
-        return RC::SCHEMA_FIELD_MISSING;
+  bool groupby_flag = false;
+  if((int)select_sql.groupBy.size() > 0){
+    groupby_flag = true;
+    for(size_t i = 0; i < all_relAttrNodes.size(); i++){
+      if(all_relAttrNodes[i].aggr_func == UNKNOWN){
+        if(i > (int)select_sql.groupBy.size()-1){
+          LOG_WARN("group by mismatch field\n");
+          return RC::SCHEMA_FIELD_MISSING;
+        }
+        if(0 != strcmp(all_relAttrNodes[i].attribute_name.c_str(), select_sql.groupBy[i].attribute_name.c_str())){
+          LOG_WARN("group by mismatch field\n");
+          return RC::SCHEMA_FIELD_MISSING;
+        }
+        else{
+          //这里假设不会出现select *这种情况
+          group_by_fields.push_back(query_fields[i]);
+        }
       }
-      if(0 != strcmp(all_relAttrNodes[i].attribute_name.c_str(), select_sql.groupBy[i].attribute_name.c_str())){
-        LOG_WARN("group by mismatch field\n");
-        return RC::SCHEMA_FIELD_MISSING;
-      }
-      else{
-        //这里假设不会出现select *这种情况
-        group_by_fields.push_back(query_fields[i]);
-      }
+      else break;
     }
-    else break;
   }
 
 
@@ -438,6 +442,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   select_stmt->filter_stmt_ = filter_stmt;
   select_stmt->conjunction_flag_ = conjunction_flag;
   select_stmt->group_by_fields_.swap(group_by_fields);
+  select_stmt->groupby_flag_ = groupby_flag;
   select_stmt->order_by_stmt_ = orderby_stmt;
   //放入表达式
   //这里还得进行一次深度优先遍历，用于把query_fields中解析出来的属性对应的类型写入到expr树对应的Field中

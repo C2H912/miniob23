@@ -77,15 +77,15 @@ RC ExecuteStage::handle_request_with_physical_operator(SQLStageEvent *sql_event)
       else{    
       bool with_table_name = select_stmt->tables().size() > 1;
 
-      if(select_stmt->aggr_fields()[0] != UNKNOWN){
+      if(select_stmt->aggr_fields()[0] != UNKNOWN || select_stmt->groupby_flag() == true){
         for(int i = 0; i < (int)select_stmt->aggr_fields().size(); i++){
           AggrOp temp_aggr = select_stmt->aggr_fields()[i];
-          if(select_stmt->aggr_alias()[i].first==true)
+          if(select_stmt->aggr_alias()[i].first == true)
           {
             schema.append_cell(select_stmt->aggr_alias()[i].second.c_str());
           }
           else{
-              schema.append_cell(select_stmt->aggr_specs()[i], temp_aggr);
+            schema.append_cell(select_stmt->aggr_specs()[i], temp_aggr);
           }
           
         }
