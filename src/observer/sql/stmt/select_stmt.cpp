@@ -180,6 +180,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         for (Table *table : tables) {
           if(relation_attr.aggr_func != UNKNOWN){
             query_fields.push_back(Field(table, table->table_meta().field(0)));//这里就不加别名了
+            
           }
           else{
             wildcard_fields(table, query_fields);
@@ -527,7 +528,8 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         0 == strcmp(relation_attr.attribute_name.c_str(), "*")) {
       for (Table *table : tables) {
         if(relation_attr.aggr_func != UNKNOWN){
-          query_fields.push_back(Field(table, table->table_meta().field(0)));
+          query_fields.push_back(Field(table, table->table_meta().field(0)));//这里放了字段进去
+          break;
         }
         else{
           wildcard_fields(table, query_fields);
@@ -554,6 +556,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         for (Table *table : tables) {
           if(relation_attr.aggr_func != UNKNOWN){
             query_fields.push_back(Field(table, table->table_meta().field(0)));
+           // break;
           }
           else{
             wildcard_fields(table, query_fields);
