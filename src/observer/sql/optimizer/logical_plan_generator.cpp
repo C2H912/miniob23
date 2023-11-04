@@ -243,17 +243,12 @@ RC LogicalPlanGenerator::create_plan(
           predicate_oper->add_child(std::move(table_oper));
         }
         group_oper->add_child(std::move(predicate_oper));
-        aggr_oper->add_child(std::move(group_oper));
       } else {
         if (table_oper) {
           group_oper->add_child(std::move(table_oper));
         }
       }
       aggr_oper->add_child(std::move(group_oper));
-      project_oper->add_child(std::move(aggr_oper));
-      if(order_oper){
-        order_oper->add_child(std::move(project_oper));
-      }
     }
     else{
       if (predicate_oper) {
@@ -266,10 +261,10 @@ RC LogicalPlanGenerator::create_plan(
           aggr_oper->add_child(std::move(table_oper));
         }
       }
-      project_oper->add_child(std::move(aggr_oper));
-      if(order_oper){
-        order_oper->add_child(std::move(project_oper));
-      }
+    }
+    project_oper->add_child(std::move(aggr_oper));
+    if(order_oper){
+      order_oper->add_child(std::move(project_oper));
     }
   }
   else{

@@ -811,6 +811,14 @@ group_by:
     $$->attribute_name = $1;
     free($1);
   } 
+  | ID DOT ID
+  {
+    $$ = new RelAttrSqlNode;
+    $$->relation_name  = $1;
+    $$->attribute_name = $3;
+    free($1);
+    free($3);
+  }
   ;
 group_by_list:
   /* empty */
