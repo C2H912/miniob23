@@ -46,6 +46,7 @@ RC AggrePhysicalOperator::next()
     scan_index_++;
     if(scan_index_ == (int)tuple_.size()){
       enter_flag_ = false;
+      tuple_.clear();
       return RC::RECORD_EOF;
     }
     else{
