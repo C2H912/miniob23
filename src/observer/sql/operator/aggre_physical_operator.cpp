@@ -19,13 +19,13 @@ See the Mulan PSL v2 for more details. */
 #include "storage/field/field.h"
 
 AggrePhysicalOperator::AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-    const std::vector<std::string> &spec, std::unique_ptr<Expression> expr, bool having_flag)
-:fields_(fields), aggr_fields_(aggr_fields), spec_(spec), expression_(std::move(expr)), having_flag_(having_flag)
+    const std::vector<std::string> &spec, std::unique_ptr<Expression> expr, bool having_flag, int having_num)
+:fields_(fields), aggr_fields_(aggr_fields), spec_(spec), expression_(std::move(expr)), having_flag_(having_flag), having_num_(having_num)
 {}
 
 AggrePhysicalOperator::AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-    const std::vector<std::string> &spec, bool having_flag)
-:fields_(fields), aggr_fields_(aggr_fields), spec_(spec), having_flag_(having_flag)
+    const std::vector<std::string> &spec, bool having_flag, int having_num)
+:fields_(fields), aggr_fields_(aggr_fields), spec_(spec), having_flag_(having_flag), having_num_(having_num)
 {}
 
 RC AggrePhysicalOperator::open(Trx *trx)
@@ -199,7 +199,7 @@ RC AggrePhysicalOperator::do_group_aggre(std::map<Key, std::vector<ValueListTupl
 
     //检查having
     if(having_flag_ == true){
-      //当前结果ListTuple
+      //当前结果ListTuple, 这里包含了HAVING的部分
       AggreListTuple having_tuple;
       having_tuple.set_cells(group_cells);
       having_tuple.set_specs(spec_);
@@ -213,7 +213,18 @@ RC AggrePhysicalOperator::do_group_aggre(std::map<Key, std::vector<ValueListTupl
       }
       //判断是否应该写入
       if (value.get_boolean()) {
-        current_group.set_cells(group_cells);
+        //这里要减去having的部分
+        std::vector<Value> print_cell;
+        std::vector<AggrOp> print_aggre;
+        std::vector<std::string> print_spec;
+        for(size_t i = 0; i < group_cells.size() - having_num_; i++){
+          print_cell.push_back(group_cells[i]);
+          print_spec.push_back(spec_[i]);
+          print_aggre.push_back(aggr_fields_[i]);
+        }
+        current_group.set_cells(print_cell);
+        current_group.set_specs(print_spec);
+        current_group.set_aggre(print_aggre);
         tuple_.push_back(current_group);
         continue;
       }

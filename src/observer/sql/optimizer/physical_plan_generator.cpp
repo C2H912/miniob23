@@ -251,11 +251,11 @@ RC PhysicalPlanGenerator::create_plan(AggreLogicalOperator &aggr_oper, unique_pt
     vector<unique_ptr<Expression>> &expressions = aggr_oper.expressions();
     unique_ptr<Expression> expression = std::move(expressions.front());
     aggre_operator = unique_ptr<AggrePhysicalOperator>(new AggrePhysicalOperator(aggr_oper.fields(), 
-                           aggr_oper.aggr_fields(), aggr_oper.spec(), std::move(expression), true));
+                           aggr_oper.aggr_fields(), aggr_oper.spec(), std::move(expression), true, aggr_oper.having_num()));
   }
   else{
     aggre_operator = unique_ptr<AggrePhysicalOperator>(new AggrePhysicalOperator(aggr_oper.fields(), 
-                           aggr_oper.aggr_fields(), aggr_oper.spec(), false));
+                           aggr_oper.aggr_fields(), aggr_oper.spec(), false, 0));
   }
 
   if (child_phy_oper) {

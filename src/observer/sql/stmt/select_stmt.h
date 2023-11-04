@@ -114,18 +114,29 @@ public:
     return groupby_flag_;
   }
 
+  int having_num()
+  {
+    return having_num_;
+  }
+
 private:
   std::vector<Field> query_fields_;
+  std::vector<Table *> tables_;
+  //
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> aggr_specs_;
-  std::vector<Table *> tables_;
   std::vector<std::pair<bool,std::string>> aggr_alias_;
+  int having_num_ = 0;
+  HavingStmt *having_stmt_ = nullptr;
+  //
   int conjunction_flag_;    //0: AND, 1: OR
   FilterStmt *filter_stmt_ = nullptr;
+  //
   std::vector<Field> group_by_fields_;
-  HavingStmt *having_stmt_ = nullptr;
   bool groupby_flag_ = false;
+  //
   OrderByStmt *order_by_stmt_ = nullptr;
+  //
   bool is_expr_ = false;
   std::vector<std::unique_ptr<Expression>> expressions_;
 };

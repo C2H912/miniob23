@@ -78,7 +78,7 @@ RC ExecuteStage::handle_request_with_physical_operator(SQLStageEvent *sql_event)
       bool with_table_name = select_stmt->tables().size() > 1;
 
       if(select_stmt->aggr_fields()[0] != UNKNOWN || select_stmt->groupby_flag() == true){
-        for(int i = 0; i < (int)select_stmt->aggr_fields().size(); i++){
+        for(int i = 0; i < (int)select_stmt->aggr_fields().size() - select_stmt->having_num(); i++){
           AggrOp temp_aggr = select_stmt->aggr_fields()[i];
           if(select_stmt->aggr_alias()[i].first == true)
           {

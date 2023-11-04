@@ -175,6 +175,30 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   for(size_t i = 0; i < select_sql.expressions.size(); i++){
     dfs(select_sql.expressions[i], all_relAttrNodes);
   }
+  //把having里面的也放进去
+  for(size_t i = 0; i < select_sql.havingcConditions.size(); i++){
+    ConditionSqlNode having_condiction = select_sql.havingcConditions[i];
+    if(having_condiction.left_is_attr == 0){
+      if(having_condiction.left_expr->type() == ExprType::FIELD){
+        FieldExpr* fieldnode = static_cast<FieldExpr*>(having_condiction.left_expr);
+        RelAttrSqlNode temp;
+        temp.relation_name = fieldnode->str_table_name();
+        temp.attribute_name = fieldnode->str_attribute_name();
+        temp.aggr_func = fieldnode->aggr_name();
+        all_relAttrNodes.push_back(temp);
+      }
+    }
+    if(having_condiction.right_is_attr == 0){
+      if(having_condiction.right_expr->type() == ExprType::FIELD){
+        FieldExpr* fieldnode = static_cast<FieldExpr*>(having_condiction.right_expr);
+        RelAttrSqlNode temp;
+        temp.relation_name = fieldnode->str_table_name();
+        temp.attribute_name = fieldnode->str_attribute_name();
+        temp.aggr_func = fieldnode->aggr_name();
+        all_relAttrNodes.push_back(temp);
+      }
+    }
+  }
   //特殊情况: 整个表达式只有一个*，即select * from a;
   if((int)all_relAttrNodes.size() == 0){
     return RC::EMPTY;
@@ -182,7 +206,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   bool is_star = false;
   int star_index = 10000;//标识star的位置
 
-  for(int i = 0;i<all_relAttrNodes.size();i++)
+  for(int i = 0; i < all_relAttrNodes.size() - select_sql.havingcConditions.size();i++)
   {
     if(0 == strcmp(all_relAttrNodes[i].attribute_name.c_str(), "*")&&all_relAttrNodes[0].aggr_func==UNKNOWN){ //这里只判断了第一个是不是为*号
     is_star = true;
@@ -191,8 +215,6 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
   }
   }
-
-  
 
   select_sql.attributes = all_relAttrNodes;
 
@@ -479,6 +501,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   select_stmt->aggr_fields_.swap(aggr_fields);
   select_stmt->aggr_specs_.swap(aggr_specs);
   select_stmt->aggr_alias_.swap(aggr_alias);
+  select_stmt->having_num_ = (int)select_sql.havingcConditions.size();
   //
   select_stmt->filter_stmt_ = filter_stmt;
   select_stmt->conjunction_flag_ = conjunction_flag;

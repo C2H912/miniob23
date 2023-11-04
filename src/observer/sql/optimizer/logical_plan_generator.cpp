@@ -136,7 +136,7 @@ RC LogicalPlanGenerator::create_complex_sub_plan(std::vector<Tuple*> &paretnts, 
 
   unique_ptr<LogicalOperator> aggr_oper;
   if (aggr_fields[0] != UNKNOWN) {
-    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs, false));
+    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs, false, select_stmt->having_num()));
   }
 
   unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs, std::move(select_stmt->expressions())));
@@ -221,7 +221,7 @@ RC LogicalPlanGenerator::create_plan(
 
   unique_ptr<LogicalOperator> aggr_oper;
   if (aggr_fields[0] != UNKNOWN || select_stmt->groupby_flag() == true) {
-    RC rc = create_plan(select_stmt->having_stmt(), aggr_oper, all_fields, aggr_fields, aggr_specs);
+    RC rc = create_plan(select_stmt->having_stmt(), select_stmt->having_num(), aggr_oper, all_fields, aggr_fields, aggr_specs);
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to create predicate logical plan. rc=%s", strrc(rc));
       return rc;
@@ -378,7 +378,7 @@ RC LogicalPlanGenerator::create_complex_filter_plan(FilterStmt *filter_stmt, std
   return RC::SUCCESS;
 }
 
-RC LogicalPlanGenerator::create_plan(HavingStmt *having_stmt, std::unique_ptr<LogicalOperator> &logical_operator, const std::vector<Field> &fields, 
+RC LogicalPlanGenerator::create_plan(HavingStmt *having_stmt, int having_num, std::unique_ptr<LogicalOperator> &logical_operator, const std::vector<Field> &fields, 
                const std::vector<AggrOp> &aggr_fields, const std::vector<std::string> &spec)
 {
   std::vector<unique_ptr<Expression>> cmp_exprs;
@@ -398,10 +398,10 @@ RC LogicalPlanGenerator::create_plan(HavingStmt *having_stmt, std::unique_ptr<Lo
   if (!cmp_exprs.empty()) {
     unique_ptr<ConjunctionExpr> conjunction_expr(new ConjunctionExpr(ConjunctionExpr::Type::AND, cmp_exprs));
     aggre_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(fields, aggr_fields, spec,
-        std::move(conjunction_expr), true));
+        std::move(conjunction_expr), true, having_num));
   }
   else{
-    aggre_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(fields, aggr_fields, spec, false));
+    aggre_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(fields, aggr_fields, spec, false, having_num));
   }
 
   logical_operator = std::move(aggre_oper);

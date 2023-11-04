@@ -15,13 +15,13 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/aggre_logical_operator.h"
 
 AggreLogicalOperator::AggreLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-        const std::vector<std::string> &spec, std::unique_ptr<Expression> expression, bool having)
-: fields_(fields), aggr_fields_(aggr_fields), spec_(spec), having_(having)
+        const std::vector<std::string> &spec, std::unique_ptr<Expression> expression, bool having, int having_num)
+: fields_(fields), aggr_fields_(aggr_fields), spec_(spec), having_(having), having_num_(having_num)
 {
         expressions_.emplace_back(std::move(expression));
 }
 
 AggreLogicalOperator::AggreLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-        const std::vector<std::string> &spec, bool having)
-: fields_(fields), aggr_fields_(aggr_fields), spec_(spec), having_(having)
+        const std::vector<std::string> &spec, bool having, int having_num)
+: fields_(fields), aggr_fields_(aggr_fields), spec_(spec), having_(having), having_num_(having_num)
 {}
