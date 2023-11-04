@@ -111,9 +111,16 @@ RC filter_get_table_and_field(Db *db, Table *default_table, std::unordered_map<s
     table = default_table;
   } else if (nullptr != tables) { //这里用到了 在表中找匹配的表
     auto iter = tables->find(attr.relation_name);
+
     if (iter != tables->end()) {
       table = iter->second;
+    }else if(nullptr != alias_tables){
+      auto iter2 = alias_tables->find(attr.relation_name);//在别名中找对比
+      if (iter2 != alias_tables->end()) {
+      table = iter2->second;
     }
+    }
+    
   } else {
     table = db->find_table(attr.relation_name.c_str());
   }
@@ -247,18 +254,9 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   }
 
   filter_unit = new FilterUnit;
-  // std::unordered_map<std::string,Table*> sons;
- 
-  //   for(std::pair<std::string, Table *> it : *tables){
-  //   sons.insert(it);
-  // }
-  // for(std::pair<std::string, Table *> it : *alias_tables){
-  //   sons.insert(it);
-  // }
-  
   //expression
   if (condition.left_is_attr == 0) {
-    rc = filter_dfs(condition.left_expr, db, default_table, tables);
+    rc = filter_dfs(condition.left_expr, db, default_table, tables,alias_tables);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr or invalid value");
       return rc;

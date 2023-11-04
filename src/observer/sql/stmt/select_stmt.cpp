@@ -132,7 +132,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
-    if(!select_sql.relations[i].alias.empty())
+    if(!select_sql.relations[i].alias.empty()&&alias_name!="")
     {
        std::pair<std::unordered_map<std::string, Table *>::iterator, bool> ret = alias_map.insert(std::pair<std::string, Table *>(alias_name, table));
       if(!ret.second)
@@ -159,7 +159,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
     tables.push_back(table);
     table_map.insert(std::pair<std::string, Table *>(table_name, table));
-    if(!select_sql.relations[i].alias.empty())
+    if(!temp_node.join_relations.alias.empty()&&alias_name!="")
     {
        std::pair<std::unordered_map<std::string, Table *>::iterator, bool> ret = alias_map.insert(std::pair<std::string, Table *>(alias_name, table));
       if(!ret.second)
@@ -179,9 +179,19 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     return RC::EMPTY;
   }
   bool is_star = false;
-  if(0 == strcmp(all_relAttrNodes[0].attribute_name.c_str(), "*")){
+  int star_index = 10000;//标识star的位置
+
+  for(int i = 0;i<all_relAttrNodes.size();i++)
+  {
+    if(0 == strcmp(all_relAttrNodes[i].attribute_name.c_str(), "*")&&all_relAttrNodes[0].aggr_func==UNKNOWN){ //这里只判断了第一个是不是为*号
     is_star = true;
+    star_index = i;
+    break;
+
   }
+  }
+
+  
 
   select_sql.attributes = all_relAttrNodes;
 
@@ -227,7 +237,8 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         0 == strcmp(relation_attr.attribute_name.c_str(), "*")) {
       for (Table *table : tables) {
         if(relation_attr.aggr_func != UNKNOWN){
-          query_fields.push_back(Field(table, table->table_meta().field(0)));
+          query_fields.push_back(Field(table, table->table_meta().field(0)));//这里放了字段进去
+          break;
         }
         else{
           wildcard_fields(table, query_fields);
@@ -257,13 +268,14 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         for (Table *table : tables) {
           if(relation_attr.aggr_func != UNKNOWN){
             query_fields.push_back(Field(table, table->table_meta().field(0)));
+           // break;
           }
           else{
             wildcard_fields(table, query_fields);
           }
         }
         aggr_specs.push_back("*");
-        if(!relation_attr.alias.empty())//标识该聚合字段是否有别名
+        if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
         {
           aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
         }
@@ -271,12 +283,20 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
           aggr_alias.push_back(std::pair<bool, std::string>(false, relation_attr.alias));
         }
       } 
-      //2-2： select a.id或者a.* from a;
       else {
         auto iter = table_map.find(table_name);
-        if (iter == table_map.end()) {
-          LOG_WARN("no such table in from list: %s", table_name);
+        if (iter == table_map.end()) {//在当前表寻找
+
+           iter = alias_map.find(table_name);//在别名中找对比
+        if (iter == alias_map.end()) {
+           
+           iter = parents.find(table_name);//在父表中找对比
+        if (iter == parents.end()) {
+            LOG_WARN("no such table in from list: %s", table_name);
           return RC::SCHEMA_FIELD_MISSING;
+        }
+        }
+   
         }
 
         Table *table = iter->second;
@@ -289,16 +309,15 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
             wildcard_fields(table, query_fields);
           }
           aggr_specs.push_back("*");
-          if(!relation_attr.alias.empty())//标识该聚合字段是否有别名
+          if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
           {
             aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
           }
           else{
             aggr_alias.push_back(std::pair<bool, std::string>(false, relation_attr.alias));
           }
-        } 
-        ///2-2-2: select a.id from a;
-        else {
+        } else {
+
           const FieldMeta *field_meta = table->table_meta().field(field_name);
           std::string alias_name = relation_attr.alias;
           if (nullptr == field_meta) {
@@ -308,13 +327,14 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
           query_fields.push_back(Field(table, field_meta,alias_name));
           aggr_specs.push_back(relation_attr.attribute_name);
-          if(!relation_attr.alias.empty()) {
-            aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
+          if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
+            {
+              aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
+            }
+            else{
+              aggr_alias.push_back(std::pair<bool, std::string>(false, relation_attr.alias));
+            }
           }
-          else{
-            aggr_alias.push_back(std::pair<bool, std::string>(false, relation_attr.alias));
-          }
-        }
       }
     } 
     //case 3: select id from a;
@@ -334,7 +354,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
       query_fields.push_back(Field(table, field_meta, alias_name));
       aggr_specs.push_back(relation_attr.attribute_name);
-      if(!relation_attr.alias.empty())//标识该聚合字段是否有别名
+      if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
       {
         aggr_alias.push_back(std::pair<bool, std::string>(true, relation_attr.alias));
       }
@@ -381,6 +401,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   RC rc = FilterStmt::create(db,
       default_table,
       &all_parents,
+      &alias_map,
       all_filters.data(),
       static_cast<int>(all_filters.size()),
       filter_stmt);
@@ -452,8 +473,13 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   for(size_t i = 0; i < select_sql.expressions.size(); i++){
     dfs_for_field(select_sql.expressions[i], expr_index, select_stmt->query_fields_);
   }
+
+  for(int i = 0;i<star_index&&i<select_sql.expressions.size();i++){
+    select_stmt->expressions_.emplace_back(select_sql.expressions[i]);
+  }
+
   if(is_star == true && select_stmt->aggr_fields_[0] == UNKNOWN){
-    for(size_t i = 0; i < select_stmt->query_fields_.size(); i++){
+    for(size_t i = star_index; i < select_stmt->query_fields_.size(); i++){
       std::string tablename = select_stmt->query_fields_[i].table_name();
       std::string fieldname = select_stmt->query_fields_[i].field_name();
       FieldExpr *expr = new FieldExpr(tablename, fieldname, UNKNOWN);
@@ -468,10 +494,10 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
       select_stmt->expressions_.emplace_back(expr);
     }
   }
-  else{
-    for (Expression * const expr : select_sql.expressions) {
-      select_stmt->expressions_.emplace_back(expr);
-    }
+  else {
+    // for (Expression * const expr : select_sql.expressions) {
+    //   select_stmt->expressions_.emplace_back(expr);
+    // }
   }
 
   stmt = select_stmt;
