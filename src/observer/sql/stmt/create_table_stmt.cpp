@@ -17,7 +17,22 @@ See the Mulan PSL v2 for more details. */
 
 RC CreateTableStmt::create(Db *db, const CreateTableSqlNode &create_table, Stmt *&stmt)
 {
-  stmt = new CreateTableStmt(create_table.relation_name, create_table.attr_infos);
+  CreateTableStmt *create_stmt;
+  if(create_table.select_flag == true){
+    Stmt *sub_stmt;
+    SelectStmt *caller;   //无实质内容，只为了调用一个select的create方法，把create的结果存到sub_stmt中
+    std::unordered_map<std::string,Table* > parents;
+    RC rc = caller->create(db, create_table.select_infos->selection, sub_stmt, parents);
+    if(rc != RC::SUCCESS){
+      LOG_WARN("sub create stmt fail");
+      return rc;
+    }
+    create_stmt = new CreateTableStmt(create_table.relation_name, static_cast<SelectStmt*>(sub_stmt));
+  }
+  else{
+    create_stmt = new CreateTableStmt(create_table.relation_name, create_table.attr_infos);
+  }
+  stmt = create_stmt;
   sql_debug("create table statement: table name %s", create_table.relation_name.c_str());
   return RC::SUCCESS;
 }

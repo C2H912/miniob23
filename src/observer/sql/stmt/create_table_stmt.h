@@ -18,6 +18,8 @@ See the Mulan PSL v2 for more details. */
 #include <vector>
 
 #include "sql/stmt/stmt.h"
+#include "common/log/log.h" //.
+#include "sql/stmt/select_stmt.h"
 
 class Db;
 
@@ -32,10 +34,28 @@ public:
   CreateTableStmt(const std::string &table_name, const std::vector<AttrInfoSqlNode> &attr_infos)
         : table_name_(table_name),
           attr_infos_(attr_infos)
-  {}
+  {
+    is_create_select_ = false;
+  }
+  CreateTableStmt(const std::string &table_name, SelectStmt *select_infos_)
+        : table_name_(table_name),
+          select_table_(select_infos_)
+  {
+    is_create_select_ = true;
+  }
   virtual ~CreateTableStmt() = default;
 
   StmtType type() const override { return StmtType::CREATE_TABLE; }
+
+  bool is_create_select()
+  {
+    return is_create_select_;
+  }
+
+  SelectStmt* select_table()
+  {
+    return select_table_;
+  }
 
   const std::string &table_name() const { return table_name_; }
   const std::vector<AttrInfoSqlNode> &attr_infos() const { return attr_infos_; }
@@ -43,6 +63,8 @@ public:
   static RC create(Db *db, const CreateTableSqlNode &create_table, Stmt *&stmt);
 
 private:
+  bool is_create_select_ = false;
   std::string table_name_;
+  SelectStmt* select_table_;
   std::vector<AttrInfoSqlNode> attr_infos_;
 };

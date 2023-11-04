@@ -43,10 +43,11 @@ public:
   //RC create_plan(
   //  const std::vector<Field> &all_fields, const std::vector<AggrOp> &aggr_fields, 
   //  std::unique_ptr<LogicalOperator> &logical_operator);
+  RC create_plan(SelectStmt *select_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
+  RC create_plan(InsertStmt *insert_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
 
 private:
   RC create_plan(CalcStmt *calc_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
-  RC create_plan(SelectStmt *select_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_complex_sub_plan(std::vector<Tuple*> &paretnts, SelectStmt *select_stmt, 
       std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(FilterStmt *filter_stmt, std::unique_ptr<LogicalOperator> &logical_operator, int conjunction_flag);
@@ -54,7 +55,6 @@ private:
                  const std::vector<AggrOp> &aggr_fields, const std::vector<std::string> &spec);
   RC create_complex_filter_plan(FilterStmt *filter_stmt, std::unique_ptr<LogicalOperator> &logical_operator, 
       int conjunction_flag, std::vector<Tuple*> &paretnts);
-  RC create_plan(InsertStmt *insert_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(DeleteStmt *delete_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(UpdateStmt *update_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(ExplainStmt *explain_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
