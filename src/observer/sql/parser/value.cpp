@@ -333,6 +333,13 @@ int Value::compare_date(const Value &other) const
 
 int Value::compare(const Value &other) const
 {
+  if(this->attr_type_ == NULLS && other.attr_type_ == NULLS) {
+    return 0;
+  } else if(this->attr_type_ == NULLS && other.attr_type_ != NULLS) {
+    return -1;
+  } else if(this->attr_type_ != NULLS && other.attr_type_ == NULLS) {
+    return 1;
+  } 
   if (this->attr_type_ == other.attr_type_) {
     switch (this->attr_type_) {
       case INTS: {
