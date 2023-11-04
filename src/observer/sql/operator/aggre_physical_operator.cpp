@@ -110,9 +110,14 @@ RC AggrePhysicalOperator::next()
     }
     
     if((int)all_tuple.size() == 0){
+      enter_flag_ = false;
       return RC::RECORD_EOF;
     }
     rc = do_aggre_func(all_tuple);
+    if((int)tuple_.size() == 0){
+      enter_flag_ = false;
+      return RC::RECORD_EOF;
+    }
     if (rc != RC::SUCCESS) {
       return rc;
     }
