@@ -34,6 +34,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/stmt/calc_stmt.h"
 #include "sql/stmt/select_stmt.h"
 #include "sql/stmt/filter_stmt.h"
+#include "sql/stmt/having_stmt.h"
 #include "sql/stmt/insert_stmt.h"
 #include "sql/stmt/delete_stmt.h"
 #include "sql/stmt/update_stmt.h"
@@ -135,7 +136,7 @@ RC LogicalPlanGenerator::create_complex_sub_plan(std::vector<Tuple*> &paretnts, 
 
   unique_ptr<LogicalOperator> aggr_oper;
   if (aggr_fields[0] != UNKNOWN) {
-    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs));
+    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs, false));
   }
 
   unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs, std::move(select_stmt->expressions())));
@@ -220,7 +221,11 @@ RC LogicalPlanGenerator::create_plan(
 
   unique_ptr<LogicalOperator> aggr_oper;
   if (aggr_fields[0] != UNKNOWN || select_stmt->groupby_flag() == true) {
-    aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs));
+    RC rc = create_plan(select_stmt->having_stmt(), aggr_oper, all_fields, aggr_fields, aggr_specs);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to create predicate logical plan. rc=%s", strrc(rc));
+      return rc;
+    }
   }
 
   unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(all_fields, aggr_fields, aggr_specs, std::move(select_stmt->expressions())));
@@ -378,6 +383,36 @@ RC LogicalPlanGenerator::create_complex_filter_plan(FilterStmt *filter_stmt, std
   return RC::SUCCESS;
 }
 
+RC LogicalPlanGenerator::create_plan(HavingStmt *having_stmt, std::unique_ptr<LogicalOperator> &logical_operator, const std::vector<Field> &fields, 
+               const std::vector<AggrOp> &aggr_fields, const std::vector<std::string> &spec)
+{
+  std::vector<unique_ptr<Expression>> cmp_exprs;
+  const std::vector<HavingUnit *> &having_units = having_stmt->having_units();
+  for (const HavingUnit *having_unit : having_units) {
+    const HavingObj &having_obj_left = having_unit->left();
+    const HavingObj &having_obj_right = having_unit->right();
+
+    unique_ptr<Expression> left(std::move(having_obj_left.expr));
+    unique_ptr<Expression> right(std::move(having_obj_right.expr));
+
+    ComparisonExpr *cmp_expr = new ComparisonExpr(having_unit->comp(), std::move(left), std::move(right));
+    cmp_exprs.emplace_back(cmp_expr);
+  }
+
+  unique_ptr<AggreLogicalOperator> aggre_oper;
+  if (!cmp_exprs.empty()) {
+    unique_ptr<ConjunctionExpr> conjunction_expr(new ConjunctionExpr(ConjunctionExpr::Type::AND, cmp_exprs));
+    aggre_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(fields, aggr_fields, spec,
+        std::move(conjunction_expr), true));
+  }
+  else{
+    aggre_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(fields, aggr_fields, spec, false));
+  }
+
+  logical_operator = std::move(aggre_oper);
+  return RC::SUCCESS;
+}
+
 RC LogicalPlanGenerator::create_plan(
     FilterStmt *filter_stmt, unique_ptr<LogicalOperator> &logical_operator, int conjunction_flag)
 {
@@ -386,87 +421,7 @@ RC LogicalPlanGenerator::create_plan(
   for (const FilterUnit *filter_unit : filter_units) {
     const FilterObj &filter_obj_left = filter_unit->left();
     const FilterObj &filter_obj_right = filter_unit->right();
-#if 0
-    //递归地生成子查询的火山
-    unique_ptr<PhysicalOperator> left_volcano;
-    unique_ptr<PhysicalOperator> right_volcano;
-    if(filter_obj_left.type == 1){
-      OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
-      RC rc = caller.create_sub_request(filter_obj_left.stmt, left_volcano);
-      if(rc != RC::SUCCESS){
-        LOG_WARN("failed to get SUB TABLE from operator");
-        return rc;
-      }
-    }
-    if(filter_obj_right.type == 1){
-      OptimizeStage caller;   //无实际用途，就为了调用一下create_sub_request() :)
-      RC rc = caller.create_sub_request(filter_obj_right.stmt, right_volcano);
-      if(rc != RC::SUCCESS){
-        LOG_WARN("failed to get SUB TABLE from operator");
-        return rc;
-      }
-    }
-    //这里拿到火山后马上执行，把子表读到SubQueryExpr中，因为expression表达式如果再包含PhysicalOperator.h
-    //的话会形成自包含，编译不通过
-    std::vector<std::vector<Value>> left_table;
-    if(left_volcano){
-      RC rc = RC::SUCCESS;
-      //把子表读进sub_table中
-      left_volcano->open(nullptr);
-      while (RC::SUCCESS == (rc = left_volcano->next())) {
-        Tuple * tuple = left_volcano->current_tuple();
-        std::vector<Value> row;
-        for(int i = 0; i < tuple->cell_num(); i++){
-          Value value;
-          rc = tuple->cell_at(i, value);
-          if (rc != RC::SUCCESS) {
-            left_volcano->close();
-            LOG_WARN("failed to get SUB TABLE from operator");
-            return rc;
-          }
-          row.push_back(value);
-        }
-        left_table.push_back(row);
-      }
-      left_volcano->close();
-      if (rc == RC::RECORD_EOF) {
-        rc = RC::SUCCESS;
-      }
-      else{
-        LOG_WARN("failed to get SUB TABLE from operator");
-        return rc;
-      }
-    }
-    std::vector<std::vector<Value>> right_table;
-    if(right_volcano){
-      RC rc = RC::SUCCESS;
-      //把子表读进sub_table中
-      right_volcano->open(nullptr);
-      while (RC::SUCCESS == (rc = right_volcano->next())) {
-        Tuple * tuple = right_volcano->current_tuple();
-        std::vector<Value> row;
-        for(int i = 0; i < tuple->cell_num(); i++){
-          Value value;
-          rc = tuple->cell_at(i, value);
-          if (rc != RC::SUCCESS) {
-            right_volcano->close();
-            LOG_WARN("failed to get SUB TABLE from operator");
-            return rc;
-          }
-          row.push_back(value);
-        }
-        right_table.push_back(row);
-      }
-      right_volcano->close();
-      if (rc == RC::RECORD_EOF) {
-        rc = RC::SUCCESS;
-      }
-      else{
-        LOG_WARN("failed to get SUB TABLE from operator");
-        return rc;
-      }
-    }
-#endif
+
     unique_ptr<Expression> left(filter_obj_left.type == 0
                                          ? std::move(filter_obj_left.expr) :
                                 (filter_obj_left.type == 1

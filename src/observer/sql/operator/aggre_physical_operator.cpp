@@ -19,8 +19,13 @@ See the Mulan PSL v2 for more details. */
 #include "storage/field/field.h"
 
 AggrePhysicalOperator::AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-    const std::vector<std::string> &spec)
-:fields_(fields), aggr_fields_(aggr_fields), spec_(spec)
+    const std::vector<std::string> &spec, std::unique_ptr<Expression> expr, bool having_flag)
+:fields_(fields), aggr_fields_(aggr_fields), spec_(spec), expression_(std::move(expr)), having_flag_(having_flag)
+{}
+
+AggrePhysicalOperator::AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
+    const std::vector<std::string> &spec, bool having_flag)
+:fields_(fields), aggr_fields_(aggr_fields), spec_(spec), having_flag_(having_flag)
 {}
 
 RC AggrePhysicalOperator::open(Trx *trx)
@@ -68,10 +73,11 @@ RC AggrePhysicalOperator::next()
     }
     group_result = oper->current_group();
     rc = do_group_aggre(group_result);
-    if(rc != RC::SUCCESS){
+    if(rc != RC::SUCCESS && rc != RC::RECORD_EOF){
       LOG_WARN("GROUP BY AGGRE FAILED\n");
       return rc;
     }
+    return rc;
   }
 // ---------------- case 2: 一般情况 ------------------
   else{
@@ -185,9 +191,39 @@ RC AggrePhysicalOperator::do_group_aggre(std::map<Key, std::vector<ValueListTupl
       group_cells.push_back(ret_tuple[k]);
     }
 
-    //写入结果
+    //检查having
+    if(having_flag_ == true){
+      //当前结果ListTuple
+      AggreListTuple having_tuple;
+      having_tuple.set_cells(group_cells);
+      having_tuple.set_specs(spec_);
+      having_tuple.set_aggre(aggr_fields_);
+      Tuple *tuple = static_cast<Tuple*>(&having_tuple);
+      //通过tuple计算value的值
+      Value value;
+      rc = expression_->get_value(*tuple, value);
+      if (rc != RC::SUCCESS) {
+        return rc;
+      }
+      //判断是否应该写入
+      if (value.get_boolean()) {
+        current_group.set_cells(group_cells);
+        tuple_.push_back(current_group);
+        continue;
+      }
+      else{
+        continue;
+      }
+    }
+
+    //没有HAVING的话直接写入结果
     current_group.set_cells(group_cells);
     tuple_.push_back(current_group);
+  }
+
+  if((int)tuple_.size() == 0){
+    enter_flag_ = false;
+    return RC::RECORD_EOF;
   }
 
   return RC::SUCCESS;

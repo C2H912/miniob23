@@ -154,8 +154,9 @@ struct SelectSqlNode
 {
   std::vector<RelAttrSqlNode>     attributes;     ///< attributes in select clause
   std::vector<Expression*>        expressions;
-  std::vector<RelName>            relations;       ///< 使用结构体封装表名和别名
+  std::vector<RelName>            relations;      ///< 使用结构体封装表名和别名
   std::vector<ConditionSqlNode>   conditions;     ///< 查询条件，使用AND串联起来多个条件
+  std::vector<ConditionSqlNode>   havingcConditions;     ///< 查询条件，使用AND串联起来多个条件
   std::vector<InnerJoinSqlNode>   joinTables;     ///< INNER JOIN
   std::vector<RelAttrSqlNode>     groupBy;
   std::vector<OrderBySqlNode>     orderBy;

@@ -142,7 +142,6 @@ RC filter_get_table_and_field(Db *db, Table *default_table, std::unordered_map<s
   return RC::SUCCESS;
 }
 
-
 RC filter_dfs(Expression* current, Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables)
 {
   //终止节点
@@ -190,8 +189,6 @@ RC filter_dfs(Expression* current, Db *db, Table *default_table, std::unordered_
   }
   return RC::SUCCESS;
 }
-
-
 
 RC filter_dfs(Expression* current, Db *db, Table *default_table, std::unordered_map<std::string, Table *> *tables ,std::unordered_map<std::string, Table *> *alias_tables)
 {

@@ -207,6 +207,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <value_list>          value_list
 %type <record_list>         record_list
 %type <condition_list>      where
+%type <condition_list>      having
 %type <condition_list>      condition_list
 %type <condition_list>      on
 %type <join_lists>          join_list
@@ -716,7 +717,7 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT add_expr_list FROM rel rel_list join_list where opt_group_by opt_order_by
+    SELECT add_expr_list FROM rel rel_list join_list where opt_group_by having opt_order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
 
@@ -751,8 +752,13 @@ select_stmt:        /*  select 语句的语法解析树*/
       }
 
       if ($9 != nullptr) {
-        $$->selection.orderBy.swap(*$9);
+        $$->selection.havingcConditions.swap(*$9);
         delete $9;
+      }
+
+      if ($10 != nullptr) {
+        $$->selection.orderBy.swap(*$10);
+        delete $10;
       }
 
       free($4);
@@ -899,8 +905,6 @@ order_by_unit:
       $$->order_relation = $1;
 	}
 	;
-
-
 
 sub_select_stmt:        /*  select 语句的语法解析树*/
     LBRACE SELECT add_expr_list FROM rel rel_list where RBRACE
@@ -1345,6 +1349,15 @@ on:
       $$ = nullptr;
     }
     | ON condition_list {
+      $$ = $2;  
+    }
+    ;
+having:
+    /* empty */
+    {
+      $$ = nullptr;
+    }
+    | HAVING condition_list {
       $$ = $2;  
     }
     ;

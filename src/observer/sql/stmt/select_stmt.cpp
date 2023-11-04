@@ -21,6 +21,7 @@ See the Mulan PSL v2 for more details. */
 
 #include "sql/stmt/select_stmt.h"
 #include "sql/stmt/filter_stmt.h"
+#include "sql/stmt/having_stmt.h"
 #include "common/log/log.h"
 #include "common/lang/string.h"
 #include "storage/db/db.h"
@@ -410,6 +411,25 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     return rc;
   }
 
+// ---------- create filter statement in `having` statement ----------
+  HavingStmt *having_stmt = nullptr;
+  std::vector<ConditionSqlNode> all_havings;
+  //一般的having条件
+  for(size_t i = 0; i < select_sql.havingcConditions.size(); i++){
+    all_havings.push_back(select_sql.havingcConditions[i]);
+  }
+  //create stmt
+  rc = HavingStmt::create(db,
+      default_table,
+      &all_parents,
+      all_havings.data(),
+      static_cast<int>(all_havings.size()),
+      having_stmt);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("cannot construct filter stmt");
+    return rc;
+  }
+
 // ---------- create filter statement in `order by` statement ----------
   OrderByStmt *orderby_stmt = nullptr;
   //DEFER_WHEN_NOT_NULL(orderby_stmt);//在离开作用域时，检查orderby_stmt,如果不为空 delete
@@ -458,12 +478,15 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   //
   select_stmt->aggr_fields_.swap(aggr_fields);
   select_stmt->aggr_specs_.swap(aggr_specs);
-  //
   select_stmt->aggr_alias_.swap(aggr_alias);
+  //
   select_stmt->filter_stmt_ = filter_stmt;
   select_stmt->conjunction_flag_ = conjunction_flag;
+  //
   select_stmt->group_by_fields_.swap(group_by_fields);
+  select_stmt->having_stmt_ = having_stmt;
   select_stmt->groupby_flag_ = groupby_flag;
+  //
   select_stmt->order_by_stmt_ = orderby_stmt;
   //放入表达式
   //这里还得进行一次深度优先遍历，用于把query_fields中解析出来的属性对应的类型写入到expr树对应的Field中

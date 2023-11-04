@@ -28,7 +28,9 @@ class AggrePhysicalOperator : public PhysicalOperator
 {
 public:
   AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-    const std::vector<std::string> &spec);
+    const std::vector<std::string> &spec, std::unique_ptr<Expression> expr, bool having_flag);
+  AggrePhysicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
+    const std::vector<std::string> &spec, bool having_flag);
 
   virtual ~AggrePhysicalOperator() = default;
 
@@ -63,6 +65,8 @@ private:
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> spec_;
   std::vector<AggreListTuple> tuple_;
+  std::unique_ptr<Expression> expression_;
+  bool having_flag_ = false;
   int scan_index_ = 0;
   bool enter_flag_ = false;
 };

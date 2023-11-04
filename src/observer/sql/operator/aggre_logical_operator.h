@@ -25,7 +25,9 @@ class AggreLogicalOperator : public LogicalOperator
 {
 public:
   AggreLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
-                       const std::vector<std::string> &spec);
+                       const std::vector<std::string> &spec, std::unique_ptr<Expression> expression, bool having);
+  AggreLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
+                       const std::vector<std::string> &spec, bool having);
   virtual ~AggreLogicalOperator() = default;
 
   LogicalOperatorType type() const override
@@ -45,10 +47,15 @@ public:
   {
     return spec_;
   }
+  const bool having_flag() const
+  {
+    return having_;
+  } 
   
   
 private:
   std::vector<Field> fields_;
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> spec_;
+  bool having_ = false;
 };

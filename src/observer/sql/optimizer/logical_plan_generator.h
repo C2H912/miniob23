@@ -25,6 +25,7 @@ class CalcStmt;
 class SelectStmt;
 class UpdateStmt;
 class FilterStmt;
+class HavingStmt;
 class InsertStmt;
 class DeleteStmt;
 class ExplainStmt;
@@ -49,6 +50,8 @@ private:
   RC create_complex_sub_plan(std::vector<Tuple*> &paretnts, SelectStmt *select_stmt, 
       std::unique_ptr<LogicalOperator> &logical_operator);
   RC create_plan(FilterStmt *filter_stmt, std::unique_ptr<LogicalOperator> &logical_operator, int conjunction_flag);
+  RC create_plan(HavingStmt *having_stmt, std::unique_ptr<LogicalOperator> &logical_operator, const std::vector<Field> &fields, 
+                 const std::vector<AggrOp> &aggr_fields, const std::vector<std::string> &spec);
   RC create_complex_filter_plan(FilterStmt *filter_stmt, std::unique_ptr<LogicalOperator> &logical_operator, 
       int conjunction_flag, std::vector<Tuple*> &paretnts);
   RC create_plan(InsertStmt *insert_stmt, std::unique_ptr<LogicalOperator> &logical_operator);
