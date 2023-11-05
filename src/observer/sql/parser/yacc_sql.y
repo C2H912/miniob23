@@ -754,7 +754,17 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT add_expr_list FROM rel rel_list join_list where opt_group_by having opt_order_by
+    SELECT add_expr_list
+    {
+      $$ = new ParsedSqlNode(SCF_SELECT);
+
+      if ($2 != nullptr) {
+        std::reverse($2->begin(), $2->end());
+        $$->selection.expressions.swap(*$2);
+        delete $2;
+      }
+    }
+    | SELECT add_expr_list FROM rel rel_list join_list where opt_group_by having opt_order_by
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
 
@@ -799,16 +809,6 @@ select_stmt:        /*  select 语句的语法解析树*/
       }
 
       free($4);
-    }
-    | SELECT add_expr_list
-    {
-      $$ = new ParsedSqlNode(SCF_SELECT);
-
-      if ($2 != nullptr) {
-        std::reverse($2->begin(), $2->end());
-        $$->selection.expressions.swap(*$2);
-        delete $2;
-      }
     }
     ;
 
@@ -1140,6 +1140,7 @@ value2:
 		} 
     ;
 function_attr:
+/*
     LENGTH LBRACE value RBRACE ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
@@ -1154,11 +1155,14 @@ function_attr:
       free($6);
     }
     |
+*/
     LENGTH LBRACE value RBRACE
     {
       ValueExpr *temp = new ValueExpr(*$3);
       $$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
     }
+    ;
+/*
     |
     LENGTH LBRACE ID RBRACE
     {
@@ -1347,7 +1351,7 @@ function_attr:
       $$ = create_func_expression(DATE_FORMATS, temp, temp2, sql_string, &@$);
     }
     ;
-
+*/
 cal_attr:
     '*' {
       $$ = new RelAttrSqlNode;
