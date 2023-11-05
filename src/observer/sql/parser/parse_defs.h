@@ -23,6 +23,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/parser/value.h"
 
 class Expression;
+class ParsedSqlNode;
 
 /**
  * @defgroup SQLParser SQL Parser 
@@ -260,6 +261,7 @@ struct CreateTableSqlNode
 {
   std::string                  relation_name;         ///< Relation name
   std::vector<AttrInfoSqlNode> attr_infos;            ///< attributes
+  ParsedSqlNode * select_sql_node;                    /// Todo: create table select
 };
 
 /**
@@ -330,7 +332,7 @@ struct SetVariableSqlNode
   SelectSqlNode* query;
 };
 
-class ParsedSqlNode;
+
 
 /**
  * @brief 描述一个explain语句

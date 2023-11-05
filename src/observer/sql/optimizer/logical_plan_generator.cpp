@@ -38,6 +38,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/stmt/update_stmt.h"
 #include "sql/stmt/explain_stmt.h"
 #include "sql/stmt/order_by_stmt.h"
+#include "sql/stmt/create_table_stmt.h"
 
 using namespace std;
 
@@ -74,6 +75,19 @@ RC LogicalPlanGenerator::create(Stmt *stmt, unique_ptr<LogicalOperator> &logical
       ExplainStmt *explain_stmt = static_cast<ExplainStmt *>(stmt);
       rc = create_plan(explain_stmt, logical_operator);
     } break;
+
+    case StmtType::CREATE_TABLE: {
+      CreateTableStmt *create_table_as_select_stmt = static_cast<CreateTableStmt *>(stmt);
+      Stmt *tmp_select_stmt = create_table_as_select_stmt->get_select_stmt();
+      if(tmp_select_stmt != nullptr){     // create table select
+          SelectStmt *select_stmt = static_cast<SelectStmt *>(tmp_select_stmt);
+          rc = create_plan(select_stmt, logical_operator);
+      }
+      else {      // create table
+        rc = RC::UNIMPLENMENT;
+      }
+    } break;
+    
     default: {
       rc = RC::UNIMPLENMENT;
     }
