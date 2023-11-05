@@ -469,7 +469,7 @@ create_table_stmt:    /*create table 语句的语法解析树*/
 
       create_table.select_flag = false;
     }
-    | CREATE TABLE ID LBRACE attr_def attr_def_list RBRACE AS select_stmt
+    | CREATE TABLE ID LBRACE attr_def attr_def_list RBRACE select_stmt
     {
       $$ = new ParsedSqlNode(SCF_CREATE_TABLE);
       CreateTableSqlNode &create_table = $$->create_table;
@@ -484,9 +484,10 @@ create_table_stmt:    /*create table 语句的语法解析树*/
       create_table.attr_infos.emplace_back(*$5);
       std::reverse(create_table.attr_infos.begin(), create_table.attr_infos.end());
 
-      create_table.select_infos = $9;
+      create_table.select_infos = $8;
       create_table.select_flag = true;
       delete $5;
+
     }
     | CREATE TABLE ID AS select_stmt
     {
