@@ -144,6 +144,11 @@ public:
   {
     aggr_func_ = UNKNOWN;
   }
+   FieldExpr(std::string table_name,std::string attribute_name) 
+      :  table_name_(table_name),attribute_name_(attribute_name)
+  {
+    aggr_func_ = UNKNOWN;
+  }
   FieldExpr(const Table *table, const FieldMeta *field) : field_(table, field)
   {}
   FieldExpr(const Field &field) : field_(field)

@@ -1,0 +1,39 @@
+-- 创建一个名为employees的表
+CREATE TABLE employees (e_id INT,first_name CHAR(50),last_name CHAR(50),d_id INT);
+
+-- 插入一些示例数据
+INSERT INTO employees  VALUES (1, 'John', 'Doe', 101),(2, 'Jane', 'Smith', 102),(3, 'Bob', 'Johnson', 101),(4, 'Alice', 'Williams', 103);
+
+-- 查询员工的姓氏并使用别名
+SELECT last_name AS surname FROM employees;
+
+-- 查询员工的名字和姓氏，并使用别名
+SELECT first_name AS "First Name", last_name AS "Last Name" FROM employees;
+
+SELECT e.last_name AS surname FROM employees AS e;
+
+-- 使用表别名在联接两个表时查询员工和其所属部门
+SELECT e.first_name, e.last_name, d.department_name FROM employees AS e INNER JOIN departments AS d ON e.t_id = d.t_id;
+
+select t1.id as num, t1.col1 as age, t1.feat1, t2.* from table_alias_1 t1, table_alias_2 t2 where t1.id < t2.id;
+- 32 | 44 | 72.2 | 35 | 16 | 75.6
+- 32 | 44 | 72.2 | 65 | 50 | 36.2
+- 32 | 44 | 72.2 | 69 | 40 | 63.8
+- 32 | 44 | 72.2 | 80 | 56 | 93.5
+- 32 | 44 | 72.2 | 99 | 39 | 26.4
+- 36 | 5 | 28.3 | 65 | 50 | 36.2
+- 36 | 5 | 28.3 | 69 | 40 | 63.8
+- 36 | 5 | 28.3 | 80 | 56 | 93.5
+- 36 | 5 | 28.3 | 99 | 39 | 26.4
+- 38 | 97 | 50.5 | 65 | 50 | 36.2
+- 38 | 97 | 50.5 | 69 | 40 | 63.8
+- 38 | 97 | 50.5 | 80 | 56 | 93.5
+- 38 | 97 | 50.5 | 99 | 39 | 26.4
+-- below are some requests executed before(partial) --
+-- init data
+CREATE TABLE table_alias_1(id int, col1 int, feat1 float);
+CREATE TABLE table_alias_2(id int, col2 int, feat2 float);
+CREATE TABLE table_alias_3(id int, col3 int, feat3 float);
+INSERT INTO table_alias_1 VALUES (32, 44, 72.2);
+INSERT INTO table_alias_1 VALUES (38, 97, 50.5);
+...
