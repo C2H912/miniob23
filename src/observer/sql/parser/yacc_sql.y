@@ -226,7 +226,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <comp>                logical_comp_op
 %type <aggr>                aggr_func;
 %type <rel_attr>            cal_attr
-//%type <expression>          function_attr
+%type <expression>          function_attr
 %type <attr_infos>          attr_def_list
 %type <attr_info>           attr_def
 %type <value_list>          value_list
@@ -1134,9 +1134,11 @@ value2:
 			char *tmp = common::substr($1,1,strlen($1)-2);
       $$ = new Value(1, tmp);
       free(tmp);
-		} 
+    }
+    | function_attr {
+
+    }
     ;
-/*
 function_attr:
     LENGTH LBRACE value RBRACE ID
     {
@@ -1257,7 +1259,7 @@ function_attr:
       $$ = create_func_expression(ROUNDS, temp, temp2, sql_string, &@$);
     }
     //这里往后是id+value
-     |
+    |
     ROUND LBRACE ID COMMA value RBRACE ID
     {
       //ValueExpr *temp = new ValueExpr(*$3);
@@ -1345,7 +1347,6 @@ function_attr:
       $$ = create_func_expression(DATE_FORMATS, temp, temp2, sql_string, &@$);
     }
     ;
-*/
 cal_attr:
     '*' {
       $$ = new RelAttrSqlNode;
