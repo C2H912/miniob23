@@ -41,7 +41,7 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
   //---------- 生成select火山 ----------
     LogicalPlanGenerator not_used;
     std::unique_ptr<LogicalOperator> logical_operator;
-    SelectStmt *select_stmt = static_cast<SelectStmt *>(stmt);
+    SelectStmt *select_stmt = create_table_stmt->select_table();
     rc = not_used.create_plan(select_stmt, logical_operator);
     if (rc != RC::SUCCESS) {
       if (rc != RC::UNIMPLENMENT) {
@@ -139,7 +139,8 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
       return rc;
     }
 
-    rc = physical_operator_insert->open(nullptr);
+    Trx *trx = session->current_trx();
+    rc = physical_operator_insert->open(trx);
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to run volcano plan. rc=%s", strrc(rc));
       return rc;
