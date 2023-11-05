@@ -487,8 +487,6 @@ create_table_stmt:    /*create table 语句的语法解析树*/
       create_table.select_infos = $9;
       create_table.select_flag = true;
       delete $5;
-
-      create_table.select_flag = false;
     }
     | CREATE TABLE ID AS select_stmt
     {
