@@ -182,6 +182,13 @@ RC LogicalPlanGenerator::create_plan(
 {
   unique_ptr<LogicalOperator> table_oper(nullptr);
 
+  //不经过表的function sql
+  if(!select_stmt->enter_volcano()){
+    unique_ptr<LogicalOperator> project_oper(new ProjectLogicalOperator(std::move(select_stmt->expressions())));
+    logical_operator.swap(project_oper);
+    return RC::SUCCESS;
+  }
+
   const std::vector<Table *> &tables = select_stmt->tables();
   const std::vector<Field> &all_fields = select_stmt->query_fields();
   const std::vector<AggrOp> &aggr_fields = select_stmt->aggr_fields();//解析后的字段

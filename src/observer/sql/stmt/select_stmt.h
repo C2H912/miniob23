@@ -119,6 +119,11 @@ public:
     return having_num_;
   }
 
+  bool enter_volcano()
+  {
+    return enter_volcano_;
+  }
+
 private:
   std::vector<Field> query_fields_;
   std::vector<Table *> tables_;
@@ -139,4 +144,6 @@ private:
   //
   bool is_expr_ = false;
   std::vector<std::unique_ptr<Expression>> expressions_;
+  //
+  bool enter_volcano_ = true;
 };
