@@ -150,6 +150,11 @@ public:
     return 0 <= compare(other);
   }
 
+  int ret_int() const
+  {
+    return num_value_.int_value_;
+  }
+
 
 public:
   /**

@@ -941,7 +941,13 @@ RC FuncExpr::calc_date(const Value &child_value, const Value &constrain_value, V
   }
 
   std::string sdate = child_value.get_string();
-  int idate = date2int(sdate.c_str());
+  int idate = 0;
+  if(sdate.empty()){
+    idate = child_value.ret_int();
+  }
+  else{
+    idate = date2int(sdate.c_str());
+  }
   std::string format = constrain_value.get_string();
   
 

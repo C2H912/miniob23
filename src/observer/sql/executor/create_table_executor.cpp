@@ -87,6 +87,15 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
         return rc;
       }
     }
+    for(size_t i = 0; i < sub_table.size(); i++){
+      for(size_t j = 0; j < sub_table[i].size(); j++){
+        if(sub_table[i][j].attr_type() == DATES){
+          int temp_date = date2int(sub_table[i][j].get_string().c_str());
+          sub_table[i][j].set_int(temp_date);
+          sub_table[i][j].set_type(DATES);
+        }
+      }
+    }
 
   //---------- create table ----------
     std::vector<AttrInfoSqlNode> all_fields;
