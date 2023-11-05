@@ -1176,7 +1176,7 @@ function_attr:
     ROUND LBRACE value RBRACE AS ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $6;
+      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $6);
       free($6);
     }
     |

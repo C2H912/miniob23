@@ -3222,7 +3222,7 @@ yyreduce:
 #line 1177 "yacc_sql.y"
     {
       ValueExpr *temp = new ValueExpr(*(yyvsp[-3].value));
-      (yyval.expression) = create_func_expression_alias(ROUNDS, temp, nullptr, (yyvsp[0].string);
+      (yyval.expression) = create_func_expression_alias(ROUNDS, temp, nullptr, (yyvsp[0].string));
       free((yyvsp[0].string));
     }
 #line 3229 "yacc_sql.cpp"
