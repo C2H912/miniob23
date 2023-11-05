@@ -775,6 +775,16 @@ select_stmt:        /*  select 语句的语法解析树*/
 
       free($4);
     }
+    | SELECT add_expr_list
+    {
+      $$ = new ParsedSqlNode(SCF_SELECT);
+
+      if ($2 != nullptr) {
+        std::reverse($2->begin(), $2->end());
+        $$->selection.expressions.swap(*$2);
+        delete $2;
+      }
+    }
     ;
 
 rel://这个是返回表名结构体的语法
