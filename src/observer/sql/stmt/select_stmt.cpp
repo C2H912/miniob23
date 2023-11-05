@@ -142,7 +142,7 @@ void dfs(Expression* current, std::vector<RelAttrSqlNode>& attr)
          case DATE_FORMATS:{
            ValueExpr* value_node = static_cast<ValueExpr*>(fieldnode->constrain());
           //func_alias = "DATE_FORMAT("+child_node->str_attribute_name()+")";
-           func_alias = "DATE_FORMAT("+child_node->str_attribute_name()+","+value_node->get_value().to_string()+")";
+           func_alias = "DATE_FORMAT('"+child_node->str_attribute_name()+"',"+value_node->get_value().to_string()+")";
           break;
         }
         }
