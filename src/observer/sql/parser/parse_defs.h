@@ -46,22 +46,28 @@ enum AggrOp
  * Attr -> Attribute
  */
 
-#if 0
+// #if 1
+// enum FuncOp
+// {
+//   UNCHECKED,
+//   FUNC_LENGTH,
+//   FUNC_ROUND,
+//   FUNC_DATE_FORMAT,
+// };
+// #endif
 enum FuncOp
 {
-  UNCHECKED,
-  FUNC_LENGTH,
-  FUNC_ROUND,
-  FUNC_DATE_FORMAT,
+  ROUNDS,
+  LENGTHS,
+  DATE_FORMATS
 };
-#endif
-
 struct RelAttrSqlNode
 {
   std::string relation_name;   ///< relation name (may be NULL) 表名
   std::string attribute_name;  ///< attribute name              属性名
   AggrOp aggr_func;
   std::string alias;//列别名 在输出时打印
+  FuncOp func;
 };
 
 
@@ -88,12 +94,7 @@ enum CompOp
   NO_OP
 };
 
-enum FuncOp
-{
-  ROUNDS,
-  LENGTHS,
-  DATE_FORMATS
-};
+
 
 /**
  * @brief 表示一个条件比较

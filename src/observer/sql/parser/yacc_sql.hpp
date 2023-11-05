@@ -142,7 +142,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 178 "yacc_sql.y"
+#line 155 "yacc_sql.y"
 
   ParsedSqlNode *                   sql_node;
   SelectSqlNode *                   sub_sql_node;
@@ -152,7 +152,6 @@ union YYSTYPE
   std::vector<Value> *              record;
   enum CompOp                       comp;
   enum AggrOp                       aggr;
-  enum FuncOp                       func;
   RelAttrSqlNode *                  rel_attr;
   std::vector<AttrInfoSqlNode> *    attr_infos;
   AttrInfoSqlNode *                 attr_info;
@@ -173,7 +172,7 @@ union YYSTYPE
   int                               number;
   float                             floats;
 
-#line 177 "yacc_sql.hpp"
+#line 176 "yacc_sql.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -52,29 +52,6 @@ ALUExpr *create_alu_expression(ALUExpr::Type2 type,
   return expr;
 }
 
-FuncExpr *create_func_expression(FuncOp type,
-                                             Expression *child,
-                                             Expression *constarin,
-                                             const char *sql_string,
-                                             YYLTYPE *llocp)
-{
-  FuncExpr *expr = new FuncExpr(type, child, constarin);
-  expr->set_name(token_name(sql_string, llocp));
-  return expr;
-}
-
-FuncExpr *create_func_expression_alias(FuncOp type,
-                                             Expression *child,
-                                             Expression *constarin,
-                                             std::string alias,
-                                             const char *sql_string,
-                                             YYLTYPE *llocp)
-{
-  FuncExpr *expr = new FuncExpr(type, child, constarin, alias);
-  expr->set_name(token_name(sql_string, llocp));
-  return expr;
-}
-
 /*
 AggreExpr *create_aggr_expression(AggrOp type,
                                       Expression *child,
@@ -184,7 +161,6 @@ AggreExpr *create_aggr_expression(AggrOp type,
   std::vector<Value> *              record;
   enum CompOp                       comp;
   enum AggrOp                       aggr;
-  enum FuncOp                       func;
   RelAttrSqlNode *                  rel_attr;
   std::vector<AttrInfoSqlNode> *    attr_infos;
   AttrInfoSqlNode *                 attr_info;
@@ -226,7 +202,6 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <comp>                logical_comp_op
 %type <aggr>                aggr_func;
 %type <rel_attr>            cal_attr
-%type <expression>          function_attr
 %type <attr_infos>          attr_def_list
 %type <attr_info>           attr_def
 %type <value_list>          value_list
@@ -800,16 +775,6 @@ select_stmt:        /*  select 语句的语法解析树*/
 
       free($4);
     }
-    | SELECT add_expr_list
-    {
-      $$ = new ParsedSqlNode(SCF_SELECT);
-
-      if ($2 != nullptr) {
-        std::reverse($2->begin(), $2->end());
-        $$->selection.expressions.swap(*$2);
-        delete $2;
-      }
-    }
     ;
 
 rel://这个是返回表名结构体的语法
@@ -1097,9 +1062,6 @@ base_expr:
       $$->set_name(token_name(sql_string, &@$));
       delete $1;
     }
-    | function_attr {
-
-    }
     ;
 value2:
     NUMBER {
@@ -1139,129 +1101,20 @@ value2:
       free(tmp);
 		} 
     ;
-function_attr:
-    LENGTH LBRACE value RBRACE ID
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(LENGTHS, temp, nullptr, $5, sql_string, &@$);
-      free($5);
-    }
-    |
-    LENGTH LBRACE value RBRACE AS ID
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(LENGTHS, temp, nullptr, $6, sql_string, &@$);
-      free($6);
-    }
-    |
-    LENGTH LBRACE value RBRACE
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
-    }
-    |
-    LENGTH LBRACE ID RBRACE
-    {
-      FieldExpr *temp = new FieldExpr($3);
-      $$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
-    }
-    |
-    ROUND LBRACE ID RBRACE
-    {
-      FieldExpr *temp = new FieldExpr($3);
-      $$ = create_func_expression(ROUNDS, temp, nullptr, sql_string, &@$);
-    }
-    |
-    ROUND LBRACE value RBRACE ID
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $5, sql_string, &@$);
-      free($5);
-    }
-    |
-    ROUND LBRACE value RBRACE AS ID
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $6, sql_string, &@$);
-      free($6);
-    }
-    |
-    ROUND LBRACE value RBRACE
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression(ROUNDS, temp, nullptr, sql_string, &@$);
-    }
-    |
-    ROUND LBRACE value COMMA value RBRACE ID
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression_alias(ROUNDS, temp, temp2, $7, sql_string, &@$);
-
-      free($7);
-    }
-    |
-    ROUND LBRACE value COMMA value RBRACE AS ID
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression_alias(ROUNDS, temp, temp2, $8, sql_string, &@$);
-
-      free($8);
-    }
-    |
-    ROUND LBRACE value COMMA value RBRACE
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression(ROUNDS, temp, temp2, sql_string, &@$);
-    }
-    |
-    DATE_FORMAT LBRACE ID COMMA value RBRACE
-    {
-      FieldExpr *temp = new FieldExpr($3);
-      ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression(DATE_FORMATS, temp, temp2, sql_string, &@$);
-    }
-    |
-    DATE_FORMAT LBRACE value COMMA value RBRACE ID
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $7, sql_string, &@$);
-
-      free($7);
-    }
-    |
-    DATE_FORMAT LBRACE value COMMA value RBRACE AS ID
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $8, sql_string, &@$);
-
-      free($8);
-    }
-    |
-    DATE_FORMAT LBRACE value COMMA value RBRACE
-    {
-      ValueExpr *temp = new ValueExpr(*$3);
-      ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression(DATE_FORMATS, temp, temp2, sql_string, &@$);
-    }
-    ;
-
 cal_attr:
     '*' {
       $$ = new RelAttrSqlNode;
       $$->relation_name  = "";
       $$->attribute_name = "*";
       $$->aggr_func = UNKNOWN;
+      //$$->fun_op = UNCHECKED;
       @$ = @1;
     }
     | ID {
       $$ = new RelAttrSqlNode;
       $$->attribute_name = $1;
       $$->aggr_func = UNKNOWN;
+      //$$->fun_op = UNCHECKED;
       @$ = @1;
       free($1);
     }
@@ -1270,6 +1123,7 @@ cal_attr:
       $$->relation_name  = $1;
       $$->attribute_name = "*";
       $$->aggr_func = UNKNOWN;
+      //$$->fun_op = UNCHECKED;
       @$ = @1;
       free($1);
       
@@ -1279,6 +1133,7 @@ cal_attr:
       $$->relation_name  = $1;
       $$->attribute_name = $3;
       $$->aggr_func = UNKNOWN;
+      //$$->fun_op = UNCHECKED;
       @$ = @1;
       free($1);
       free($3);
@@ -1287,12 +1142,14 @@ cal_attr:
       $$ = new RelAttrSqlNode;
       $$->attribute_name = "*";
       $$->aggr_func = $1;
+      //$$->fun_op = UNCHECKED;
       @$ = @1;
     }
     | aggr_func LBRACE ID RBRACE{
       $$ = new RelAttrSqlNode;
       $$->attribute_name = $3;
       $$->aggr_func = $1;
+      //$$->fun_op = UNCHECKED;
       @$ = @1;
       free($3);
     }
@@ -1301,6 +1158,7 @@ cal_attr:
       $$->relation_name  = $3;
       $$->attribute_name = $5;
       $$->aggr_func = $1;
+      //$$->fun_op = UNCHECKED;
       @$ = @1;
       free($3);
       free($5);
@@ -1309,6 +1167,7 @@ cal_attr:
       $$ = new RelAttrSqlNode;
       $$->attribute_name = $1;
       $$->aggr_func = UNKNOWN;
+    //  $$->fun_op = UNCHECKED;
       $$->alias = $3;
       free($3);
       free($1);
@@ -1318,6 +1177,7 @@ cal_attr:
       $$->relation_name  = $1;
       $$->attribute_name = $3;
       $$->aggr_func = UNKNOWN;
+      //$$->fun_op = UNCHECKED;
       $$->alias = $5;
       free($1);
       free($3);
@@ -1327,6 +1187,7 @@ cal_attr:
       $$ = new RelAttrSqlNode;
       $$->attribute_name = "*";
       $$->aggr_func = $1;
+      //$$->fun_op = UNCHECKED;
       $$->alias = $6;
       free($6);
     }
@@ -1335,6 +1196,7 @@ cal_attr:
       $$->attribute_name = $3;
       $$->aggr_func = $1;
        $$->alias = $6;
+       //$$->fun_op = UNCHECKED;
        free($6);
       free($3);
     }
@@ -1343,6 +1205,7 @@ cal_attr:
       $$->relation_name  = $3;
       $$->attribute_name = $5;
       $$->aggr_func = $1;
+    //  $$->fun_op = UNCHECKED;
       $$->alias = $8;
       free($8);
       free($3);
@@ -1352,6 +1215,7 @@ cal_attr:
       $$ = new RelAttrSqlNode;
       $$->attribute_name = $1;
       $$->aggr_func = UNKNOWN;
+    //  $$->fun_op = UNCHECKED;
       $$->alias = $2;
       free($2);
       free($1);
@@ -1361,6 +1225,7 @@ cal_attr:
       $$->relation_name  = $1;
       $$->attribute_name = $3;
       $$->aggr_func = UNKNOWN;
+    //  $$->fun_op = UNCHECKED;
       $$->alias = $4;
       free($1);
       free($3);
@@ -1370,6 +1235,7 @@ cal_attr:
       $$ = new RelAttrSqlNode;
       $$->attribute_name = "*";
       $$->aggr_func = $1;
+    //  $$->fun_op = UNCHECKED;
       $$->alias = $5;
       free($5);
     }
@@ -1377,7 +1243,8 @@ cal_attr:
       $$ = new RelAttrSqlNode;
       $$->attribute_name = $3;
       $$->aggr_func = $1;
-      $$->alias = $5;
+       $$->alias = $5;
+    //   $$->fun_op = UNCHECKED;
        
        free($5);
       free($3);
@@ -1388,10 +1255,69 @@ cal_attr:
       $$->attribute_name = $5;
       $$->aggr_func = $1;
       $$->alias = $7;
+    //   $$->fun_op = UNCHECKED;
       free($7);
       free($3);
       free($5);
     }
+    // | LENGTH LBRACE value RBRACE ID
+    // {
+    //   $$ = new RelAttrSqlNode;
+    //   $$->aggr_func = UNKNOWN;
+    //   $$->alias = $5;
+    //    $$->fun_op = FUNC_ROUND;
+    //   FuncExpr funcExpr;
+    //   //func_expr.funcOp = LENGTH;
+    //   //funcExpr.value = std::make_pair($3,$3);
+    //   //funcExpr.is_func = false;
+    //   $$->func = funcExpr;
+    //   free($3);
+    //   free($5);
+    // }
+    // |
+    // ROUND LBRACE value RBRACE ID
+    // {
+    //   $$ = new RelAttrSqlNode;
+    //   $$->aggr_func = UNKNOWN;
+    //   $$->alias = $5;
+    //   $$->fun_op = FUNC_ROUND;
+    //   FuncExpr funcExpr;
+    //   //funcExpr.value = std::make_pair($3,$3);
+    //   funcExpr.is_func = false;
+    //   $$->func = funcExpr;
+    //   free($3);
+    //   free($5);
+    // }
+    // |
+    // ROUND LBRACE value COMMA value RBRACE ID
+    // {
+    //   $$ = new RelAttrSqlNode;
+    //   $$->aggr_func = UNKNOWN;
+    //   $$->alias = $7;
+    //   $$->fun_op = FUNC_ROUND;
+    //   FuncExpr funcExpr;
+    //   //funcExpr.value = std::make_pair($3,$5);
+    //   funcExpr.is_func = false;
+    //   $$->func = funcExpr;
+    //   free($3);
+    //   free($5);
+    //   free($7);
+    // }
+    // |
+    // DATE_FORMAT LBRACE value COMMA value RBRACE ID
+    // {
+    //    $$ = new RelAttrSqlNode;
+    //   $$->aggr_func = UNKNOWN;
+    //   $$->alias = $7;
+    //   $$->fun_op = FUNC_DATE_FORMAT;
+    //   FuncExpr funcExpr;
+    //   //funcExpr.value = std::make_pair($3,$5);
+    //   funcExpr.is_func = false;
+    //   $$->func = funcExpr;
+    //   free($3);
+    //   free($5);
+    //   free($7);
+    // }
     ;
 
 aggr_func:
