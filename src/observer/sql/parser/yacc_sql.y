@@ -226,7 +226,7 @@ AggreExpr *create_aggr_expression(AggrOp type,
 %type <comp>                logical_comp_op
 %type <aggr>                aggr_func;
 %type <rel_attr>            cal_attr
-%type <expression>          function_attr
+//%type <expression>          function_attr
 %type <attr_infos>          attr_def_list
 %type <attr_info>           attr_def
 %type <value_list>          value_list
@@ -1097,9 +1097,6 @@ base_expr:
       $$->set_name(token_name(sql_string, &@$));
       delete $1;
     }
-    | function_attr {
-
-    }
     ;
 value2:
     NUMBER {
@@ -1139,8 +1136,8 @@ value2:
       free(tmp);
 		} 
     ;
-function_attr:
 /*
+function_attr:
     LENGTH LBRACE value RBRACE ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
@@ -1155,14 +1152,11 @@ function_attr:
       free($6);
     }
     |
-*/
     LENGTH LBRACE value RBRACE
     {
       ValueExpr *temp = new ValueExpr(*$3);
       $$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
     }
-    ;
-/*
     |
     LENGTH LBRACE ID RBRACE
     {
