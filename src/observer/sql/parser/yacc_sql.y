@@ -800,7 +800,7 @@ select_stmt:        /*  select 语句的语法解析树*/
 
       free($4);
     }
-    | SELECT add_expr_list
+    | SELECT add_expr_list SEMICOLON
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
 

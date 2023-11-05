@@ -19,6 +19,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/optimizer/optimize_stage.h"
 #include <regex>
 #include <cmath>
+#include <iomanip>
 
 using namespace std;
 
@@ -923,7 +924,13 @@ RC FuncExpr::calc_round(const Value &child_value, const Value &constrain_value, 
       return RC::INVALID_ARGUMENT;
     }
     float cell = child_value.get_float();
-    double temp = round2decimal((double)cell, constrain_value.get_int());
+    double temp;
+    //double temp = round2decimal((double)cell, constrain_value.get_int());
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(constrain_value.get_int()) << cell;
+
+    // 从字符串流中提取格式化后的浮点数
+    ss >> temp;
     value.set_float(static_cast<float>(temp));
   }
 
