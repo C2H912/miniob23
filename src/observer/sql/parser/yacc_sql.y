@@ -754,7 +754,7 @@ update_option:
 
 
 select_stmt:        /*  select 语句的语法解析树*/
-    SELECT add_expr_list
+    SELECT add_expr_list SEMICOLON
     {
       $$ = new ParsedSqlNode(SCF_SELECT);
 
