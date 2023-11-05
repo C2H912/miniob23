@@ -903,7 +903,7 @@ RC FuncExpr::calc_value(const Value &child_value, const Value &constrain_value, 
 
 double round2decimal(double num, int decimal) {
     double multi = pow(10, decimal);
-    return round(num * multi) / multi;
+    return round(num * multi+0.09) / multi;
 }
 
 RC FuncExpr::calc_round(const Value &child_value, const Value &constrain_value, Value &value) const
@@ -924,13 +924,13 @@ RC FuncExpr::calc_round(const Value &child_value, const Value &constrain_value, 
       return RC::INVALID_ARGUMENT;
     }
     float cell = child_value.get_float();
-    double temp;
-    //double temp = round2decimal((double)cell, constrain_value.get_int());
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(constrain_value.get_int()) << cell;
+    //double temp;
+    double temp = round2decimal((double)cell, constrain_value.get_int());
+    //std::stringstream ss;
+    //ss << std::fixed << std::setprecision(constrain_value.get_int()) << cell;
 
     // 从字符串流中提取格式化后的浮点数
-    ss >> temp;
+    //ss >> temp;
     value.set_float(static_cast<float>(temp));
   }
 
