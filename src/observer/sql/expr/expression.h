@@ -136,6 +136,11 @@ public:
   FieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func) 
       : table_name_(table_name), attribute_name_(attribute_name), aggr_func_(aggr_func)
   {}
+  FieldExpr(std::string table_name, std::string attribute_name) 
+      : table_name_(table_name), attribute_name_(attribute_name)
+  {
+    aggr_func_ = UNKNOWN;
+  }
   FieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func, std::string alias_name) 
       : table_name_(table_name), attribute_name_(attribute_name), aggr_func_(aggr_func),alias_name_(alias_name)
   {}
