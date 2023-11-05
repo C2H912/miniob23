@@ -2589,7 +2589,7 @@ yyreduce:
       if ((yyvsp[0].expression_list) != nullptr) {
         std::reverse((yyvsp[0].expression_list)->begin(), (yyvsp[0].expression_list)->end());
         (yyval.sql_node)->selection.expressions.swap(*(yyvsp[0].expression_list));
-        delete (yyvsp[0].expression_list);
+        //delete $2;
       }
     }
 #line 2596 "yacc_sql.cpp"
