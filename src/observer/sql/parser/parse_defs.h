@@ -317,8 +317,6 @@ struct SetVariableSqlNode
   SelectSqlNode* query;
 };
 
-class ParsedSqlNode;
-
 /**
  * @brief 描述一个explain语句
  * @ingroup SQLParser

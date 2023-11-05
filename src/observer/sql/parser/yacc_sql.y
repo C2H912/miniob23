@@ -54,24 +54,18 @@ ALUExpr *create_alu_expression(ALUExpr::Type2 type,
 
 FuncExpr *create_func_expression(FuncOp type,
                                              Expression *child,
-                                             Expression *constarin,
-                                             const char *sql_string,
-                                             YYLTYPE *llocp)
+                                             Expression *constarin)
 {
   FuncExpr *expr = new FuncExpr(type, child, constarin);
-  expr->set_name(token_name(sql_string, llocp));
   return expr;
 }
 
 FuncExpr *create_func_expression_alias(FuncOp type,
                                              Expression *child,
                                              Expression *constarin,
-                                             std::string alias,
-                                             const char *sql_string,
-                                             YYLTYPE *llocp)
+                                             std::string alias)
 {
   FuncExpr *expr = new FuncExpr(type, child, constarin, alias);
-  expr->set_name(token_name(sql_string, llocp));
   return expr;
 }
 
@@ -1143,60 +1137,60 @@ function_attr:
     LENGTH LBRACE value RBRACE ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(LENGTHS, temp, nullptr, $5, sql_string, &@$);
+      $$ = create_func_expression_alias(LENGTHS, temp, nullptr, $5);
       free($5);
     }
     |
     LENGTH LBRACE value RBRACE AS ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(LENGTHS, temp, nullptr, $6, sql_string, &@$);
+      $$ = create_func_expression_alias(LENGTHS, temp, nullptr, $6);
       free($6);
     }
     |
     LENGTH LBRACE value RBRACE
     {
       ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
+      $$ = create_func_expression(LENGTHS, temp, nullptr);
     }
     |
     LENGTH LBRACE ID RBRACE
     {
       FieldExpr *temp = new FieldExpr($3);
-      $$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
+      $$ = create_func_expression(LENGTHS, temp, nullptr);
     }
     |
     ROUND LBRACE ID RBRACE
     {
       FieldExpr *temp = new FieldExpr($3);
-      $$ = create_func_expression(ROUNDS, temp, nullptr, sql_string, &@$);
+      $$ = create_func_expression(ROUNDS, temp, nullptr);
     }
     |
     ROUND LBRACE value RBRACE ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $5, sql_string, &@$);
+      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $5);
       free($5);
     }
     |
     ROUND LBRACE value RBRACE AS ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $6, sql_string, &@$);
+      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $6;
       free($6);
     }
     |
     ROUND LBRACE value RBRACE
     {
       ValueExpr *temp = new ValueExpr(*$3);
-      $$ = create_func_expression(ROUNDS, temp, nullptr, sql_string, &@$);
+      $$ = create_func_expression(ROUNDS, temp, nullptr);
     }
     |
     ROUND LBRACE value COMMA value RBRACE ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
       ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression_alias(ROUNDS, temp, temp2, $7, sql_string, &@$);
+      $$ = create_func_expression_alias(ROUNDS, temp, temp2, $7);
 
       free($7);
     }
@@ -1205,7 +1199,7 @@ function_attr:
     {
       ValueExpr *temp = new ValueExpr(*$3);
       ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression_alias(ROUNDS, temp, temp2, $8, sql_string, &@$);
+      $$ = create_func_expression_alias(ROUNDS, temp, temp2, $8);
 
       free($8);
     }
@@ -1214,21 +1208,21 @@ function_attr:
     {
       ValueExpr *temp = new ValueExpr(*$3);
       ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression(ROUNDS, temp, temp2, sql_string, &@$);
+      $$ = create_func_expression(ROUNDS, temp, temp2);
     }
     |
     DATE_FORMAT LBRACE ID COMMA value RBRACE
     {
       FieldExpr *temp = new FieldExpr($3);
       ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression(DATE_FORMATS, temp, temp2, sql_string, &@$);
+      $$ = create_func_expression(DATE_FORMATS, temp, temp2);
     }
     |
     DATE_FORMAT LBRACE value COMMA value RBRACE ID
     {
       ValueExpr *temp = new ValueExpr(*$3);
       ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $7, sql_string, &@$);
+      $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $7);
 
       free($7);
     }
@@ -1237,7 +1231,7 @@ function_attr:
     {
       ValueExpr *temp = new ValueExpr(*$3);
       ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $8, sql_string, &@$);
+      $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $8);
 
       free($8);
     }
@@ -1246,7 +1240,7 @@ function_attr:
     {
       ValueExpr *temp = new ValueExpr(*$3);
       ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression(DATE_FORMATS, temp, temp2, sql_string, &@$);
+      $$ = create_func_expression(DATE_FORMATS, temp, temp2);
     }
     ;
 

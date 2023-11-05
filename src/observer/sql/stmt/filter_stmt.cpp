@@ -317,7 +317,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   filter_unit = new FilterUnit;
   //expression
   if (condition.left_is_attr == 0) {
-    rc = filter_dfs(condition.left_expr, db, default_table, tables,alias_tables);
+    rc = filter_dfs(condition.left_expr, db, default_table, tables, alias_tables);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr or invalid value");
       return rc;
@@ -348,7 +348,7 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
 
   //expression
   if (condition.right_is_attr == 0) {
-    rc = filter_dfs(condition.right_expr, db, default_table, tables);
+    rc = filter_dfs(condition.right_expr, db, default_table, tables, alias_tables);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr");
       return rc;
