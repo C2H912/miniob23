@@ -155,7 +155,6 @@ public:
     return num_value_.int_value_;
   }
 
-
 public:
   /**
    * 获取对应的值

@@ -43,6 +43,12 @@ public:
   {
     is_create_select_ = true;
   }
+  CreateTableStmt(const std::string &table_name, const std::vector<AttrInfoSqlNode> &attr_infos, SelectStmt *select_infos_)
+        : table_name_(table_name), attr_infos_(attr_infos),
+          select_table_(select_infos_)
+  {
+    is_create_select_ = true;
+  }
   virtual ~CreateTableStmt() = default;
 
   StmtType type() const override { return StmtType::CREATE_TABLE; }

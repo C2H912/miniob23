@@ -451,7 +451,7 @@ drop_index_stmt:      /*drop index 语句的语法解析树*/
     }
     ;
 create_table_stmt:    /*create table 语句的语法解析树*/
-    CREATE TABLE ID LBRACE attr_def attr_def_list RBRACE
+    CREATE TABLE ID LBRACE attr_def attr_def_list RBRACE SEMICOLON
     {
       $$ = new ParsedSqlNode(SCF_CREATE_TABLE);
       CreateTableSqlNode &create_table = $$->create_table;
@@ -465,6 +465,27 @@ create_table_stmt:    /*create table 语句的语法解析树*/
       }
       create_table.attr_infos.emplace_back(*$5);
       std::reverse(create_table.attr_infos.begin(), create_table.attr_infos.end());
+      delete $5;
+
+      create_table.select_flag = false;
+    }
+    | CREATE TABLE ID LBRACE attr_def attr_def_list RBRACE AS select_stmt
+    {
+      $$ = new ParsedSqlNode(SCF_CREATE_TABLE);
+      CreateTableSqlNode &create_table = $$->create_table;
+      create_table.relation_name = $3;
+      free($3);
+
+      std::vector<AttrInfoSqlNode> *src_attrs = $6;
+
+      if (src_attrs != nullptr) {
+        create_table.attr_infos.swap(*src_attrs);
+      }
+      create_table.attr_infos.emplace_back(*$5);
+      std::reverse(create_table.attr_infos.begin(), create_table.attr_infos.end());
+
+      create_table.select_infos = $9;
+      create_table.select_flag = true;
       delete $5;
 
       create_table.select_flag = false;
@@ -811,6 +832,7 @@ select_stmt:        /*  select 语句的语法解析树*/
       free($4);
     }
     ;
+
 
 rel://这个是返回表名结构体的语法
   ID ID 
@@ -1185,8 +1207,38 @@ function_attr:
       //$$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
       $$ =create_func_expression_alias(LENGTHS, temp, nullptr, $5, sql_string, &@$);
     }
+    //这后面是加上id.id的
     |
-    // =========================
+    LENGTH LBRACE ID DOT ID RBRACE AS ID
+    {
+      FieldExpr *temp = new FieldExpr($3,$5);
+      //$$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
+      $$ =create_func_expression_alias(LENGTHS, temp, nullptr, $8, sql_string, &@$);
+    }
+    |
+    LENGTH LBRACE ID DOT ID RBRACE ID
+    {
+      FieldExpr *temp = new FieldExpr($3,$5);
+      //$$ = create_func_expression(LENGTHS, temp, nullptr, sql_string, &@$);
+      $$ =create_func_expression_alias(LENGTHS, temp, nullptr, $7, sql_string, &@$);
+    }
+    //这里后面是id。id
+    |
+    ROUND LBRACE ID DOT ID RBRACE ID
+    {
+      FieldExpr *temp = new FieldExpr($3,$5);
+      //$$ = create_func_expression(ROUNDS, temp, nullptr, sql_string, &@$);
+      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $7, sql_string, &@$);
+    }
+    |
+    ROUND LBRACE ID DOT ID RBRACE AS ID
+    {
+     FieldExpr *temp = new FieldExpr($3,$5);
+      //$$ = create_func_expression(ROUNDS, temp, nullptr, sql_string, &@$);
+      $$ = create_func_expression_alias(ROUNDS, temp, nullptr, $8, sql_string, &@$);
+      free($8);
+    }
+    |
     ROUND LBRACE ID RBRACE
     {
       FieldExpr *temp = new FieldExpr($3);
@@ -1270,6 +1322,14 @@ function_attr:
       free($7);
     }
     |
+    ROUND LBRACE ID COMMA value RBRACE
+    {
+      //ValueExpr *temp = new ValueExpr(*$3);
+      FieldExpr *temp = new FieldExpr($3);
+      ValueExpr *temp2 = new ValueExpr(*$5);
+      $$ = create_func_expression(ROUNDS, temp, temp2, sql_string, &@$);
+    }
+    |
     ROUND LBRACE ID COMMA value RBRACE AS ID
     {
       //ValueExpr *temp = new ValueExpr(*$3);
@@ -1278,14 +1338,6 @@ function_attr:
       $$ = create_func_expression_alias(ROUNDS, temp, temp2, $8, sql_string, &@$);
 
       free($8);
-    }
-    |
-    ROUND LBRACE ID COMMA value RBRACE
-    {
-      //ValueExpr *temp = new ValueExpr(*$3);
-      FieldExpr *temp = new FieldExpr($3);
-      ValueExpr *temp2 = new ValueExpr(*$5);
-      $$ = create_func_expression(ROUNDS, temp, temp2, sql_string, &@$);
     }
     |
     // =========================
@@ -1338,6 +1390,24 @@ function_attr:
       $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $8, sql_string, &@$);
 
       free($8);
+    }
+    |
+    DATE_FORMAT LBRACE ID DOT ID COMMA value RBRACE ID
+    {
+      FieldExpr *temp = new FieldExpr($3,$5);
+      ValueExpr *temp2 = new ValueExpr(*$7);
+      $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $9, sql_string, &@$);
+
+      free($7);
+    }
+    |
+    DATE_FORMAT LBRACE ID DOT ID COMMA value RBRACE AS ID
+    {
+      FieldExpr *temp = new FieldExpr($3,$5);
+      ValueExpr *temp2 = new ValueExpr(*$7);
+      $$ = create_func_expression_alias(DATE_FORMATS, temp, temp2, $10, sql_string, &@$);
+
+      free($10);
     }
     |
     DATE_FORMAT LBRACE value COMMA value RBRACE

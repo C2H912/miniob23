@@ -66,6 +66,48 @@ void dfs(Expression* current, std::vector<RelAttrSqlNode>& attr)
   else if(current->type() == ExprType::FUNC){
     FuncExpr* fieldnode = static_cast<FuncExpr*>(current);
     if(fieldnode->child()->type() == ExprType::VALUE){
+      ValueExpr* child_node = static_cast<ValueExpr*>(fieldnode->child());
+      RelAttrSqlNode node;
+      node.aggr_func = UNKNOWN;
+      node.flag = true;
+       if(fieldnode->alias_name().empty())
+      {
+        //如果为空
+
+        std::string func_alias;
+        switch(fieldnode->func_op())
+        {
+         case LENGTHS:{
+          func_alias = "LENGTH("+child_node->get_value().to_string()+")";
+          break;
+        }
+         case ROUNDS:{
+          ValueExpr* value_node = static_cast<ValueExpr*>(fieldnode->constrain());
+          if(value_node==nullptr)
+          {
+          func_alias = "ROUND("+child_node->get_value().to_string()+")";
+          
+          }
+          else{
+            func_alias = "ROUND("+child_node->get_value().to_string()+","+value_node->get_value().to_string()+")";
+          }
+          break;
+        }
+         case DATE_FORMATS:{
+           ValueExpr* value_node = static_cast<ValueExpr*>(fieldnode->constrain());
+          //func_alias = "DATE_FORMAT("+child_node->str_attribute_name()+")";
+           func_alias = "DATE_FORMAT("+child_node->get_value().get_date()+","+value_node->get_value().to_string()+")";
+          break;
+        }
+        }
+      
+        node.alias = func_alias;
+      }
+      else{
+        node.alias = fieldnode->alias_name();
+      }
+
+      attr.push_back(node);
       return;
     }
     else if(fieldnode->child()->type() == ExprType::FIELD){
@@ -74,7 +116,43 @@ void dfs(Expression* current, std::vector<RelAttrSqlNode>& attr)
       node.relation_name = child_node->str_table_name();
       node.attribute_name = child_node->str_attribute_name();
       node.aggr_func = UNKNOWN;
-      node.alias = fieldnode->alias_name();
+      //直接在这里处理alias
+      if(fieldnode->alias_name().empty())
+      {
+        //如果为空
+        std::string func_alias;
+        switch(fieldnode->func_op())
+        {
+         case LENGTHS:{
+          func_alias = "LENGTH("+child_node->str_attribute_name()+")";
+          break;
+        }
+         case ROUNDS:{
+          ValueExpr* value_node = static_cast<ValueExpr*>(fieldnode->constrain());
+          if(value_node==nullptr)
+          {
+          func_alias = "ROUND("+child_node->str_attribute_name()+")";
+          
+          }
+          else{
+            func_alias = "ROUND("+child_node->str_attribute_name()+","+value_node->get_value().to_string()+")";
+          }
+          break;
+        }
+         case DATE_FORMATS:{
+           ValueExpr* value_node = static_cast<ValueExpr*>(fieldnode->constrain());
+          //func_alias = "DATE_FORMAT("+child_node->str_attribute_name()+")";
+           func_alias = "DATE_FORMAT('"+child_node->str_attribute_name()+"',"+value_node->get_value().to_string()+")";
+          break;
+        }
+        }
+      
+        node.alias = func_alias;
+      }
+      else{
+        node.alias = fieldnode->alias_name();
+      }
+     
       attr.push_back(node);
     }
     return;
@@ -170,7 +248,27 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     }
   }
   //特殊情况: 不经过表的function sql
-  if((int)all_relAttrNodes.size() == 0){
+ 
+    bool flag_alias = false;
+    for (size_t i = 0; i < (int)all_relAttrNodes.size(); i++)
+    {
+      int count = 0;
+      if(all_relAttrNodes[i].flag)
+      {
+         count++;
+      }
+      else{
+        break;
+      }
+      if(count == ((int)all_relAttrNodes.size())){
+        flag_alias = true;
+      }
+    
+    }
+
+
+  if(flag_alias)
+  {
     bool all_func = true;
     for(size_t i = 0; i < select_sql.expressions.size(); i++){
       if(select_sql.expressions[i]->type() != ExprType::FUNC){
@@ -183,14 +281,18 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
     }
     SelectStmt *select_stmt = new SelectStmt();
     select_stmt->enter_volcano_ = false;
-    select_stmt->is_expr_ = true; //.
+    //select_stmt->is_expr_ = true; //.
+
     for(size_t j = 0; j < select_sql.expressions.size(); j++){
+      select_stmt->alias_fields_.emplace_back(Field(all_relAttrNodes[j].alias));
       select_stmt->expressions_.emplace_back(select_sql.expressions[j]);
     }
     stmt = select_stmt;
     return RC::SUCCESS;
   }
-
+   
+  
+ 
 
 // ---------- collect tables in `from` statement ----------
   std::vector<Table *> tables;
@@ -267,6 +369,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
 // ---------- collect query fields in `select` statement ----------
   std::vector<Field> query_fields;
+  std::vector<Field> alias_fields;
   std::vector<AggrOp> aggr_fields;
   std::vector<std::string> aggr_specs;
   std::vector<std::pair<bool,std::string>> aggr_alias;
@@ -276,6 +379,11 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
 
   for (int i = 0; i < (int)select_sql.attributes.size(); i++) {
     const RelAttrSqlNode &relation_attr = select_sql.attributes[i];
+    if(relation_attr.flag)
+    {
+      alias_fields.push_back(select_sql.attributes[i].alias);
+      continue;
+    }
     
   //1. 检查聚合的语法, 如果是group by的话可以不做这个检查
 
@@ -307,11 +415,14 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         0 == strcmp(relation_attr.attribute_name.c_str(), "*")) {
       for (Table *table : tables) {
         if(relation_attr.aggr_func != UNKNOWN){
+
           query_fields.push_back(Field(table, table->table_meta().field(0)));//这里放了字段进去
+          alias_fields.push_back(Field(table, table->table_meta().field(0)));
           break;
         }
         else{
           wildcard_fields(table, query_fields);
+          wildcard_fields(table, alias_fields);
         }
       }
       aggr_specs.push_back("*");
@@ -338,10 +449,13 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         for (Table *table : tables) {
           if(relation_attr.aggr_func != UNKNOWN){
             query_fields.push_back(Field(table, table->table_meta().field(0)));
+            alias_fields.push_back(Field(table, table->table_meta().field(0)));
+            
            // break;
           }
           else{
             wildcard_fields(table, query_fields);
+            wildcard_fields(table, alias_fields);
           }
         }
         aggr_specs.push_back("*");
@@ -374,9 +488,11 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
         if (0 == strcmp(field_name, "*")) {
           if(relation_attr.aggr_func != UNKNOWN){
             query_fields.push_back(Field(table, table->table_meta().field(0)));
+             alias_fields.push_back(Field(table, table->table_meta().field(0)));
           }
           else{
             wildcard_fields(table, query_fields);
+            wildcard_fields(table, alias_fields);
           }
           aggr_specs.push_back("*");
           if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
@@ -396,6 +512,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
           }
 
           query_fields.push_back(Field(table, field_meta,alias_name));
+          alias_fields.push_back(Field(table, field_meta,alias_name));
           aggr_specs.push_back(relation_attr.attribute_name);
           if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
             {
@@ -423,6 +540,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
       }
 
       query_fields.push_back(Field(table, field_meta, alias_name));
+      alias_fields.push_back(Field(table, field_meta,alias_name));
       aggr_specs.push_back(relation_attr.attribute_name);
       if(!relation_attr.alias.empty()&&relation_attr.alias!="")//标识该聚合字段是否有别名o
       {
@@ -544,6 +662,7 @@ RC SelectStmt::create(Db *db, SelectSqlNode &select_sql, Stmt *&stmt,std::unorde
   // TODO add expression copy
   select_stmt->tables_.swap(tables);
   select_stmt->query_fields_.swap(query_fields);
+  select_stmt->alias_fields_.swap(alias_fields);
   //
   select_stmt->aggr_fields_.swap(aggr_fields);
   select_stmt->aggr_specs_.swap(aggr_specs);

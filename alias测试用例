@@ -1,0 +1,45 @@
+-- 创建一个名为employees的表
+CREATE TABLE employees (e_id INT,first_name CHAR(50),last_name CHAR(50),d_id INT);
+
+-- 插入一些示例数据
+INSERT INTO employees  VALUES (1, 'John', 'Doe', 101),(2, 'Jane', 'Smith', 102),(3, 'Bob', 'Johnson', 101),(4, 'Alice', 'Williams', 103);
+
+-- 查询员工的姓氏并使用别名
+SELECT last_name AS surname FROM employees;
+
+-- 查询员工的名字和姓氏，并使用别名
+SELECT first_name AS "First Name", last_name AS "Last Name" FROM employees;
+
+SELECT e.last_name AS surname FROM employees AS e;
+
+-- 使用表别名在联接两个表时查询员工和其所属部门
+SELECT e.first_name, e.last_name, d.department_name FROM employees AS e INNER JOIN departments AS d ON e.t_id = d.t_id;
+
+select t1.id as num, t1.col1 as age, t1.feat1, t2.* from table_alias_1 t1, table_alias_2 t2 where t1.id < t2.id;
+- 32 | 44 | 72.2 | 35 | 16 | 75.6
+- 32 | 44 | 72.2 | 65 | 50 | 36.2
+- 32 | 44 | 72.2 | 69 | 40 | 63.8
+- 32 | 44 | 72.2 | 80 | 56 | 93.5
+- 32 | 44 | 72.2 | 99 | 39 | 26.4
+- 36 | 5 | 28.3 | 65 | 50 | 36.2
+- 36 | 5 | 28.3 | 69 | 40 | 63.8
+- 36 | 5 | 28.3 | 80 | 56 | 93.5
+- 36 | 5 | 28.3 | 99 | 39 | 26.4
+- 38 | 97 | 50.5 | 65 | 50 | 36.2
+- 38 | 97 | 50.5 | 69 | 40 | 63.8
+- 38 | 97 | 50.5 | 80 | 56 | 93.5
+- 38 | 97 | 50.5 | 99 | 39 | 26.4
+-- below are some requests executed before(partial) --
+-- init data
+CREATE TABLE table_alias_1(id int, col1 int, feat1 float);
+CREATE TABLE table_alias_2(id int, col2 int, feat2 float);
+CREATE TABLE table_alias_3(id int, col3 int, feat3 float);
+INSERT INTO table_alias_1 VALUES (32, 44, 72.2);
+INSERT INTO table_alias_1 VALUES (38, 97, 50.5);
+...
+
+
+compile failed,In file included from /home/miniob/miniob_test/players/miniob/src/observer/sql/operator/physical_operator.h:22,,               
+  from /home/miniob/miniob_test/players/miniob/src/observer/sql/optimizer/optimize_stage.h:21,,     
+              from /home/miniob/miniob_test/players/miniob/src/observer/session/session_stage.h:21,,   
+               from /home/miniob/miniob_test/players/miniob/src/observer/common/init.cpp:28:,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h: In member function ‘virtual std::vector<TupleCellSpec*>& RowTuple::getspeces_()’:,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:167:12: warning: reference to local variable ‘aa’ returned [-Wreturn-local-addr],  167 |     return aa;,      |            ^~,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:166:34: note: declared here,  166 |     std::vector<TupleCellSpec *> aa;,      |                                  ^~,In file included from /home/miniob/miniob_test/players/miniob/src/observer/sql/operator/physical_operator.h:22,,                 from /home/miniob/miniob_test/players/miniob/src/observer/sql/optimizer/optimize_stage.h:21,,                 from /home/miniob/miniob_test/players/miniob/src/observer/session/session_stage.h:21,,                 from /home/miniob/miniob_test/players/miniob/src/observer/common/init.cpp:28:,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h: In member function ‘Tuple* ProjectTuple::setMyTuple(Tuple*)’:,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:335:3: warning: no return statement in function returning non-void [-Wreturn-type],  335 |   },      |   ^,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h: In member function ‘virtual std::vector<TupleCellSpec*>& ExpressionTuple::getspeces_()’:,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:391:12: warning: reference to local variable ‘aa’ returned [-Wreturn-local-addr],  391 |     return aa;,      |            ^~,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:390:34: note: declared here,  390 |     std::vector<TupleCellSpec *> aa;,      |                                  ^~,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h: In member function ‘virtual std::vector<TupleCellSpec*>& ValueListTuple::getspeces_()’:,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:472:12: warning: reference to local variable ‘aa’ returned [-Wreturn-local-addr],  472 |     return aa;,      |            ^~,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:471:34: note: declared here,  471 |     std::vector<TupleCellSpec *> aa;,      |                                  ^~,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h: In member function ‘virtual std::vector<TupleCellSpec*>& JoinedTuple::getspeces_()’:,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:561:12: warning: reference to local variable ‘aa’ returned [-Wreturn-local-addr],  561 |     return aa;,      |            ^~,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:560:34: note: declared here,  560 |     std::vector<TupleCellSpec *> aa;,      |                                  ^~,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h: In member function ‘virtual std::vector<TupleCellSpec*>& AggreListTuple::getspeces_()’:,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:625:12: warning: reference to local variable ‘aa’ returned [-Wreturn-local-addr],  625 |     return aa;,      |            ^~,/home/miniob/miniob_test/players/miniob/src/observer/sql/expr/tuple.h:624:34: note: declared here,  624 |     std::vector<TupleCellSpec *> aa;,      |                                  ^~,In file included from /home/miniob/miniob_test/players/miniob/src/observer/sql/executor/sql_result.h:20,,                 from /home/miniob/miniob_test/players/miniob/src/observer/event/session_event.h:21,,                 from /

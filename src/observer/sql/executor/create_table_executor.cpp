@@ -98,19 +98,25 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
     }
 
   //---------- create table ----------
-    std::vector<AttrInfoSqlNode> all_fields;
-    std::vector<Field> select_field = select_stmt->query_fields();
-    for(size_t i = 0; i < select_field.size(); i++){
-      AttrInfoSqlNode current_node;
-      const FieldMeta *current_field = select_field[i].meta();
-      current_node.type = current_field->type();
-      current_node.name = current_field->name();
-      current_node.length = current_field->len();
-      current_node.nullable = current_field->nullable();
-      all_fields.push_back(current_node);
+    if(create_table_stmt->attr_infos().size() == 0){
+      std::vector<AttrInfoSqlNode> all_fields;
+      std::vector<Field> select_field = select_stmt->query_fields();
+      for(size_t i = 0; i < select_field.size(); i++){
+        AttrInfoSqlNode current_node;
+        const FieldMeta *current_field = select_field[i].meta();
+        current_node.type = current_field->type();
+        current_node.name = current_field->name();
+        current_node.length = current_field->len();
+        current_node.nullable = current_field->nullable();
+        all_fields.push_back(current_node);
+      }
+      const char *table_name = create_table_stmt->table_name().c_str();
+      rc = session->get_current_db()->create_table(table_name, (int)all_fields.size(), all_fields.data());
     }
-    const char *table_name = create_table_stmt->table_name().c_str();
-    rc = session->get_current_db()->create_table(table_name, (int)all_fields.size(), all_fields.data());
+    else{
+      const char *table_name = create_table_stmt->table_name().c_str();
+      rc = session->get_current_db()->create_table(table_name, (int)create_table_stmt->attr_infos().size(), create_table_stmt->attr_infos().data());
+    }
 
   //---------- insert stmt ----------
     if((int)sub_table.size() == 0){

@@ -39,6 +39,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 1,
-	"table_name" : "table_alias_2"
+	"table_id" : 3,
+	"table_name" : "table_name_2"
 }

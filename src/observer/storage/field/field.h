@@ -29,6 +29,8 @@ public:
   {}
   Field(const Table *table, const FieldMeta *field,std::string alias) : table_(table), field_(field),alias_(alias)
   {}
+  Field(std::string alias) : alias_(alias)
+  {}
   Field(const Field &) = default;
 
   const Table *table() const

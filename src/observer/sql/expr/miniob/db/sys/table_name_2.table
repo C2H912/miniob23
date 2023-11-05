@@ -13,7 +13,7 @@
 		{
 			"id" : 1,
 			"len" : 4,
-			"name" : "col1",
+			"name" : "col2",
 			"nullable" : true,
 			"offset" : 4,
 			"type" : "dates",
@@ -22,7 +22,7 @@
 		{
 			"id" : 2,
 			"len" : 4,
-			"name" : "feat1",
+			"name" : "feat2",
 			"nullable" : true,
 			"offset" : 8,
 			"type" : "booleans",
@@ -39,6 +39,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 0,
-	"table_name" : "table_alias_1"
+	"table_id" : 10,
+	"table_name" : "table_name_2"
 }

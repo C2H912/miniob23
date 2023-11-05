@@ -27,7 +27,12 @@ RC CreateTableStmt::create(Db *db, const CreateTableSqlNode &create_table, Stmt 
       LOG_WARN("sub create stmt fail");
       return rc;
     }
-    create_stmt = new CreateTableStmt(create_table.relation_name, static_cast<SelectStmt*>(sub_stmt));
+    if(create_table.attr_infos.size() == 0){
+      create_stmt = new CreateTableStmt(create_table.relation_name, static_cast<SelectStmt*>(sub_stmt));
+    }
+    else{
+      create_stmt = new CreateTableStmt(create_table.relation_name, create_table.attr_infos, static_cast<SelectStmt*>(sub_stmt));
+    }
   }
   else{
     create_stmt = new CreateTableStmt(create_table.relation_name, create_table.attr_infos);
