@@ -97,6 +97,10 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
       }
     }
 
+    if((int)sub_table.size() == 0){
+      return rc;
+    }
+
   //---------- create table ----------
     if(create_table_stmt->attr_infos().size() == 0){
       std::vector<AttrInfoSqlNode> all_fields;
@@ -119,9 +123,6 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
     }
 
   //---------- insert stmt ----------
-    if((int)sub_table.size() == 0){
-      return rc;
-    }
     InsertSqlNode insert_node;
     insert_node.relation_name = create_table_stmt->table_name();
     for(size_t i = 0; i < sub_table.size(); i++){
