@@ -63,6 +63,22 @@ void dfs(Expression* current, std::vector<RelAttrSqlNode>& attr)
     attr.push_back(node);
     return;
   }
+  else if(current->type() == ExprType::FUNC){
+    FuncExpr* fieldnode = static_cast<FuncExpr*>(current);
+    if(fieldnode->child()->type() == ExprType::VALUE){
+      return;
+    }
+    else if(fieldnode->child()->type() == ExprType::FIELD){
+      FieldExpr* child_node = static_cast<FieldExpr*>(fieldnode->child());
+      RelAttrSqlNode node;
+      node.relation_name = child_node->str_table_name();
+      node.attribute_name = child_node->str_attribute_name();
+      node.aggr_func = UNKNOWN;
+      node.alias = fieldnode->alias_name();
+      attr.push_back(node);
+    }
+    return;
+  }
   //计算节点
   ALUExpr* arithnode = static_cast<ALUExpr*>(current);
   if(arithnode->left() != nullptr){
@@ -84,6 +100,18 @@ void dfs_for_field(Expression* current, int &index, std::vector<Field> &fields)
     FieldExpr* fieldnode = static_cast<FieldExpr*>(current);
     fieldnode->set_field(fields[index]);
     index++;
+    return;
+  }
+  else if(current->type() == ExprType::FUNC){
+    FuncExpr* fieldnode = static_cast<FuncExpr*>(current);
+    if(fieldnode->child()->type() == ExprType::VALUE){
+      return;
+    }
+    else if(fieldnode->child()->type() == ExprType::FIELD){
+      FieldExpr* child_node = static_cast<FieldExpr*>(fieldnode->child());
+      child_node->set_field(fields[index]);
+      index++;
+    }
     return;
   }
   //计算节点

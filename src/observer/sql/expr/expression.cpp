@@ -18,6 +18,7 @@ See the Mulan PSL v2 for more details. */
 #include "sql/operator/physical_operator.h"
 #include "sql/optimizer/optimize_stage.h"
 #include <regex>
+#include <cmath>
 
 using namespace std;
 
@@ -800,7 +801,7 @@ RC ALUExpr::get_expr_value(Tuple &tuple, Value &value)
   return calc_value(left_value, right_value, value);
 }
 
-
+#if 0
 RC FuncExpression::create_expression(const RelAttrSqlNode *expr, Expression *&res_expr)
 {
   RC rc = RC::SUCCESS;
@@ -847,4 +848,272 @@ RC FuncExpression::create_expression(const RelAttrSqlNode *expr, Expression *&re
 
   //res_expr = new FuncExpression(expr->fexp->type, expr->fexp->param_size, param_expr1, param_expr2, 0);
   return rc;
+}
+#endif
+
+///////////////////////////////////////////////
+
+FuncExpr::FuncExpr(FuncOp type, Expression *child, Expression *constrain, std::string alias)
+    : func_type_(type), child_(child), constrain_(constrain), alias_name_(alias)
+{}
+
+FuncExpr::FuncExpr(FuncOp type, Expression *child, Expression *constrain)
+    : func_type_(type), child_(child), constrain_(constrain)
+{}
+
+AttrType FuncExpr::value_type() const
+{
+  return AttrType::FLOATS;
+}
+
+RC FuncExpr::calc_value(const Value &child_value, const Value &constrain_value, Value &value) const
+{
+  RC rc = RC::SUCCESS;
+  switch(func_type_){
+    case LENGTHS:{
+      int length = strlen(child_value.get_string().c_str());
+      break;
+    }
+    case ROUNDS:{
+      rc = calc_round(child_value, constrain_value, value);
+      if(rc != RC::SUCCESS){
+        return rc;
+      }
+      break;
+    }
+    case DATE_FORMATS:{
+      rc = calc_date(child_value, constrain_value, value);
+      if(rc != RC::SUCCESS){
+        return rc;
+      }
+      break;
+    }
+    default:
+      return RC::INVALID_ARGUMENT;
+  }
+
+  return rc;
+}
+
+double round2decimal(double num, int decimal) {
+    double multi = pow(10, decimal);
+    return round(num * multi) / multi;
+}
+
+RC FuncExpr::calc_round(const Value &child_value, const Value &constrain_value, Value &value) const
+{
+  RC rc = RC::SUCCESS;
+
+  if (child_value.attr_type() != FLOATS) {
+    return RC::INTERNAL;
+  }
+
+  if(constrain_ == nullptr){
+    float cell = child_value.get_float();
+    double temp = round2decimal((double)cell, 0);
+    value.set_int(static_cast<int>(temp));
+  }
+  else{
+    float cell = child_value.get_float();
+    double temp = round2decimal((double)cell, constrain_value.get_int());
+    value.set_float(static_cast<float>(temp));
+  }
+
+  return rc;
+}
+
+RC FuncExpr::calc_date(const Value &child_value, const Value &constrain_value, Value &value) const
+{
+  RC rc = RC::SUCCESS;
+
+  if (child_value.attr_type() != DATES) {
+    return RC::INTERNAL;
+  }
+  if (constrain_value.attr_type() != CHARS) {
+    return RC::INTERNAL;
+  }
+
+  std::string sdate = child_value.get_string();
+  int idate = date2int(sdate.c_str());
+  std::string format = constrain_value.get_string();
+  
+
+  std::string result;
+  int year = idate / 10000;
+  int month = (idate / 100) % 100;
+  int day = idate % 100;
+  for (size_t i = 0; i < format.length(); i++) {
+    // A ~ z
+    if (65 <= format[i] && format[i] <= 122) {
+      switch (format[i]) {
+        case 'Y': {
+          char tmp[5];
+          sprintf(tmp, "%d", year);
+          result += tmp;
+          break;
+        }
+        case 'y': {
+          char tmp[5];
+          sprintf(tmp, "%d", year % 100);
+          if (0 <= (year % 100) && (year % 100) <= 9) {
+            result += "0";
+          }
+          result += tmp;
+          break;
+        }
+        case 'M': {
+          switch (month) {
+            case 1: {
+              result += "January";
+              break;
+            }
+            case 2: {
+              result += "February";
+              break;
+            }
+            case 3: {
+              result += "March";
+              break;
+            }
+            case 4: {
+              result += "April";
+              break;
+            }
+            case 5: {
+              result += "May";
+              break;
+            }
+            case 6: {
+              result += "June";
+              break;
+            }
+            case 7: {
+              result += "July";
+              break;
+            }
+            case 8: {
+              result += "August";
+              break;
+            }
+            case 9: {
+              result += "September";
+              break;
+            }
+            case 10: {
+              result += "October";
+              break;
+            }
+            case 11: {
+              result += "November";
+              break;
+            }
+            case 12: {
+              result += "December";
+              break;
+            }
+            default: {
+              return RC::INTERNAL;
+              break;
+            }
+          }
+          break;
+        }
+        case 'm': {
+          char tmp[3];
+          sprintf(tmp, "%d", month);
+          if (0 <= month && month <= 9) {
+            result += "0";
+          }
+          result += tmp;
+          break;
+        }
+        case 'D': {
+          char tmp[3];
+          sprintf(tmp, "%d", day);
+          if (10 <= day && day <= 20) {
+            result += tmp;
+            result += "th";
+          } else {
+            switch (day % 10) {
+              case 1: {
+                result += tmp;
+                result += "st";
+                break;
+              }
+              case 2: {
+                result += tmp;
+                result += "nd";
+                break;
+              }
+              case 3: {
+                result += tmp;
+                result += "rd";
+                break;
+              }
+              default: {
+                result += tmp;
+                result += "th";
+                break;
+              }
+            }
+          }
+          break;
+        }
+        case 'd': {
+          char tmp[3];
+          sprintf(tmp, "%d", day);
+          if (0 <= day && day <= 9) {
+            result += "0";
+          }
+          result += tmp;
+          break;
+        }
+        default: {
+          result += format[i];
+          break;
+        }
+      }
+    } else if (format[i] != '%') {
+      result += format[i];
+    }
+  }
+  // std::cout << result_date_str << std::endl;
+  value.set_string(result.c_str());
+  value.set_type(DATES);
+
+  return rc;
+}
+
+RC FuncExpr::get_value(Tuple &tuple, Value &value)
+{
+  return RC::SUCCESS;
+}
+
+RC FuncExpr::try_get_value(Value &value) const
+{
+  return RC::SUCCESS;
+}
+
+RC FuncExpr::get_expr_value(Tuple &tuple, Value &value)
+{
+  RC rc = RC::SUCCESS;
+
+  Value child_value;
+  Value constrain_value;
+
+  rc = child_->get_expr_value(tuple, child_value);
+  if (rc != RC::SUCCESS) {
+    LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+    return rc;
+  }
+
+  if(constrain_ != nullptr){
+    rc = constrain_->get_expr_value(tuple, constrain_value);
+    if (rc != RC::SUCCESS) {
+      LOG_WARN("failed to get value of left expression. rc=%s", strrc(rc));
+      return rc;
+    }
+  }
+
+  return calc_value(child_value, constrain_value, value);
 }

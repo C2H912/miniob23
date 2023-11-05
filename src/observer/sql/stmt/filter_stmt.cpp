@@ -173,6 +173,38 @@ RC filter_dfs(Expression* current, Db *db, Table *default_table, std::unordered_
     fieldnode->set_field(temp);
     return RC::SUCCESS;
   }
+  else if(current->type() == ExprType::FUNC){
+    FuncExpr* fieldnode = static_cast<FuncExpr*>(current);
+    if(fieldnode->child()->type() == ExprType::VALUE){
+      if(current->value_type() == UNDEFINED){
+        LOG_WARN("attr_type invalid");
+        return RC::INVALID_ARGUMENT;
+      }
+      return RC::SUCCESS;
+    }
+    else if(fieldnode->child()->type() == ExprType::FIELD){
+      FieldExpr* child_node = static_cast<FieldExpr*>(fieldnode->child());
+      RelAttrSqlNode node;
+      if(child_node->str_table_name().empty()){
+        node.relation_name = default_table->name();
+        child_node->set_table_name(default_table->name());
+      }
+      else{
+        node.relation_name = child_node->str_table_name();
+      }
+      node.attribute_name = child_node->str_attribute_name();
+      Table *table = nullptr;
+      const FieldMeta *field = nullptr;
+      Field temp;
+      RC rc = filter_get_table_and_field(db, default_table, tables, node, table, field, temp);
+      if(rc != RC::SUCCESS){
+        return rc;
+      }
+      child_node->set_field(temp);
+      return RC::SUCCESS;
+    }
+    return RC::SUCCESS;
+  }
   //计算节点
   ALUExpr* arithnode = static_cast<ALUExpr*>(current);
   if(arithnode->left() != nullptr){
@@ -219,6 +251,38 @@ RC filter_dfs(Expression* current, Db *db, Table *default_table, std::unordered_
       return rc;
     }
     fieldnode->set_field(temp);
+    return RC::SUCCESS;
+  }
+  else if(current->type() == ExprType::FUNC){
+    FuncExpr* fieldnode = static_cast<FuncExpr*>(current);
+    if(fieldnode->child()->type() == ExprType::VALUE){
+      if(current->value_type() == UNDEFINED){
+        LOG_WARN("attr_type invalid");
+        return RC::INVALID_ARGUMENT;
+      }
+      return RC::SUCCESS;
+    }
+    else if(fieldnode->child()->type() == ExprType::FIELD){
+      FieldExpr* child_node = static_cast<FieldExpr*>(fieldnode->child());
+      RelAttrSqlNode node;
+      if(child_node->str_table_name().empty()){
+        node.relation_name = default_table->name();
+        child_node->set_table_name(default_table->name());
+      }
+      else{
+        node.relation_name = child_node->str_table_name();
+      }
+      node.attribute_name = child_node->str_attribute_name();
+      Table *table = nullptr;
+      const FieldMeta *field = nullptr;
+      Field temp;
+      RC rc = filter_get_table_and_field(db, default_table, tables, alias_tables, node, table, field, temp);
+      if(rc != RC::SUCCESS){
+        return rc;
+      }
+      child_node->set_field(temp);
+      return RC::SUCCESS;
+    }
     return RC::SUCCESS;
   }
   //计算节点

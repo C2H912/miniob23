@@ -75,4 +75,5 @@ private:
   std::vector<std::unique_ptr<Expression>> expressions_;
   ExpressionTuple expr_tuple_;
   ValueListTuple result_;
+  bool function_enter_ = false;
 };

@@ -49,8 +49,8 @@ enum class ExprType
   CONJUNCTION,  ///< 多个表达式使用同一种关系(AND或OR)来联结
   ALU,
   AGGRE,
-  ARITHMETIC,   ///< 算术运算
   FUNC,
+  ARITHMETIC,   ///< 算术运算
 };
 
 /**
@@ -136,9 +136,14 @@ public:
   FieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func) 
       : table_name_(table_name), attribute_name_(attribute_name), aggr_func_(aggr_func)
   {}
-   FieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func, std::string alias_name) 
+  FieldExpr(std::string table_name, std::string attribute_name, AggrOp aggr_func, std::string alias_name) 
       : table_name_(table_name), attribute_name_(attribute_name), aggr_func_(aggr_func),alias_name_(alias_name)
   {}
+  FieldExpr(std::string attribute_name) 
+      : attribute_name_(attribute_name)
+  {
+    aggr_func_ = UNKNOWN;
+  }
   FieldExpr(const Table *table, const FieldMeta *field) : field_(table, field)
   {}
   FieldExpr(const Field &field) : field_(field)
@@ -596,6 +601,7 @@ private:
   Expression* right_;
 };
 
+#if 0
 class FuncExpression : public Expression {
 public:
   FuncExpression() = default;
@@ -668,4 +674,49 @@ private:
   FuncOp func_type_;
   std::vector<Expression *> params_expr_;
   int param_size_;
+};
+#endif
+
+class FuncExpr : public Expression 
+{
+public:
+  FuncExpr(FuncOp type, Expression *child, Expression *constrain, std::string alias);
+  FuncExpr(FuncOp type, Expression *child, Expression *constrain);
+  virtual ~FuncExpr() = default;
+
+  ExprType type() const override { return ExprType::FUNC; }
+
+  AttrType value_type() const override;
+
+  RC get_value(Tuple &tuple, Value &value) override;
+  RC try_get_value(Value &value) const override;
+  RC get_expr_value(Tuple &tuple, Value &value) override;
+
+  //这个函数永远不应该被调用
+  std::vector<std::vector<Value>> sub_table() const override {
+    std::vector<std::vector<Value>> ret;
+    return ret;
+  }
+  int expr_type() const override {
+    return 125;
+  }
+
+  //
+  FuncOp func_op() const { return func_type_; }
+  std::string alias_name() const { return alias_name_; }
+  Expression* child() { return child_; }
+  Expression* constrain() { return constrain_; }
+
+  RC calc_value(const Value &left_value, const Value &right_value, Value &value) const;
+  RC calc_round(const Value &left_value, const Value &right_value, Value &value) const;
+  RC calc_date(const Value &left_value, const Value &right_value, Value &value) const;
+  
+private:
+  FuncOp func_type_;
+  Expression *child_;
+  Expression *constrain_;
+  Field field_;
+  std::string table_name_;
+  std::string attribute_name_;
+  std::string alias_name_;
 };

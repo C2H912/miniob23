@@ -53,7 +53,33 @@ Tuple *ProjectPhysicalOperator::current_tuple2()
 RC ProjectPhysicalOperator::next()
 {
   if (children_.empty()) {
-    return RC::RECORD_EOF;
+    //处理不经过表的function
+    if(function_enter_ == false){
+      std::vector<Value> temp_result;
+      int cell_num = expr_tuple_.cell_num();
+      for (int i = 0; i < cell_num; i++) {
+        Value value;
+        ValueListTuple not_used;
+        RC rcc = expr_tuple_.get_expr_value(not_used, value, i);
+        if (OB_FAIL(rcc)) {
+          return rcc;
+        }
+        temp_result.push_back(value);
+      }
+      result_.set_cells(temp_result);
+      if(!temp_result.empty()){
+        function_enter_ = true;
+        return RC::SUCCESS;
+      }
+      else{
+        function_enter_ = false;
+        return RC::RECORD_EOF;
+      }
+    }
+    else{
+      function_enter_ = false;
+      return RC::RECORD_EOF;
+    }
   }
 
   RC rc = RC::SUCCESS;
