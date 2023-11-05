@@ -135,7 +135,7 @@ RC LogicalPlanGenerator::create_complex_sub_plan(std::vector<Tuple*> &paretnts, 
   }
 
   unique_ptr<LogicalOperator> aggr_oper;
-  if (aggr_fields[0] != UNKNOWN) {
+  if (select_stmt->aggr_fields().size()!=0&&aggr_fields[0] != UNKNOWN) {
     aggr_oper = unique_ptr<AggreLogicalOperator>(new AggreLogicalOperator(all_fields, aggr_fields, aggr_specs, false, select_stmt->having_num()));
   }
 
@@ -227,7 +227,7 @@ RC LogicalPlanGenerator::create_plan(
   }
 
   unique_ptr<LogicalOperator> aggr_oper;
-  if (aggr_fields[0] != UNKNOWN || select_stmt->groupby_flag() == true) {
+  if (select_stmt->aggr_fields().size()!=0&&(aggr_fields[0] != UNKNOWN || select_stmt->groupby_flag() == true)) {
     RC rc = create_plan(select_stmt->having_stmt(), select_stmt->having_num(), aggr_oper, all_fields, aggr_fields, aggr_specs);
     if (rc != RC::SUCCESS) {
       LOG_WARN("failed to create predicate logical plan. rc=%s", strrc(rc));
