@@ -74,7 +74,43 @@ void dfs(Expression* current, std::vector<RelAttrSqlNode>& attr)
       node.relation_name = child_node->str_table_name();
       node.attribute_name = child_node->str_attribute_name();
       node.aggr_func = UNKNOWN;
-      node.alias = fieldnode->alias_name();
+      //直接在这里处理alias
+      if(fieldnode->alias_name().empty())
+      {
+        //如果为空
+        std::string func_alias;
+        switch(fieldnode->func_op())
+        {
+         case LENGTHS:{
+          func_alias = "LENGTH("+child_node->str_attribute_name()+")";
+          break;
+        }
+         case ROUNDS:{
+          ValueExpr* value_node = static_cast<ValueExpr*>(fieldnode->constrain());
+          if(value_node==nullptr)
+          {
+          func_alias = "ROUND("+child_node->str_attribute_name()+")";
+          
+          }
+          else{
+            func_alias = "ROUND("+child_node->str_attribute_name()+","+value_node->get_value().to_string()+")";
+          }
+          break;
+        }
+         case DATE_FORMATS:{
+           ValueExpr* value_node = static_cast<ValueExpr*>(fieldnode->constrain());
+          //func_alias = "DATE_FORMAT("+child_node->str_attribute_name()+")";
+           func_alias = "DATE_FORMAT("+child_node->str_attribute_name()+","+value_node->get_value().to_string()+")";
+          break;
+        }
+        }
+      
+        node.alias = func_alias;
+      }
+      else{
+        node.alias = fieldnode->alias_name();
+      }
+     
       attr.push_back(node);
     }
     return;

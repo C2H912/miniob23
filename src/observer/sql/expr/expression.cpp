@@ -871,7 +871,12 @@ RC FuncExpr::calc_value(const Value &child_value, const Value &constrain_value, 
   RC rc = RC::SUCCESS;
   switch(func_type_){
     case LENGTHS:{
+      if(child_value.attr_type()!=CHARS)
+      {
+        return RC::INVALID_ARGUMENT;
+      }
       int length = strlen(child_value.get_string().c_str());
+      value.set_int(length);
       break;
     }
     case ROUNDS:{
