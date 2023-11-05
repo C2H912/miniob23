@@ -782,7 +782,7 @@ select_stmt:        /*  select 语句的语法解析树*/
       if ($2 != nullptr) {
         std::reverse($2->begin(), $2->end());
         $$->selection.expressions.swap(*$2);
-        delete $2;
+        //delete $2;
       }
     }
     ;
