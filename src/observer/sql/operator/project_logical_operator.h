@@ -31,6 +31,7 @@ class ProjectLogicalOperator : public LogicalOperator
 public:
   ProjectLogicalOperator(const std::vector<Field> &fields, const std::vector<AggrOp> &aggr_fields,
               const std::vector<std::string> &aggr_specs, std::vector<std::unique_ptr<Expression>> &&expressions);
+  ProjectLogicalOperator(std::vector<std::unique_ptr<Expression>> &&expressions);
   virtual ~ProjectLogicalOperator() = default;
 
   LogicalOperatorType type() const override
@@ -63,11 +64,17 @@ public:
     return aggr_alias_;
   }
 
+  bool func_flag()
+  {
+    return func_flag_;
+  }
+
 private:
   //! 投影映射的字段名称
   //! 并不是所有的select都会查看表字段，也可能是常量数字、字符串，
   //! 或者是执行某个函数。所以这里应该是表达式Expression。
   //! 不过现在简单处理，就使用字段来描述
+  bool func_flag_ = false;
   std::vector<Field> fields_;
   std::vector<AggrOp> aggr_fields_;
   std::vector<std::string> aggr_specs_;

@@ -213,15 +213,22 @@ RC PhysicalPlanGenerator::create_plan(ProjectLogicalOperator &project_oper, uniq
   }
 
   ProjectPhysicalOperator *project_operator = new ProjectPhysicalOperator(std::move(project_oper.expressions()));
-  const vector<Field> &project_fields = project_oper.fields();
-  const vector<AggrOp> &project_aggr = project_oper.aggr_fields();
-  std::vector<std::pair<bool,std::string>> aggr_alias = project_oper.aggr_alias();
 
-  for (const Field &field : project_fields) {
-    project_operator->add_projection(field.table(), field.meta(),field.alias());
+  if(project_oper.func_flag()){
+
   }
-  if (child_phy_oper) {
-    project_operator->add_child(std::move(child_phy_oper));
+  else{
+    //打印表头
+    const vector<Field> &project_fields = project_oper.fields();
+    const vector<AggrOp> &project_aggr = project_oper.aggr_fields();
+    std::vector<std::pair<bool,std::string>> aggr_alias = project_oper.aggr_alias();
+
+    for (const Field &field : project_fields) {
+      project_operator->add_projection(field.table(), field.meta(),field.alias());
+    }
+    if (child_phy_oper) {
+      project_operator->add_child(std::move(child_phy_oper));
+    }
   }
 
   oper = unique_ptr<PhysicalOperator>(project_operator);

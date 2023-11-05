@@ -77,7 +77,7 @@ RC ExecuteStage::handle_request_with_physical_operator(SQLStageEvent *sql_event)
       else{    
       bool with_table_name = select_stmt->tables().size() > 1;
 
-      if(select_stmt->aggr_fields()[0] != UNKNOWN || select_stmt->groupby_flag() == true){
+      if(select_stmt->aggr_fields().size()!=0&&(select_stmt->aggr_fields()[0] != UNKNOWN || select_stmt->groupby_flag() == true)){
         for(int i = 0; i < (int)select_stmt->aggr_fields().size() - select_stmt->having_num(); i++){
           AggrOp temp_aggr = select_stmt->aggr_fields()[i];
           if(select_stmt->aggr_alias()[i].first == true)
@@ -91,7 +91,7 @@ RC ExecuteStage::handle_request_with_physical_operator(SQLStageEvent *sql_event)
         }
       }
       else{
-        for (const Field &field : select_stmt->query_fields()) {
+        for (const Field &field : select_stmt->alias_fields()) {
 
             if(field.alias()!=nullptr){
             schema.append_cell(field.alias());

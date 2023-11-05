@@ -61,7 +61,10 @@ public:
   {
     return query_fields_;
   }
-
+  const std::vector<Field> &alias_fields() const
+  {
+    return alias_fields_;
+  }
   const std::vector<AggrOp> &aggr_fields() const
   {
     return aggr_fields_;
@@ -119,8 +122,14 @@ public:
     return having_num_;
   }
 
+  bool enter_volcano()
+  {
+    return enter_volcano_;
+  }
+
 private:
   std::vector<Field> query_fields_;
+  std::vector<Field> alias_fields_;
   std::vector<Table *> tables_;
   //
   std::vector<AggrOp> aggr_fields_;
@@ -139,4 +148,6 @@ private:
   //
   bool is_expr_ = false;
   std::vector<std::unique_ptr<Expression>> expressions_;
+  //
+  bool enter_volcano_ = true;
 };

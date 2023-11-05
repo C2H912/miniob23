@@ -871,7 +871,7 @@ RC FuncExpr::calc_value(const Value &child_value, const Value &constrain_value, 
   RC rc = RC::SUCCESS;
   switch(func_type_){
     case LENGTHS:{
-      if(child_value.attr_type()!=CHARS)
+      if(child_value.attr_type() != CHARS)
       {
         return RC::INVALID_ARGUMENT;
       }
@@ -910,7 +910,7 @@ RC FuncExpr::calc_round(const Value &child_value, const Value &constrain_value, 
   RC rc = RC::SUCCESS;
 
   if (child_value.attr_type() != FLOATS) {
-    return RC::INTERNAL;
+    return RC::INVALID_ARGUMENT;
   }
 
   if(constrain_ == nullptr){
@@ -919,6 +919,9 @@ RC FuncExpr::calc_round(const Value &child_value, const Value &constrain_value, 
     value.set_int(static_cast<int>(temp));
   }
   else{
+    if(constrain_value.attr_type() != INTS){
+      return RC::INVALID_ARGUMENT;
+    }
     float cell = child_value.get_float();
     double temp = round2decimal((double)cell, constrain_value.get_int());
     value.set_float(static_cast<float>(temp));
@@ -932,10 +935,10 @@ RC FuncExpr::calc_date(const Value &child_value, const Value &constrain_value, V
   RC rc = RC::SUCCESS;
 
   if (child_value.attr_type() != DATES) {
-    return RC::INTERNAL;
+    return RC::INVALID_ARGUMENT;
   }
   if (constrain_value.attr_type() != CHARS) {
-    return RC::INTERNAL;
+    return RC::INVALID_ARGUMENT;
   }
 
   std::string sdate = child_value.get_string();

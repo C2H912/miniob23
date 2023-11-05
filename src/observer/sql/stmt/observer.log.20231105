@@ -239,3 +239,728 @@ Finish dump configuration
 [2023-11-05 13:07:30.279658 pid:33483 tid:7fffdbfff640 ctx:555555886320 DEBUG: yylex@lex_sql.l:125] >> FROM
 [2023-11-05 13:07:30.280355 pid:33483 tid:7fffdbfff640 ctx:555555886320 DEBUG: yylex@lex_sql.l:172] >> ID
 [2023-11-05 13:07:30.280963 pid:33483 tid:7fffdbfff640 ctx:555555886320 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:25:14.540068 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:236] >> Output configuration 
+Begin dump configuration
+[]
+
+[DefaultThreads]
+count=3
+
+[IOThreads]
+count=3
+
+[LOG]
+LOG_CONSOLE_LEVEL=1
+LOG_FILE_LEVEL=5
+LOG_FILE_NAME=observer.log
+
+[NET]
+CLIENT_ADDRESS=INADDR_ANY
+MAX_CONNECTION_NUM=8192
+PORT=6789
+
+[SEDA_BASE]
+EventHistory=false
+MaxEventHistoryNum=100
+STAGES=SessionStage
+ThreadPools=SQLThreads,IOThreads,DefaultThreads
+
+[SQLThreads]
+count=3
+
+[SessionStage]
+ThreadId=SQLThreads
+
+Finish dump configuration 
+
+[2023-11-05 15:25:14.545099 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:128, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.548085 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:256, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.551022 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:384, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.554166 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:512, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.557240 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:640, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.560297 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:768, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.563416 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:896, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.566667 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1024, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.570107 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1152, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.573709 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1280, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.579021 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1408, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.586686 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1536, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.591704 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1664, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.597437 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1792, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.601964 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1920, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.606645 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2048, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.613022 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2176, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.626836 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2304, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.654460 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2432, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.665758 pid:75337 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.666464 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init@mem_pool.h:211] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:25:14.667292 pid:75337 tid:7ffff7a56740 ctx:0 INFO: BufferPoolManager@disk_buffer_pool.cpp:622] >> buffer pool manager init with memory size 335544320, page num: 2560, pool num: 20
+[2023-11-05 15:25:14.684295 pid:75337 tid:7ffff7a56740 ctx:0 WARN: create_db@default_handler.cpp:107] >> Db already exists: sys
+[2023-11-05 15:25:14.706023 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init@clog.cpp:310] >> open clog file success. file=miniob/db/sys/clog, fd=4
+[2023-11-05 15:25:14.725850 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:25:14.726513 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:25:14.728853 pid:75337 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586d3f8, lbt=0x555555739653 0x555555729d6f 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:25:14.734986 pid:75337 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/oo.data.
+[2023-11-05 15:25:14.735591 pid:75337 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a4c018, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739653 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:25:14.736859 pid:75337 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/oo.data. file_desc=5, hdr_frame=0x7ffff6a4c018, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:25:14.737577 pid:75337 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=5, bp=0x55555588f090, lbt=0x555555739653 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:25:14.738382 pid:75337 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586d3f8, lbt=0x555555739653 0x55555572a556 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:25:14.738957 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:25:14.739522 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:25:14.740096 pid:75337 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: oo, file: oo.table
+[2023-11-05 15:25:14.740716 pid:75337 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:183] >> All table have been opened. num=1
+[2023-11-05 15:25:14.741899 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: read@clog.cpp:339] >> file read touch eof. filename=miniob/db/sys/clog
+[2023-11-05 15:25:14.742428 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: recover@clog.cpp:565] >> recover redo log done
+[2023-11-05 15:25:14.743118 pid:75337 tid:7ffff7a56740 ctx:0 INFO: recover@clog.cpp:569] >> find 0 uncommitted trx
+[2023-11-05 15:25:14.743784 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: set_current_db@session.cpp:60] >> change db to sys
+[2023-11-05 15:25:14.744300 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init@default_handler.cpp:83] >> Default handler init with miniob success
+[2023-11-05 15:25:14.744981 pid:75337 tid:7ffff7a56740 ctx:0 DEBUG: parse@seda_config.cpp:92] >> Seda config parse success
+
+[2023-11-05 15:25:14.745534 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:63] >> (Re)Starting State: Pid: 75337 Time: Sun Nov  5 15:25:14 2023
+
+[2023-11-05 15:25:14.746155 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:64] >> The process Name is observe
+[2023-11-05 15:25:14.746884 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init_event_history@seda_config.cpp:209] >> Successfully init_event_history, EventHistory:0, MaxEventHops:100
+[2023-11-05 15:25:14.747689 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:25:14.748262 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> SQLThreads adding threads enter3
+[2023-11-05 15:25:14.749360 pid:75337 tid:7fffe39a0640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe39a0640, threadname = SQLThreads
+[2023-11-05 15:25:14.749561 pid:75337 tid:7fffe319f640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe319f640, threadname = SQLThreads
+[2023-11-05 15:25:14.749860 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:25:14.749832 pid:75337 tid:7fffe299e640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe299e640, threadname = SQLThreads
+[2023-11-05 15:25:14.751166 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:25:14.752424 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:25:14.752960 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> IOThreads adding threads enter3
+[2023-11-05 15:25:14.753949 pid:75337 tid:7fffe219d640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe219d640, threadname = IOThreads
+[2023-11-05 15:25:14.754142 pid:75337 tid:7fffe199c640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe199c640, threadname = IOThreads
+[2023-11-05 15:25:14.754322 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:25:14.754269 pid:75337 tid:7fffe119b640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe119b640, threadname = IOThreads
+[2023-11-05 15:25:14.755970 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:25:14.756956 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:25:14.757460 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> DefaultThreads adding threads enter3
+[2023-11-05 15:25:14.758303 pid:75337 tid:7fffe099a640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe099a640, threadname = DefaultThreads
+[2023-11-05 15:25:14.759027 pid:75337 tid:7fffc3fff640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffc3fff640, threadname = DefaultThreads
+[2023-11-05 15:25:14.759826 pid:75337 tid:7fffbbfff640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffbbfff640, threadname = DefaultThreads
+[2023-11-05 15:25:14.759835 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:25:14.761282 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:25:14.761936 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init_stages@seda_config.cpp:355] >> Stage SessionStage use threadpool SQLThreads.
+[2023-11-05 15:25:14.762545 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:86] >> enterSessionStage
+[2023-11-05 15:25:14.763305 pid:75337 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:110] >> exitSessionStage1
+[2023-11-05 15:25:14.764066 pid:75337 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:261] >> Successfully init utility
+[2023-11-05 15:25:14.764870 pid:75337 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:233] >> Listen on port 6789
+[2023-11-05 15:25:14.765312 pid:75337 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:250] >> Observer start success
+[2023-11-05 15:25:22.234247 pid:75337 tid:7ffff7a56740 ctx:0 INFO: accept@server.cpp:175] >> Accepted connection from 127.0.0.1:5288
+
+[2023-11-05 15:25:28.497667 pid:75337 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=26): create table oo (a int);
+
+[2023-11-05 15:25:28.498430 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:106] >> CREATE
+[2023-11-05 15:25:28.498986 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:108] >> TABLE
+[2023-11-05 15:25:28.499644 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:25:28.500119 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:175] >> LBRACE
+[2023-11-05 15:25:28.500607 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:25:28.501028 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:151] >> INT_T
+[2023-11-05 15:25:28.501493 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:179] >> RBRACE
+[2023-11-05 15:25:28.502092 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:25:28.502672 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: sql_debug@sql_debug.cpp:61] >> sql debug info: [create table statement: table name oo]
+[2023-11-05 15:25:28.503151 pid:75337 tid:7fffe39a0640 ctx:555555886e60 WARN: create_table@db.cpp:111] >> oo has been opened before.
+[2023-11-05 15:25:28.503669 pid:75337 tid:7fffe39a0640 ctx:555555886e60 TRACE: handle_sql@session_stage.cpp:155] >> failed to do execute. rc=SCHEMA_TABLE_EXIST
+[2023-11-05 15:25:28.504213 pid:75337 tid:7fffe39a0640 ctx:555555886e60 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-11-05 15:25:40.113580 pid:75337 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=28): create table test (a int);
+
+[2023-11-05 15:25:40.114591 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:106] >> CREATE
+[2023-11-05 15:25:40.115562 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:108] >> TABLE
+[2023-11-05 15:25:40.116168 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:25:40.116810 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:175] >> LBRACE
+[2023-11-05 15:25:40.117412 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:25:40.117985 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:151] >> INT_T
+[2023-11-05 15:25:40.118650 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:179] >> RBRACE
+[2023-11-05 15:25:40.119185 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:25:40.119951 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: sql_debug@sql_debug.cpp:61] >> sql debug info: [create table statement: table name test]
+[2023-11-05 15:25:40.120644 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: create@table.cpp:104] >> Begin to create table miniob/db/sys:test
+[2023-11-05 15:25:40.126605 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:25:40.127311 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:25:40.127963 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: init@table_meta.cpp:107] >> Sussessfully initialized table meta. table id=1, name=test
+[2023-11-05 15:25:40.146100 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: create_file@disk_buffer_pool.cpp:677] >> Successfully create miniob/db/sys/test.data.
+[2023-11-05 15:25:40.147119 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586d3f8, lbt=0x555555739653 0x555555729d6f 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555ea3be 0x5555555cf5f0 0x555555619d7f 0x555555615388 0x555555584a13 0x5555555839f6 0x5555555825b6 0x5555555820fd 0x555555759916 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-11-05 15:25:40.172145 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/test.data.
+[2023-11-05 15:25:40.172713 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a6c120, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=555555886e60, lbt=0x555555739653 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555ea3be 0x5555555cf5f0 0x555555619d7f 0x555555615388 0x555555584a13 0x5555555839f6 0x5555555825b6 0x5555555820fd 0x555555759916 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-11-05 15:25:40.173879 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/test.data. file_desc=12, hdr_frame=0x7ffff6a6c120, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:25:40.174521 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=12, bp=0x7fffd4000bd0, lbt=0x555555739653 0x5555555b9266 0x5555555f00eb 0x5555555ea3be 0x5555555cf5f0 0x555555619d7f 0x555555615388 0x555555584a13 0x5555555839f6 0x5555555825b6 0x5555555820fd 0x555555759916 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-11-05 15:25:40.175101 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586d3f8, lbt=0x555555739653 0x55555572a556 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555ea3be 0x5555555cf5f0 0x555555619d7f 0x555555615388 0x555555584a13 0x5555555839f6 0x5555555825b6 0x5555555820fd 0x555555759916 0x7ffff7aefac3 0x7ffff7b81a40
+[2023-11-05 15:25:40.175725 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:25:40.176641 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:25:40.177474 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: create@table.cpp:160] >> Successfully create table miniob/db/sys:test
+[2023-11-05 15:25:40.177960 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: create_table@db.cpp:127] >> Create table success. table name=test, table_id:1
+[2023-11-05 15:25:40.178621 pid:75337 tid:7fffe319f640 ctx:555555886e60 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-11-05 15:25:48.758078 pid:75337 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=27): select a as ooo from test
+
+[2023-11-05 15:25:48.759378 pid:75337 tid:7fffe299e640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:122] >> SELECT
+[2023-11-05 15:25:48.759813 pid:75337 tid:7fffe299e640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:25:48.760345 pid:75337 tid:7fffe299e640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:170] >> AS
+[2023-11-05 15:25:48.760909 pid:75337 tid:7fffe299e640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:25:48.761495 pid:75337 tid:7fffe299e640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:125] >> FROM
+[2023-11-05 15:25:48.762076 pid:75337 tid:7fffe299e640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:25:48.762659 pid:75337 tid:7fffe299e640 ctx:555555886e60 INFO: create@select_stmt.cpp:550] >> got 1 tables in from stmt and 1 fields in query stmt
+[2023-11-05 15:25:48.763275 pid:75337 tid:7fffe299e640 ctx:555555886e60 TRACE: create_plan@physical_plan_generator.cpp:170] >> use table scan
+[2023-11-05 15:25:48.763851 pid:75337 tid:7fffe299e640 ctx:555555886e60 TRACE: create_plan@physical_plan_generator.cpp:236] >> create a project physical operator
+[2023-11-05 15:25:48.764351 pid:75337 tid:7fffe299e640 ctx:555555886e60 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-11-05 15:25:58.902327 pid:75337 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=21): select * from test;
+
+[2023-11-05 15:25:58.903062 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:122] >> SELECT
+[2023-11-05 15:25:58.903593 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:125] >> FROM
+[2023-11-05 15:25:58.904049 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:25:58.904568 pid:75337 tid:7fffe39a0640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:25:58.905130 pid:75337 tid:7fffe39a0640 ctx:555555886e60 INFO: create@select_stmt.cpp:550] >> got 1 tables in from stmt and 1 fields in query stmt
+[2023-11-05 15:25:58.905603 pid:75337 tid:7fffe39a0640 ctx:555555886e60 TRACE: create_plan@physical_plan_generator.cpp:170] >> use table scan
+[2023-11-05 15:25:58.906194 pid:75337 tid:7fffe39a0640 ctx:555555886e60 TRACE: create_plan@physical_plan_generator.cpp:236] >> create a project physical operator
+[2023-11-05 15:25:58.906649 pid:75337 tid:7fffe39a0640 ctx:555555886e60 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-11-05 15:26:14.603082 pid:75337 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=30): select length('ddd') as aaa;
+
+[2023-11-05 15:26:14.604469 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:122] >> SELECT
+[2023-11-05 15:26:14.605643 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:167] >> LENGTH
+[2023-11-05 15:26:14.606364 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:175] >> LBRACE
+[2023-11-05 15:26:14.607112 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:253] >> SSS
+[2023-11-05 15:26:14.607776 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:179] >> RBRACE
+[2023-11-05 15:26:14.608364 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:170] >> AS
+[2023-11-05 15:26:14.608917 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:26:14.609562 pid:75337 tid:7fffe319f640 ctx:555555886e60 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:33:23.363351 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:236] >> Output configuration 
+Begin dump configuration
+[]
+
+[DefaultThreads]
+count=3
+
+[IOThreads]
+count=3
+
+[LOG]
+LOG_CONSOLE_LEVEL=1
+LOG_FILE_LEVEL=5
+LOG_FILE_NAME=observer.log
+
+[NET]
+CLIENT_ADDRESS=INADDR_ANY
+MAX_CONNECTION_NUM=8192
+PORT=6789
+
+[SEDA_BASE]
+EventHistory=false
+MaxEventHistoryNum=100
+STAGES=SessionStage
+ThreadPools=SQLThreads,IOThreads,DefaultThreads
+
+[SQLThreads]
+count=3
+
+[SessionStage]
+ThreadId=SQLThreads
+
+Finish dump configuration 
+
+[2023-11-05 15:33:23.369461 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:128, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.374136 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:256, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.378766 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:384, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.383363 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:512, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.388551 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:640, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.392640 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:768, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.396570 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:896, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.400584 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1024, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.405261 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1152, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.410079 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1280, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.414498 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1408, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.418655 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1536, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.422836 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1664, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.427903 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1792, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.432252 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1920, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.436780 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2048, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.441516 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2176, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.446433 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2304, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.451270 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2432, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.455900 pid:78677 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.456620 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@mem_pool.h:211] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:33:23.457318 pid:78677 tid:7ffff7a56740 ctx:0 INFO: BufferPoolManager@disk_buffer_pool.cpp:622] >> buffer pool manager init with memory size 335544320, page num: 2560, pool num: 20
+[2023-11-05 15:33:23.471406 pid:78677 tid:7ffff7a56740 ctx:0 WARN: create_db@default_handler.cpp:107] >> Db already exists: sys
+[2023-11-05 15:33:23.492318 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@clog.cpp:310] >> open clog file success. file=miniob/db/sys/clog, fd=4
+[2023-11-05 15:33:23.515117 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:33:23.515846 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:33:23.517873 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586c3f8, lbt=0x555555739263 0x55555572997f 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:33:23.522772 pid:78677 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/oo.data.
+[2023-11-05 15:33:23.523503 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a4c018, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739263 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:33:23.524780 pid:78677 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/oo.data. file_desc=5, hdr_frame=0x7ffff6a4c018, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:33:23.525395 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=5, bp=0x55555588d8c0, lbt=0x555555739263 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:33:23.526202 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586c3f8, lbt=0x555555739263 0x55555572a166 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:33:23.526929 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:33:23.527600 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:33:23.528306 pid:78677 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: oo, file: oo.table
+[2023-11-05 15:33:23.531893 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:33:23.532362 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:33:23.534097 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586c3f8, lbt=0x555555739263 0x55555572997f 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:33:23.537376 pid:78677 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/test.data.
+[2023-11-05 15:33:23.538146 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a6c120, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739263 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:33:23.539428 pid:78677 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/test.data. file_desc=6, hdr_frame=0x7ffff6a6c120, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:33:23.540119 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=6, bp=0x55555588f8c0, lbt=0x555555739263 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:33:23.540666 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586c3f8, lbt=0x555555739263 0x55555572a166 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:33:23.541378 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:33:23.542077 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:33:23.542632 pid:78677 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: test, file: test.table
+[2023-11-05 15:33:23.543287 pid:78677 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:183] >> All table have been opened. num=2
+[2023-11-05 15:33:23.548350 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: read@clog.cpp:339] >> file read touch eof. filename=miniob/db/sys/clog
+[2023-11-05 15:33:23.549073 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: recover@clog.cpp:565] >> recover redo log done
+[2023-11-05 15:33:23.549762 pid:78677 tid:7ffff7a56740 ctx:0 INFO: recover@clog.cpp:569] >> find 0 uncommitted trx
+[2023-11-05 15:33:23.550321 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: set_current_db@session.cpp:60] >> change db to sys
+[2023-11-05 15:33:23.550845 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@default_handler.cpp:83] >> Default handler init with miniob success
+[2023-11-05 15:33:23.551409 pid:78677 tid:7ffff7a56740 ctx:0 DEBUG: parse@seda_config.cpp:92] >> Seda config parse success
+
+[2023-11-05 15:33:23.552125 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:63] >> (Re)Starting State: Pid: 78677 Time: Sun Nov  5 15:33:23 2023
+
+[2023-11-05 15:33:23.552647 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:64] >> The process Name is observe
+[2023-11-05 15:33:23.553211 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init_event_history@seda_config.cpp:209] >> Successfully init_event_history, EventHistory:0, MaxEventHops:100
+[2023-11-05 15:33:23.553765 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:33:23.554306 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> SQLThreads adding threads enter3
+[2023-11-05 15:33:23.555176 pid:78677 tid:7fffe39a0640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe39a0640, threadname = SQLThreads
+[2023-11-05 15:33:23.555345 pid:78677 tid:7fffe319f640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe319f640, threadname = SQLThreads
+[2023-11-05 15:33:23.555658 pid:78677 tid:7fffe299e640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe299e640, threadname = SQLThreads
+[2023-11-05 15:33:23.555618 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:33:23.558012 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:33:23.558422 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:33:23.558955 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> IOThreads adding threads enter3
+[2023-11-05 15:33:23.559860 pid:78677 tid:7fffe219d640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe219d640, threadname = IOThreads
+[2023-11-05 15:33:23.560036 pid:78677 tid:7fffe199c640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe199c640, threadname = IOThreads
+[2023-11-05 15:33:23.560264 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:33:23.561501 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:33:23.561979 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:33:23.560249 pid:78677 tid:7fffe119b640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe119b640, threadname = IOThreads
+[2023-11-05 15:33:23.562581 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> DefaultThreads adding threads enter3
+[2023-11-05 15:33:23.564049 pid:78677 tid:7fffe099a640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe099a640, threadname = DefaultThreads
+[2023-11-05 15:33:23.564880 pid:78677 tid:7fffc3fff640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffc3fff640, threadname = DefaultThreads
+[2023-11-05 15:33:23.565214 pid:78677 tid:7fffc37fe640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffc37fe640, threadname = DefaultThreads
+[2023-11-05 15:33:23.565229 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:33:23.566302 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:33:23.566881 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init_stages@seda_config.cpp:355] >> Stage SessionStage use threadpool SQLThreads.
+[2023-11-05 15:33:23.567303 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:86] >> enterSessionStage
+[2023-11-05 15:33:23.567649 pid:78677 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:110] >> exitSessionStage1
+[2023-11-05 15:33:23.568258 pid:78677 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:261] >> Successfully init utility
+[2023-11-05 15:33:23.569901 pid:78677 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:233] >> Listen on port 6789
+[2023-11-05 15:33:23.570471 pid:78677 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:250] >> Observer start success
+[2023-11-05 15:33:26.164413 pid:78677 tid:7ffff7a56740 ctx:0 INFO: accept@server.cpp:175] >> Accepted connection from 127.0.0.1:34443
+
+[2023-11-05 15:33:32.826589 pid:78677 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=26): create table oo (a int);
+
+[2023-11-05 15:33:32.827577 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:106] >> CREATE
+[2023-11-05 15:33:32.828357 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:108] >> TABLE
+[2023-11-05 15:33:32.829095 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:33:32.829744 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:175] >> LBRACE
+[2023-11-05 15:33:32.830351 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:33:32.830950 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:151] >> INT_T
+[2023-11-05 15:33:32.831490 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:179] >> RBRACE
+[2023-11-05 15:33:32.832179 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:33:32.832756 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: sql_debug@sql_debug.cpp:61] >> sql debug info: [create table statement: table name oo]
+[2023-11-05 15:33:32.833425 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 WARN: create_table@db.cpp:111] >> oo has been opened before.
+[2023-11-05 15:33:32.833964 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 TRACE: handle_sql@session_stage.cpp:155] >> failed to do execute. rc=SCHEMA_TABLE_EXIST
+[2023-11-05 15:33:32.834579 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-11-05 15:33:38.180998 pid:78677 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=28): create table test (a int);
+
+[2023-11-05 15:33:38.181956 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:106] >> CREATE
+[2023-11-05 15:33:38.182631 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:108] >> TABLE
+[2023-11-05 15:33:38.183177 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:33:38.183793 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:175] >> LBRACE
+[2023-11-05 15:33:38.184516 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:33:38.185233 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:151] >> INT_T
+[2023-11-05 15:33:38.185907 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:179] >> RBRACE
+[2023-11-05 15:33:38.186473 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:33:38.187000 pid:78677 tid:7fffe319f640 ctx:555555885fd0 DEBUG: sql_debug@sql_debug.cpp:61] >> sql debug info: [create table statement: table name test]
+[2023-11-05 15:33:38.187519 pid:78677 tid:7fffe319f640 ctx:555555885fd0 WARN: create_table@db.cpp:111] >> test has been opened before.
+[2023-11-05 15:33:38.188318 pid:78677 tid:7fffe319f640 ctx:555555885fd0 TRACE: handle_sql@session_stage.cpp:155] >> failed to do execute. rc=SCHEMA_TABLE_EXIST
+[2023-11-05 15:33:38.188933 pid:78677 tid:7fffe319f640 ctx:555555885fd0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-11-05 15:33:43.925571 pid:78677 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=27): select a as ooo from test
+
+[2023-11-05 15:33:43.926931 pid:78677 tid:7fffe299e640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:122] >> SELECT
+[2023-11-05 15:33:43.927674 pid:78677 tid:7fffe299e640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:33:43.928320 pid:78677 tid:7fffe299e640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:170] >> AS
+[2023-11-05 15:33:43.929067 pid:78677 tid:7fffe299e640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:33:43.929837 pid:78677 tid:7fffe299e640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:125] >> FROM
+[2023-11-05 15:33:43.930584 pid:78677 tid:7fffe299e640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:33:43.931400 pid:78677 tid:7fffe299e640 ctx:555555885fd0 INFO: create@select_stmt.cpp:549] >> got 1 tables in from stmt and 1 fields in query stmt
+[2023-11-05 15:33:43.932202 pid:78677 tid:7fffe299e640 ctx:555555885fd0 TRACE: create_plan@physical_plan_generator.cpp:170] >> use table scan
+[2023-11-05 15:33:43.932846 pid:78677 tid:7fffe299e640 ctx:555555885fd0 TRACE: create_plan@physical_plan_generator.cpp:236] >> create a project physical operator
+[2023-11-05 15:33:43.933545 pid:78677 tid:7fffe299e640 ctx:555555885fd0 INFO: handle_request@session_stage.cpp:109] >> write result return SUCCESS
+[2023-11-05 15:33:48.043690 pid:78677 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=30): select length('ddd') as aaa;
+
+[2023-11-05 15:33:48.044358 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:122] >> SELECT
+[2023-11-05 15:33:48.044937 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:167] >> LENGTH
+[2023-11-05 15:33:48.045522 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:175] >> LBRACE
+[2023-11-05 15:33:48.046083 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:253] >> SSS
+[2023-11-05 15:33:48.046602 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:179] >> RBRACE
+[2023-11-05 15:33:48.047222 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:170] >> AS
+[2023-11-05 15:33:48.047859 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:33:48.048474 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:33:48.049166 pid:78677 tid:7fffe39a0640 ctx:555555885fd0 TRACE: create_plan@physical_plan_generator.cpp:236] >> create a project physical operator
+[2023-11-05 15:39:08.046878 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:236] >> Output configuration 
+Begin dump configuration
+[]
+
+[DefaultThreads]
+count=3
+
+[IOThreads]
+count=3
+
+[LOG]
+LOG_CONSOLE_LEVEL=1
+LOG_FILE_LEVEL=5
+LOG_FILE_NAME=observer.log
+
+[NET]
+CLIENT_ADDRESS=INADDR_ANY
+MAX_CONNECTION_NUM=8192
+PORT=6789
+
+[SEDA_BASE]
+EventHistory=false
+MaxEventHistoryNum=100
+STAGES=SessionStage
+ThreadPools=SQLThreads,IOThreads,DefaultThreads
+
+[SQLThreads]
+count=3
+
+[SessionStage]
+ThreadId=SQLThreads
+
+Finish dump configuration 
+
+[2023-11-05 15:39:08.052637 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:128, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.055640 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:256, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.059101 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:384, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.062270 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:512, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.065225 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:640, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.069624 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:768, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.072808 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:896, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.076000 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1024, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.079142 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1152, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.082865 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1280, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.086472 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1408, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.089654 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1536, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.092834 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1664, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.095683 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1792, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.099200 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1920, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.102245 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2048, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.105419 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2176, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.108524 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2304, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.111723 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2432, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.114821 pid:80281 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.115531 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@mem_pool.h:211] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:08.116098 pid:80281 tid:7ffff7a56740 ctx:0 INFO: BufferPoolManager@disk_buffer_pool.cpp:622] >> buffer pool manager init with memory size 335544320, page num: 2560, pool num: 20
+[2023-11-05 15:39:08.131877 pid:80281 tid:7ffff7a56740 ctx:0 WARN: create_db@default_handler.cpp:107] >> Db already exists: sys
+[2023-11-05 15:39:08.147231 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@clog.cpp:310] >> open clog file success. file=miniob/db/sys/clog, fd=4
+[2023-11-05 15:39:08.175658 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:39:08.176328 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:39:08.178116 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586c3f8, lbt=0x555555739263 0x55555572997f 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:08.183254 pid:80281 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/oo.data.
+[2023-11-05 15:39:08.184055 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a4c018, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739263 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:08.185335 pid:80281 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/oo.data. file_desc=5, hdr_frame=0x7ffff6a4c018, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:39:08.186073 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=5, bp=0x55555588d8c0, lbt=0x555555739263 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:08.186689 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586c3f8, lbt=0x555555739263 0x55555572a166 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:08.187243 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:39:08.187824 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:39:08.188609 pid:80281 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: oo, file: oo.table
+[2023-11-05 15:39:08.192175 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:39:08.192830 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:39:08.194269 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586c3f8, lbt=0x555555739263 0x55555572997f 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:08.196852 pid:80281 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/test.data.
+[2023-11-05 15:39:08.197353 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a6c120, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739263 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:08.198599 pid:80281 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/test.data. file_desc=6, hdr_frame=0x7ffff6a6c120, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:39:08.199103 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=6, bp=0x55555588f8c0, lbt=0x555555739263 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:08.199797 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586c3f8, lbt=0x555555739263 0x55555572a166 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:08.200321 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:39:08.201023 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:39:08.201698 pid:80281 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: test, file: test.table
+[2023-11-05 15:39:08.202175 pid:80281 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:183] >> All table have been opened. num=2
+[2023-11-05 15:39:08.207744 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: read@clog.cpp:339] >> file read touch eof. filename=miniob/db/sys/clog
+[2023-11-05 15:39:08.208441 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: recover@clog.cpp:565] >> recover redo log done
+[2023-11-05 15:39:08.208798 pid:80281 tid:7ffff7a56740 ctx:0 INFO: recover@clog.cpp:569] >> find 0 uncommitted trx
+[2023-11-05 15:39:08.209327 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: set_current_db@session.cpp:60] >> change db to sys
+[2023-11-05 15:39:08.209724 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@default_handler.cpp:83] >> Default handler init with miniob success
+[2023-11-05 15:39:08.210350 pid:80281 tid:7ffff7a56740 ctx:0 DEBUG: parse@seda_config.cpp:92] >> Seda config parse success
+
+[2023-11-05 15:39:08.210987 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:63] >> (Re)Starting State: Pid: 80281 Time: Sun Nov  5 15:39:08 2023
+
+[2023-11-05 15:39:08.211632 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:64] >> The process Name is observe
+[2023-11-05 15:39:08.212167 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init_event_history@seda_config.cpp:209] >> Successfully init_event_history, EventHistory:0, MaxEventHops:100
+[2023-11-05 15:39:08.212908 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:39:08.213273 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> SQLThreads adding threads enter3
+[2023-11-05 15:39:08.214293 pid:80281 tid:7fffe39a0640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe39a0640, threadname = SQLThreads
+[2023-11-05 15:39:08.214579 pid:80281 tid:7fffe319f640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe319f640, threadname = SQLThreads
+[2023-11-05 15:39:08.214892 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:39:08.216100 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 07:39:08.214885 pid:80281 tid:7fffe299e640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe299e640, threadname = SQLThreads
+[2023-11-05 15:39:08.216602 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:39:08.217619 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> IOThreads adding threads enter3
+[2023-11-05 15:39:08.218339 pid:80281 tid:7fffe219d640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe219d640, threadname = IOThreads
+[2023-11-05 15:39:08.218539 pid:80281 tid:7fffe199c640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe199c640, threadname = IOThreads
+[2023-11-05 15:39:08.218972 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:39:08.218855 pid:80281 tid:7fffe119b640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe119b640, threadname = IOThreads
+[2023-11-05 15:39:08.222297 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:39:08.223419 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:39:08.224080 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> DefaultThreads adding threads enter3
+[2023-11-05 15:39:08.225117 pid:80281 tid:7fffe099a640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe099a640, threadname = DefaultThreads
+[2023-11-05 15:39:08.225747 pid:80281 tid:7fffc3fff640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffc3fff640, threadname = DefaultThreads
+[2023-11-05 15:39:08.225954 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:39:08.227195 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:39:08.225947 pid:80281 tid:7fffc37fe640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffc37fe640, threadname = DefaultThreads
+[2023-11-05 15:39:08.227748 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init_stages@seda_config.cpp:355] >> Stage SessionStage use threadpool SQLThreads.
+[2023-11-05 15:39:08.228847 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:86] >> enterSessionStage
+[2023-11-05 15:39:08.229361 pid:80281 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:110] >> exitSessionStage1
+[2023-11-05 15:39:08.229923 pid:80281 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:261] >> Successfully init utility
+[2023-11-05 15:39:08.231299 pid:80281 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:233] >> Listen on port 6789
+[2023-11-05 15:39:08.231844 pid:80281 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:250] >> Observer start success
+[2023-11-05 15:39:50.815238 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:236] >> Output configuration 
+Begin dump configuration
+[]
+
+[DefaultThreads]
+count=3
+
+[IOThreads]
+count=3
+
+[LOG]
+LOG_CONSOLE_LEVEL=1
+LOG_FILE_LEVEL=5
+LOG_FILE_NAME=observer.log
+
+[NET]
+CLIENT_ADDRESS=INADDR_ANY
+MAX_CONNECTION_NUM=8192
+PORT=6789
+
+[SEDA_BASE]
+EventHistory=false
+MaxEventHistoryNum=100
+STAGES=SessionStage
+ThreadPools=SQLThreads,IOThreads,DefaultThreads
+
+[SQLThreads]
+count=3
+
+[SessionStage]
+ThreadId=SQLThreads
+
+Finish dump configuration 
+
+[2023-11-05 15:39:50.820170 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:128, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.822668 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:256, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.825223 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:384, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.828084 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:512, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.832084 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:640, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.834687 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:768, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.837666 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:896, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.840425 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1024, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.843376 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1152, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.847173 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1280, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.853268 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1408, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.859527 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1536, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.862584 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1664, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.865447 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1792, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.868426 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1920, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.871112 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2048, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.873887 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2176, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.877256 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2304, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.880190 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2432, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.883036 pid:80680 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.883508 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@mem_pool.h:211] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:39:50.883996 pid:80680 tid:7ffff7a56740 ctx:0 INFO: BufferPoolManager@disk_buffer_pool.cpp:622] >> buffer pool manager init with memory size 335544320, page num: 2560, pool num: 20
+[2023-11-05 15:39:50.896615 pid:80680 tid:7ffff7a56740 ctx:0 WARN: create_db@default_handler.cpp:107] >> Db already exists: sys
+[2023-11-05 15:39:50.912934 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@clog.cpp:310] >> open clog file success. file=miniob/db/sys/clog, fd=4
+[2023-11-05 15:39:50.929277 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:39:50.929777 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:39:50.931333 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586c3f8, lbt=0x555555739263 0x55555572997f 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:50.935091 pid:80680 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/oo.data.
+[2023-11-05 15:39:50.935614 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a4c018, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739263 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:50.936819 pid:80680 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/oo.data. file_desc=5, hdr_frame=0x7ffff6a4c018, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:39:50.938269 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=5, bp=0x55555588d8c0, lbt=0x555555739263 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:50.938766 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586c3f8, lbt=0x555555739263 0x55555572a166 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:50.939191 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:39:50.939519 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:39:50.940175 pid:80680 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: oo, file: oo.table
+[2023-11-05 15:39:50.943300 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:39:50.943792 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:39:50.945559 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586c3f8, lbt=0x555555739263 0x55555572997f 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:50.948428 pid:80680 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/test.data.
+[2023-11-05 15:39:50.949048 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a6c120, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739263 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:50.950023 pid:80680 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/test.data. file_desc=6, hdr_frame=0x7ffff6a6c120, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:39:50.950571 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=6, bp=0x55555588f8c0, lbt=0x555555739263 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:50.951108 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586c3f8, lbt=0x555555739263 0x55555572a166 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:39:50.951725 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:39:50.952273 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:39:50.953297 pid:80680 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: test, file: test.table
+[2023-11-05 15:39:50.953937 pid:80680 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:183] >> All table have been opened. num=2
+[2023-11-05 15:39:50.958148 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: read@clog.cpp:339] >> file read touch eof. filename=miniob/db/sys/clog
+[2023-11-05 15:39:50.958690 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: recover@clog.cpp:565] >> recover redo log done
+[2023-11-05 15:39:50.959188 pid:80680 tid:7ffff7a56740 ctx:0 INFO: recover@clog.cpp:569] >> find 0 uncommitted trx
+[2023-11-05 15:39:50.959701 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: set_current_db@session.cpp:60] >> change db to sys
+[2023-11-05 15:39:50.960218 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@default_handler.cpp:83] >> Default handler init with miniob success
+[2023-11-05 15:39:50.960745 pid:80680 tid:7ffff7a56740 ctx:0 DEBUG: parse@seda_config.cpp:92] >> Seda config parse success
+
+[2023-11-05 15:39:50.961286 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:63] >> (Re)Starting State: Pid: 80680 Time: Sun Nov  5 15:39:50 2023
+
+[2023-11-05 15:39:50.961785 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:64] >> The process Name is observe
+[2023-11-05 15:39:50.962326 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init_event_history@seda_config.cpp:209] >> Successfully init_event_history, EventHistory:0, MaxEventHops:100
+[2023-11-05 15:39:50.963017 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:39:50.963594 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> SQLThreads adding threads enter3
+[2023-11-05 15:39:50.964360 pid:80680 tid:7fffe39a0640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe39a0640, threadname = SQLThreads
+[2023-11-05 15:39:50.964932 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:39:50.965336 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:39:50.965818 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:39:50.966186 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> IOThreads adding threads enter3
+[2023-11-05 15:39:50.964856 pid:80680 tid:7fffe299e640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe299e640, threadname = SQLThreads
+[2023-11-05 15:39:50.964554 pid:80680 tid:7fffe319f640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe319f640, threadname = SQLThreads
+[2023-11-05 15:39:50.967139 pid:80680 tid:7fffe199c640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe199c640, threadname = IOThreads
+[2023-11-05 15:39:50.967487 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:39:50.970485 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:39:50.970982 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:39:50.971440 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> DefaultThreads adding threads enter3
+[2023-11-05 15:39:50.966883 pid:80680 tid:7fffe219d640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe219d640, threadname = IOThreads
+[2023-11-05 15:39:50.967434 pid:80680 tid:7fffe119b640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe119b640, threadname = IOThreads
+[2023-11-05 15:39:50.972046 pid:80680 tid:7fffe099a640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe099a640, threadname = DefaultThreads
+[2023-11-05 15:39:50.972987 pid:80680 tid:7fffcb7fe640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffcb7fe640, threadname = DefaultThreads
+[2023-11-05 15:39:50.972837 pid:80680 tid:7fffcbfff640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffcbfff640, threadname = DefaultThreads
+[2023-11-05 15:39:50.973001 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:39:50.974949 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:39:50.975332 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init_stages@seda_config.cpp:355] >> Stage SessionStage use threadpool SQLThreads.
+[2023-11-05 15:39:50.975838 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:86] >> enterSessionStage
+[2023-11-05 15:39:50.976468 pid:80680 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:110] >> exitSessionStage1
+[2023-11-05 15:39:50.976949 pid:80680 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:261] >> Successfully init utility
+[2023-11-05 15:39:50.978452 pid:80680 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:233] >> Listen on port 6789
+[2023-11-05 15:39:50.978909 pid:80680 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:250] >> Observer start success
+[2023-11-05 15:45:01.409219 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:236] >> Output configuration 
+Begin dump configuration
+[]
+
+[DefaultThreads]
+count=3
+
+[IOThreads]
+count=3
+
+[LOG]
+LOG_CONSOLE_LEVEL=1
+LOG_FILE_LEVEL=5
+LOG_FILE_NAME=observer.log
+
+[NET]
+CLIENT_ADDRESS=INADDR_ANY
+MAX_CONNECTION_NUM=8192
+PORT=6789
+
+[SEDA_BASE]
+EventHistory=false
+MaxEventHistoryNum=100
+STAGES=SessionStage
+ThreadPools=SQLThreads,IOThreads,DefaultThreads
+
+[SQLThreads]
+count=3
+
+[SessionStage]
+ThreadId=SQLThreads
+
+Finish dump configuration 
+
+[2023-11-05 15:45:01.415843 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:128, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.419570 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:256, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.422969 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:384, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.426721 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:512, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.430576 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:640, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.435473 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:768, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.440800 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:896, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.445823 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1024, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.450789 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1152, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.459078 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1280, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.463837 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1408, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.468520 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1536, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.473453 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1664, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.478466 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1792, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.483481 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:1920, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.489070 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2048, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.501698 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2176, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.509196 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2304, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.514009 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2432, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.519469 pid:83217 tid:7ffff7a56740 ctx:0 INFO: extend@mem_pool.h:264] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.520203 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@mem_pool.h:211] >> Extend one pool, this->size:2560, item_num_per_pool:128, this->name:BufPool.
+[2023-11-05 15:45:01.520913 pid:83217 tid:7ffff7a56740 ctx:0 INFO: BufferPoolManager@disk_buffer_pool.cpp:622] >> buffer pool manager init with memory size 335544320, page num: 2560, pool num: 20
+[2023-11-05 15:45:01.535524 pid:83217 tid:7ffff7a56740 ctx:0 WARN: create_db@default_handler.cpp:107] >> Db already exists: sys
+[2023-11-05 15:45:01.554295 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@clog.cpp:310] >> open clog file success. file=miniob/db/sys/clog, fd=4
+[2023-11-05 15:45:01.576140 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:45:01.576713 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:45:01.578636 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586c3f8, lbt=0x555555739291 0x5555557299ad 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:45:01.583419 pid:83217 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/oo.data.
+[2023-11-05 15:45:01.584057 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a4c018, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739291 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:45:01.585339 pid:83217 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/oo.data. file_desc=5, hdr_frame=0x7ffff6a4c018, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:45:01.585981 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=5, bp=0x55555588d8c0, lbt=0x555555739291 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:45:01.586544 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586c3f8, lbt=0x555555739291 0x55555572a194 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:45:01.587170 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:45:01.587631 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:45:01.588249 pid:83217 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: oo, file: oo.table
+[2023-11-05 15:45:01.592584 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=a
+[2023-11-05 15:45:01.593237 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@field_meta.cpp:62] >> Init a field with name=__null
+[2023-11-05 15:45:01.594455 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: lock@mutex.cpp:282] >> lock 0x55555586c3f8, lbt=0x555555739291 0x5555557299ad 0x5555555bdbb4 0x5555555b86b2 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:45:01.596913 pid:83217 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:234] >> Successfully open buffer pool file miniob/db/sys/test.data.
+[2023-11-05 15:45:01.597561 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: pin@frame.cpp:237] >> after frame pin. this=0x7ffff6a6c120, write locker=0, read locker has xid 0? pin=1, fd=-1, pageNum=0, xid=7ffff7a56740, lbt=0x555555739291 0x5555555ca8df 0x5555555adabd 0x5555555b574e 0x5555555aeb66 0x5555555b8aec 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:45:01.598704 pid:83217 tid:7ffff7a56740 ctx:0 INFO: open_file@disk_buffer_pool.cpp:261] >> Successfully open miniob/db/sys/test.data. file_desc=6, hdr_frame=0x7ffff6a6c120, file header=pageCount:1, allocatedCount:1
+[2023-11-05 15:45:01.599427 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: open_file@disk_buffer_pool.cpp:701] >> insert buffer pool into fd buffer pools. fd=6, bp=0x55555588f8c0, lbt=0x555555739291 0x5555555b9266 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:45:01.599886 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: unlock@mutex.cpp:302] >> unlock 0x55555586c3f8, lbt=0x555555739291 0x55555572a194 0x5555555bdbd7 0x5555555b9312 0x5555555f00eb 0x5555555eb469 0x5555555d0565 0x5555555cdbd4 0x5555555d63d2 0x5555555d4994 0x555555574133 0x555555574b63 0x55555556f5c8 0x7ffff7a84d90 0x7ffff7a84e40 0x55555556e0d5
+[2023-11-05 15:45:01.600391 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init_free_pages@record_manager.cpp:342] >> record file handler init free pages done. free page num=0, rc=SUCCESS
+[2023-11-05 15:45:01.601045 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@record_manager.cpp:303] >> open record file handle done. rc=SUCCESS
+[2023-11-05 15:45:01.601668 pid:83217 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:180] >> Open table: test, file: test.table
+[2023-11-05 15:45:01.602381 pid:83217 tid:7ffff7a56740 ctx:0 INFO: open_all_tables@db.cpp:183] >> All table have been opened. num=2
+[2023-11-05 15:45:01.604096 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: read@clog.cpp:339] >> file read touch eof. filename=miniob/db/sys/clog
+[2023-11-05 15:45:01.604880 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: recover@clog.cpp:565] >> recover redo log done
+[2023-11-05 15:45:01.605698 pid:83217 tid:7ffff7a56740 ctx:0 INFO: recover@clog.cpp:569] >> find 0 uncommitted trx
+[2023-11-05 15:45:01.606229 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: set_current_db@session.cpp:60] >> change db to sys
+[2023-11-05 15:45:01.606879 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@default_handler.cpp:83] >> Default handler init with miniob success
+[2023-11-05 15:45:01.607471 pid:83217 tid:7ffff7a56740 ctx:0 DEBUG: parse@seda_config.cpp:92] >> Seda config parse success
+
+[2023-11-05 15:45:01.608170 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:63] >> (Re)Starting State: Pid: 83217 Time: Sun Nov  5 15:45:01 2023
+
+[2023-11-05 15:45:01.608849 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init_seda@init.cpp:64] >> The process Name is observe
+[2023-11-05 15:45:01.609505 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init_event_history@seda_config.cpp:209] >> Successfully init_event_history, EventHistory:0, MaxEventHops:100
+[2023-11-05 15:45:01.613574 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:45:01.614221 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> SQLThreads adding threads enter3
+[2023-11-05 15:45:01.615267 pid:83217 tid:7fffe39a0640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe39a0640, threadname = SQLThreads
+[2023-11-05 15:45:01.615550 pid:83217 tid:7fffdb19f640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffdb19f640, threadname = SQLThreads
+[2023-11-05 15:45:01.615812 pid:83217 tid:7fffe319f640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe319f640, threadname = SQLThreads
+[2023-11-05 15:45:01.615846 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:45:01.619094 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:45:01.619878 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:45:01.620401 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> IOThreads adding threads enter3
+[2023-11-05 15:45:01.621410 pid:83217 tid:7fffe299e640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe299e640, threadname = IOThreads
+[2023-11-05 15:45:01.621737 pid:83217 tid:7fffe219d640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe219d640, threadname = IOThreads
+[2023-11-05 15:45:01.621981 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:45:01.621960 pid:83217 tid:7fffe199c640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe199c640, threadname = IOThreads
+[2023-11-05 15:45:01.623848 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:45:01.626221 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:42] >> Enter, thread number:3
+[2023-11-05 15:45:01.627322 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:96] >> DefaultThreads adding threads enter3
+[2023-11-05 15:45:01.628553 pid:83217 tid:7fffe119b640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe119b640, threadname = DefaultThreads
+[2023-11-05 15:45:01.628803 pid:83217 tid:7fffe099a640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffe099a640, threadname = DefaultThreads
+[2023-11-05 15:45:01.629846 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: add_threads@thread_pool.cpp:113] >> adding threads exit3
+[2023-11-05 15:45:01.630585 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: Threadpool@thread_pool.cpp:48] >> exit
+[2023-11-05 15:45:01.629854 pid:83217 tid:7fffdbfff640 ctx:0 INFO: run_thread@thread_pool.cpp:258] >> threadid = 7fffdbfff640, threadname = DefaultThreads
+[2023-11-05 15:45:01.631266 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init_stages@seda_config.cpp:355] >> Stage SessionStage use threadpool SQLThreads.
+[2023-11-05 15:45:01.632081 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:86] >> enterSessionStage
+[2023-11-05 15:45:01.632683 pid:83217 tid:7ffff7a56740 ctx:0 TRACE: connect@stage.cpp:110] >> exitSessionStage1
+[2023-11-05 15:45:01.633340 pid:83217 tid:7ffff7a56740 ctx:0 INFO: init@init.cpp:261] >> Successfully init utility
+[2023-11-05 15:45:01.636912 pid:83217 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:233] >> Listen on port 6789
+[2023-11-05 15:45:01.637736 pid:83217 tid:7ffff7a56740 ctx:0 INFO: start_tcp_server@server.cpp:250] >> Observer start success
+[2023-11-05 15:45:03.620061 pid:83217 tid:7ffff7a56740 ctx:0 INFO: accept@server.cpp:175] >> Accepted connection from 127.0.0.1:23190
+
+[2023-11-05 15:45:12.849588 pid:83217 tid:7ffff7a56740 ctx:0 INFO: read_event@plain_communicator.cpp:90] >> receive command(size=30): select length('ddd') as aaa;
+
+[2023-11-05 15:45:12.850720 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:122] >> SELECT
+[2023-11-05 15:45:12.851305 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:167] >> LENGTH
+[2023-11-05 15:45:12.852052 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:175] >> LBRACE
+[2023-11-05 15:45:12.852661 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:253] >> SSS
+[2023-11-05 15:45:12.853340 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:179] >> RBRACE
+[2023-11-05 15:45:12.854034 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:170] >> AS
+[2023-11-05 15:45:12.854794 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:172] >> ID
+[2023-11-05 15:45:12.855517 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 DEBUG: yylex@lex_sql.l:99] >> SEMICOLON
+[2023-11-05 15:46:34.876544 pid:83217 tid:7fffe39a0640 ctx:555555885fd0 TRACE: create_plan@physical_plan_generator.cpp:236] >> create a project physical operator

@@ -19,3 +19,9 @@ ProjectLogicalOperator::ProjectLogicalOperator(const std::vector<Field> &fields,
 : fields_(fields), aggr_fields_(aggr_fields), aggr_specs_(aggr_specs){
     expressions_.swap(expressions);
 }
+
+ProjectLogicalOperator::ProjectLogicalOperator(std::vector<std::unique_ptr<Expression>> &&expressions) 
+{
+    expressions_.swap(expressions);
+    func_flag_ = true;
+}

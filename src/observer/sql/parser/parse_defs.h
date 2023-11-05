@@ -62,6 +62,7 @@ struct RelAttrSqlNode
   std::string attribute_name;  ///< attribute name              属性名
   AggrOp aggr_func;
   std::string alias;//列别名 在输出时打印
+  bool flag = false;
 };
 
 
