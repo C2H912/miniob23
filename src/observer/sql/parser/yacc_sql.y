@@ -1097,6 +1097,9 @@ base_expr:
       $$->set_name(token_name(sql_string, &@$));
       delete $1;
     }
+    | function_attr {
+
+    }
     ;
 value2:
     NUMBER {
@@ -1134,9 +1137,6 @@ value2:
 			char *tmp = common::substr($1,1,strlen($1)-2);
       $$ = new Value(1, tmp);
       free(tmp);
-    }
-    | function_attr {
-
     }
     ;
 function_attr:
