@@ -109,16 +109,30 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
         std::vector<std::string> query_fields_names;
         int count = 1;
         for (const Field expr : select_field_names) {
-        std::vector<std::string>::iterator it = find(query_fields_names.begin(),query_fields_names.end(),expr.field_name());
-        if(it!=query_fields_names.end())
-        {
-            query_fields_names.push_back(expr.field_name()+std::to_string(count));
+          std::string temp = expr.field_name();
+          //std::vector<std::string>::iterator it = find(query_fields_names.begin(),query_fields_names.end(),temp);
+          bool flag = false;
+          if(query_fields_names.size()!=0)//如果为空
+          {
+            for(std::string cmp:query_fields_names)
+          {
+              if(temp==cmp)
+            {
+                flag = true;
+                break;
+            }
+          
+          }
+          }
+          if(flag)
+          {
+            query_fields_names.emplace_back(temp+std::to_string(count));
             count++;
-        }
-        else
-        {
-          query_fields_names.push_back(expr.field_name());
-        }
+          }
+          else{
+            query_fields_names.emplace_back(temp);
+          }
+          
         }
 
         std::vector<std::string> field_name_select;
