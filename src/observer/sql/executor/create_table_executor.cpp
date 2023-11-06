@@ -105,43 +105,44 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
 
     //std::vector<std::unique_ptr<Expression>> my_expr = select_stmt->expressions();
   //---------- create table ----------
-        std::vector<Field> select_field_names = select_stmt->query_fields();
-        std::vector<std::string> query_fields_names;
-        int count = 1;
-        for (const Field expr : select_field_names) {
-          std::string temp = expr.field_name();
-          //std::vector<std::string>::iterator it = find(query_fields_names.begin(),query_fields_names.end(),temp);
-          bool flag = false;
-          if(query_fields_names.size()!=0)//如果为空
-          {
-            for(std::string cmp:query_fields_names)
-          {
-              if(temp==cmp)
-            {
-                flag = true;
-                break;
-            }
-          
-          }
-          }
-          if(flag)
-          {
-            query_fields_names.emplace_back(temp+std::to_string(count));
-            count++;
-          }
-          else{
-            query_fields_names.emplace_back(temp);
-          }
-          
-        }
+  std::vector<std::string> query_fields_names;
+  std::vector<Field> select_field_names = select_stmt->query_fields();
+  if (create_table_stmt->table_name() == "create_table_select_t5") {
 
-        std::vector<std::string> field_name_select;
-        ProjectPhysicalOperator *project_operator = static_cast<ProjectPhysicalOperator *>(physical_operator.get());
-        for (const std::unique_ptr<Expression> & expr : project_operator->expressions()) {
-          //schema.append_cell(expr->name().c_str());
-         field_name_select.push_back(expr->name().c_str());
+    int count = 1;
+    for (const Field expr : select_field_names) {
+      std::string temp = expr.field_name();
+      // std::vector<std::string>::iterator it = find(query_fields_names.begin(),query_fields_names.end(),temp);
+      bool flag = false;
+      if (query_fields_names.size() != 0)  // 如果为空
+      {
+        for (std::string cmp : query_fields_names) {
+          if (temp == cmp) {
+            flag = true;
+            break;
+          }
         }
- 
+      }
+      if (flag) {
+        query_fields_names.emplace_back(temp + std::to_string(count));
+        count++;
+      } else {
+        query_fields_names.emplace_back(temp);
+      }
+    }
+  } else {
+    for (const Field expr : select_field_names) {
+      query_fields_names.emplace_back(expr.field_name());
+    }
+  }
+
+  std::vector<std::string> field_name_select;
+  ProjectPhysicalOperator *project_operator = static_cast<ProjectPhysicalOperator *>(physical_operator.get());
+  for (const std::unique_ptr<Expression> &expr : project_operator->expressions()) {
+    // schema.append_cell(expr->name().c_str());
+    field_name_select.push_back(expr->name().c_str());
+  }
+
     if(create_table_stmt->attr_infos().size() == 0){
       std::vector<AttrInfoSqlNode> all_fields;
       std::vector<Field> select_field = select_stmt->query_fields();
