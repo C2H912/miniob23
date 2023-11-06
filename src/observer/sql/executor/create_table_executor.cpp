@@ -105,6 +105,22 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
 
     //std::vector<std::unique_ptr<Expression>> my_expr = select_stmt->expressions();
   //---------- create table ----------
+        std::vector<Field> select_field_names = select_stmt->query_fields();
+        std::vector<std::string> query_fields_names;
+        int count = 1;
+        for (const Field expr : select_field_names) {
+        std::vector<std::string>::iterator it = find(query_fields_names.begin(),query_fields_names.end(),expr.field_name());
+        if(it!=query_fields_names.end())
+        {
+            query_fields_names.push_back(expr.field_name()+std::to_string(count));
+            count++;
+        }
+        else
+        {
+          query_fields_names.push_back(expr.field_name());
+        }
+        }
+
         std::vector<std::string> field_name_select;
         ProjectPhysicalOperator *project_operator = static_cast<ProjectPhysicalOperator *>(physical_operator.get());
         for (const std::unique_ptr<Expression> & expr : project_operator->expressions()) {
@@ -121,7 +137,8 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
         AttrInfoSqlNode current_node;
         const FieldMeta *current_field = select_field[i].meta();
         current_node.type = select_field[i].attr_type();
-        current_node.name = field_name_select[i];
+        //current_node.name = field_name_select[i];
+        current_node.name = query_fields_names[i];
         current_node.length = select_field[i].meta()->len();
         current_node.nullable = select_field[i].meta()->nullable();
         all_fields.push_back(current_node);

@@ -22,7 +22,7 @@
 		{
 			"id" : 2,
 			"len" : 4,
-			"name" : "id+age as id_age",
+			"name" : "id1",
 			"nullable" : true,
 			"offset" : 8,
 			"type" : "dates",
@@ -39,6 +39,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 20,
+	"table_id" : 3,
 	"table_name" : "t4"
 }

@@ -30,6 +30,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 17,
+	"table_id" : 1,
 	"table_name" : "create_table_select_t2"
 }

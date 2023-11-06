@@ -4,7 +4,7 @@
 		{
 			"id" : 0,
 			"len" : 4,
-			"name" : "ttt",
+			"name" : "id",
 			"nullable" : true,
 			"offset" : 0,
 			"type" : "dates",
@@ -13,7 +13,7 @@
 		{
 			"id" : 1,
 			"len" : 4,
-			"name" : "ttt",
+			"name" : "age",
 			"nullable" : true,
 			"offset" : 4,
 			"type" : "dates",
@@ -22,7 +22,7 @@
 		{
 			"id" : 2,
 			"len" : 7,
-			"name" : "yyy",
+			"name" : "name",
 			"nullable" : true,
 			"offset" : 8,
 			"type" : "ints",
@@ -39,6 +39,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 22,
+	"table_id" : 5,
 	"table_name" : "t9"
 }
