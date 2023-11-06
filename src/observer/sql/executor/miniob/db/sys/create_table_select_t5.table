@@ -39,6 +39,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 4,
+	"table_id" : 10,
 	"table_name" : "create_table_select_t5"
 }

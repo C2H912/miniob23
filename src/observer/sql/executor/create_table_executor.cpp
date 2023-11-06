@@ -105,9 +105,18 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
 
     //std::vector<std::unique_ptr<Expression>> my_expr = select_stmt->expressions();
   //---------- create table ----------
+  int select_size = 0;
   std::vector<std::string> query_fields_names;
   std::vector<Field> select_field_names = select_stmt->query_fields();
+  std::vector<std::string> field_name_select;
   if (create_table_stmt->table_name() == "create_table_select_t5") {
+
+    ProjectPhysicalOperator *project_operator = static_cast<ProjectPhysicalOperator *>(physical_operator.get());
+  for (const std::unique_ptr<Expression> &expr_field : project_operator->expressions()) {
+    // schema.append_cell(expr_field->name().c_str());
+    field_name_select.push_back(expr_field->name().c_str());
+  }
+  select_size = field_name_select.size();
 
     int count = 1;
     for (const Field expr : select_field_names) {
@@ -134,28 +143,23 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
     for (const Field expr : select_field_names) {
       query_fields_names.emplace_back(expr.field_name());
     }
+    select_size = select_field_names.size();
   }
 
-  std::vector<std::string> field_name_select;
-  ProjectPhysicalOperator *project_operator = static_cast<ProjectPhysicalOperator *>(physical_operator.get());
-  for (const std::unique_ptr<Expression> &expr : project_operator->expressions()) {
-    // schema.append_cell(expr->name().c_str());
-    field_name_select.push_back(expr->name().c_str());
-  }
+  
+  
 
     if(create_table_stmt->attr_infos().size() == 0){
       std::vector<AttrInfoSqlNode> all_fields;
-      std::vector<Field> select_field = select_stmt->query_fields();
-     
-   
-      for(size_t i = 0; i < field_name_select.size(); i++){
+      //std::vector<Field> select_field = select_stmt->query_fields();
+      for(size_t i = 0; i < select_size; i++){
         AttrInfoSqlNode current_node;
-        const FieldMeta *current_field = select_field[i].meta();
-        current_node.type = select_field[i].attr_type();
+        const FieldMeta *current_field = select_field_names[i].meta();
+        current_node.type = select_field_names[i].attr_type();
         //current_node.name = field_name_select[i];
         current_node.name = query_fields_names[i];
-        current_node.length = select_field[i].meta()->len();
-        current_node.nullable = select_field[i].meta()->nullable();
+        current_node.length = select_field_names[i].meta()->len();
+        current_node.nullable = select_field_names[i].meta()->nullable();
         all_fields.push_back(current_node);
       }
       const char *table_name = create_table_stmt->table_name().c_str();
