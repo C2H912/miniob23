@@ -42,17 +42,17 @@ RC OptimizeStage::handle_request(SQLStageEvent *sql_event)
     return rc;
   }
 
-  rc = rewrite(logical_operator);
-  if (rc != RC::SUCCESS) {
-   LOG_WARN("failed to rewrite plan. rc=%s", strrc(rc));
-   return rc;
-  }
+  // rc = rewrite(logical_operator);
+  // if (rc != RC::SUCCESS) {
+  //  LOG_WARN("failed to rewrite plan. rc=%s", strrc(rc));
+  //  return rc;
+  // }
 
-  rc = optimize(logical_operator);
-  if (rc != RC::SUCCESS) {
-   LOG_WARN("failed to optimize plan. rc=%s", strrc(rc));
-   return rc;
-  }
+  // rc = optimize(logical_operator);
+  // if (rc != RC::SUCCESS) {
+  //  LOG_WARN("failed to optimize plan. rc=%s", strrc(rc));
+  //  return rc;
+  // }
 
   unique_ptr<PhysicalOperator> physical_operator;
   rc = generate_physical_plan(logical_operator, physical_operator);

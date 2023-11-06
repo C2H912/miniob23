@@ -21,24 +21,15 @@
 		},
 		{
 			"id" : 2,
-			"len" : 7,
-			"name" : "name",
-			"nullable" : true,
-			"offset" : 8,
-			"type" : "ints",
-			"visible" : true
-		},
-		{
-			"id" : 3,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 15,
+			"offset" : 8,
 			"type" : "ints",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
-	"table_id" : 13,
-	"table_name" : "kf"
+	"table_id" : 2,
+	"table_name" : "k3"
 }
