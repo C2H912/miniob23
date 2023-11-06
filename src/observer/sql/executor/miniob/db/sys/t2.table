@@ -12,33 +12,24 @@
 		},
 		{
 			"id" : 1,
-			"len" : 4,
-			"name" : "col2",
+			"len" : 7,
+			"name" : "name",
 			"nullable" : true,
 			"offset" : 4,
-			"type" : "dates",
+			"type" : "ints",
 			"visible" : true
 		},
 		{
 			"id" : 2,
-			"len" : 4,
-			"name" : "feat2",
-			"nullable" : true,
-			"offset" : 8,
-			"type" : "booleans",
-			"visible" : true
-		},
-		{
-			"id" : 3,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 12,
+			"offset" : 11,
 			"type" : "ints",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
-	"table_id" : 10,
-	"table_name" : "table_name_2"
+	"table_id" : 21,
+	"table_name" : "t2"
 }

@@ -21,6 +21,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 0,
-	"table_name" : "rr"
+	"table_id" : 15,
+	"table_name" : "create_table_select_t15"
 }

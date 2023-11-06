@@ -4,7 +4,7 @@
 		{
 			"id" : 0,
 			"len" : 4,
-			"name" : "a",
+			"name" : "count",
 			"nullable" : true,
 			"offset" : 0,
 			"type" : "dates",
@@ -21,6 +21,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 1,
-	"table_name" : "qq"
+	"table_id" : 14,
+	"table_name" : "create_table_select_t14"
 }

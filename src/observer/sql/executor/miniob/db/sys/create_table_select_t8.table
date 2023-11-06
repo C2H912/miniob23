@@ -13,7 +13,7 @@
 		{
 			"id" : 1,
 			"len" : 4,
-			"name" : "col3",
+			"name" : "age",
 			"nullable" : true,
 			"offset" : 4,
 			"type" : "dates",
@@ -21,24 +21,15 @@
 		},
 		{
 			"id" : 2,
-			"len" : 4,
-			"name" : "feat3",
-			"nullable" : true,
-			"offset" : 8,
-			"type" : "booleans",
-			"visible" : true
-		},
-		{
-			"id" : 3,
 			"len" : 1,
 			"name" : "__null",
 			"nullable" : false,
-			"offset" : 12,
+			"offset" : 8,
 			"type" : "ints",
 			"visible" : false
 		}
 	],
 	"indexes" : null,
-	"table_id" : 11,
-	"table_name" : "table_name_3"
+	"table_id" : 9,
+	"table_name" : "create_table_select_t8"
 }

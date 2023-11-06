@@ -25,6 +25,8 @@ See the Mulan PSL v2 for more details. */
 #include "storage/db/db.h"
 #include "sql/optimizer/logical_plan_generator.h"
 #include "sql/optimizer/physical_plan_generator.h"
+#include <algorithm>
+#include "sql/operator/project_physical_operator.h"
 
 RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
 {
@@ -74,7 +76,7 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
             LOG_WARN("failed to get SUB TABLE from operator");
             return rc;
           }
-          row.push_back(value);
+          row.push_back(value);//这里可以读到 5 5 10 
         }
         sub_table.push_back(row);
       }
@@ -97,32 +99,55 @@ RC CreateTableExecutor::execute(SQLStageEvent *sql_event)
       }
     }
 
-    if((int)sub_table.size() == 0){
-      return rc;
-    }
+    // if((int)sub_table.size() == 0){
+    //   return rc;
+    // }
 
+    //std::vector<std::unique_ptr<Expression>> my_expr = select_stmt->expressions();
   //---------- create table ----------
+        std::vector<std::string> field_name_select;
+        ProjectPhysicalOperator *project_operator = static_cast<ProjectPhysicalOperator *>(physical_operator.get());
+        for (const std::unique_ptr<Expression> & expr : project_operator->expressions()) {
+          //schema.append_cell(expr->name().c_str());
+         field_name_select.push_back(expr->name().c_str());
+        }
+ 
     if(create_table_stmt->attr_infos().size() == 0){
       std::vector<AttrInfoSqlNode> all_fields;
-      std::vector<Field> select_field = select_stmt->alias_fields();
-      for(size_t i = 0; i < select_field.size(); i++){
+      std::vector<Field> select_field = select_stmt->query_fields();
+     
+   
+      for(size_t i = 0; i < field_name_select.size(); i++){
         AttrInfoSqlNode current_node;
         const FieldMeta *current_field = select_field[i].meta();
-        current_node.type = sub_table[0][i].attr_type();
-        current_node.name = current_field->name();
-        current_node.length = sub_table[0][i].length();
-        current_node.nullable = true;
+        current_node.type = select_field[i].attr_type();
+        current_node.name = field_name_select[i];
+        current_node.length = select_field[i].meta()->len();
+        current_node.nullable = select_field[i].meta()->nullable();
         all_fields.push_back(current_node);
       }
       const char *table_name = create_table_stmt->table_name().c_str();
       rc = session->get_current_db()->create_table(table_name, (int)all_fields.size(), all_fields.data());
+      if(rc!=RC::SUCCESS)
+      {
+        return rc;
+      }
     }
     else{
+    
       const char *table_name = create_table_stmt->table_name().c_str();
       rc = session->get_current_db()->create_table(table_name, (int)create_table_stmt->attr_infos().size(), create_table_stmt->attr_infos().data());
+       if(rc!=RC::SUCCESS)
+      {
+        return rc;
+      }
     }
 
   //---------- insert stmt ----------
+    if(sub_table.size()==0)
+    {
+      return RC::SUCCESS;
+    }
     InsertSqlNode insert_node;
     insert_node.relation_name = create_table_stmt->table_name();
     for(size_t i = 0; i < sub_table.size(); i++){

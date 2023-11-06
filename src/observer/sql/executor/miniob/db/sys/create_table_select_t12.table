@@ -21,6 +21,6 @@
 		}
 	],
 	"indexes" : null,
-	"table_id" : 1,
-	"table_name" : "qq"
+	"table_id" : 12,
+	"table_name" : "create_table_select_t12"
 }
